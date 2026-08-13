@@ -8,7 +8,7 @@ Illinois,10.00,11.00,2021-01-01,1.00,legislation,treated
 Maine,12.00,12.15,2021-01-01,0.15,inflation_adj,treated
 Maryland,11.00,11.75,2021-01-01,0.75,legislation,treated
 Massachusetts,12.75,13.50,2021-01-01,0.75,legislation,treated
-Michigan,9.65,9.87,2021-01-01,0.22,inflation_adj,treated
+Michigan,9.65,9.65,2021-01-01,0.00,inflation_adj_paused,treated
 Minnesota,10.00,10.08,2021-01-01,0.08,inflation_adj,treated
 Missouri,9.45,10.30,2021-01-01,0.85,legislation,treated
 Montana,8.65,8.75,2021-01-01,0.10,inflation_adj,treated

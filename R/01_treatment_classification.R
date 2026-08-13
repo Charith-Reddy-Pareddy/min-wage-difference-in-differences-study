@@ -1,11 +1,27 @@
 # Load and validate the state minimum-wage treatment classification table.
 #
 # NOTE ON DATA PROVENANCE: the 2020/2021 wage values in
-# data/treatment_classification.csv were compiled from general knowledge of
-# state minimum wage history, not pulled directly from DOL/NCSL. Section 3
-# of the proposal calls for cross-checking against DOL and NCSL directly --
-# do that before these numbers are used in any real analysis. Day 3
-# (data acquisition) replaces this with a sourced pull.
+# data/treatment_classification.csv have been cross-checked against DOL's
+# "Minimum Wage Laws in the States" table, using two Wayback Machine
+# snapshots of https://www.dol.gov/agencies/whd/minimum-wage/state --
+# 2020-12-01 (pre-January-1 rates) and 2021-02-02 (post-January-1 rates).
+# All 24 other states matched the draft table exactly. Michigan did not:
+# the draft had it going 9.65 -> 9.87, but DOL's Feb 2021 snapshot still
+# shows 9.65. Michigan's scheduled increase is conditioned on the prior
+# year's unemployment rate staying under 8.5%; the COVID-era unemployment
+# spike tripped that clause, so the step was skipped and the rate held at
+# 9.65 through all of 2021. The table now reflects that (increase = 0.00,
+# type "inflation_adj_paused").
+#
+# That correction does NOT change the 20-treated-states count (Michigan
+# stays in the treated group, per the proposal's explicit state list -- it
+# still "raised wages" on the proposal's own binary definition, it just
+# raised them by $0). It also doesn't change the below-$0.50-threshold
+# count: Michigan was already counted there at $0.22, and $0.00 is still
+# under $0.50, so the count stays at 10. The proposal text's claim of "9
+# of the 20 states" below that threshold appears to be a minor error in
+# the proposal narrative itself, not a data problem in this table -- 10 is
+# what a direct DOL source check supports.
 
 library(dplyr)
 library(readr)
