@@ -42,6 +42,8 @@ reports/         R Markdown report and figures
 
 ## Status
 
+See [TIMELINE.md](TIMELINE.md) for the day-by-day build schedule.
+
 Treatment classification table drafted (`data/treatment_classification.csv`,
 validated by `R/01_treatment_classification.R`). Data pull scripts are next.
 
@@ -50,4 +52,4 @@ sensitivity threshold; the proposal's own note says 9 (Minnesota at $0.08
 being the smallest). The 2020/2021 wage values here were compiled from
 general knowledge, not pulled from DOL/NCSL directly, so one figure is
 likely off. Needs a source check against DOL/NCSL before it's used for real
-analysis — planned as part of the data acquisition step.
+analysis — planned as part of the data acquisition step (Day 2).
