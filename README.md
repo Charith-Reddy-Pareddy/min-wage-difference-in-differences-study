@@ -44,12 +44,25 @@ reports/         R Markdown report and figures
 
 See [TIMELINE.md](TIMELINE.md) for the day-by-day build schedule.
 
-Treatment classification table drafted (`data/treatment_classification.csv`,
-validated by `R/01_treatment_classification.R`). Data pull scripts are next.
+**Day 1:** Treatment classification table drafted, validated by
+`R/01_treatment_classification.R`.
 
-**Open item:** the draft table shows 10 treated states below the $0.50
-sensitivity threshold; the proposal's own note says 9 (Minnesota at $0.08
-being the smallest). The 2020/2021 wage values here were compiled from
-general knowledge, not pulled from DOL/NCSL directly, so one figure is
-likely off. Needs a source check against DOL/NCSL before it's used for real
-analysis — planned as part of the data acquisition step (Day 2).
+**Day 2:** Treatment table source-checked against DOL's historical minimum
+wage tables (two Wayback Machine snapshots, straddling the Jan 1, 2021
+changes). 24 of 25 states matched the draft exactly; Michigan's 2021
+increase turned out not to have happened at all (see the note at the top of
+`R/01_treatment_classification.R`) and has been corrected. That also
+resolves the earlier "10 vs. 9 states below $0.50" open item: the correct
+count is 10, and the proposal text's "9" looks like a minor error in the
+proposal narrative rather than a data problem.
+
+`R/02_fetch_fred_data.R` pulls real state-quarter employment (food service,
+retail), GDP, and population for all 25 states from FRED's public endpoint
+(2015-2022). FRED doesn't publish the food-service employment series for
+New Mexico or South Dakota (confirmed 404, not assumed); those two states
+fall back to QCEW's Open Data API instead, converted to the same thousands
+scale FRED uses.
+
+`R/03_fetch_cps_org.R` (CPS-ORG exposure pull) is written but blocked on an
+IPUMS API key — see `.env.example`. Everything through Day 5 can be built
+against placeholder exposure data in the meantime.
