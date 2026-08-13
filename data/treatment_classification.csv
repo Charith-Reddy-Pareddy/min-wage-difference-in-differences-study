@@ -1,0 +1,26 @@
+state,wage_2020,wage_2021,effective_date,increase,increase_type,group
+Alaska,10.19,10.34,2021-01-01,0.15,inflation_adj,treated
+Arizona,12.00,12.15,2021-01-01,0.15,inflation_adj,treated
+Arkansas,10.00,11.00,2021-01-01,1.00,legislation,treated
+California,13.00,14.00,2021-01-01,1.00,legislation,treated
+Colorado,12.00,12.32,2021-01-01,0.32,inflation_adj,treated
+Illinois,10.00,11.00,2021-01-01,1.00,legislation,treated
+Maine,12.00,12.15,2021-01-01,0.15,inflation_adj,treated
+Maryland,11.00,11.75,2021-01-01,0.75,legislation,treated
+Massachusetts,12.75,13.50,2021-01-01,0.75,legislation,treated
+Michigan,9.65,9.87,2021-01-01,0.22,inflation_adj,treated
+Minnesota,10.00,10.08,2021-01-01,0.08,inflation_adj,treated
+Missouri,9.45,10.30,2021-01-01,0.85,legislation,treated
+Montana,8.65,8.75,2021-01-01,0.10,inflation_adj,treated
+New Jersey,11.00,12.00,2021-01-01,1.00,legislation,treated
+New Mexico,9.00,10.50,2021-01-01,1.50,legislation,treated
+New York,11.80,12.50,2020-12-31,0.70,legislation,treated
+Ohio,8.70,8.80,2021-01-01,0.10,inflation_adj,treated
+South Dakota,9.30,9.45,2021-01-01,0.15,inflation_adj,treated
+Vermont,10.96,11.75,2021-01-01,0.79,legislation,treated
+Washington,13.50,13.69,2021-01-01,0.19,inflation_adj,treated
+Connecticut,11.00,12.00,2021-09-01,1.00,legislation,excluded
+Florida,8.56,10.00,2021-09-30,1.44,ballot_measure,excluded
+Nevada,9.00,9.75,2021-07-01,0.75,legislation,excluded
+Oregon,12.00,12.75,2021-07-01,0.75,legislation,excluded
+Virginia,7.25,9.50,2021-05-01,2.25,legislation,excluded
