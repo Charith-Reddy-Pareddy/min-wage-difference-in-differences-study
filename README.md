@@ -1,4 +1,4 @@
-# State Minimum Wage Increases and Low-Wage Employment
+# State Minimum Wage Increases and Low-Wage Employment: A Difference-in-Differences Study with Power, Heterogeneity, and Robustness Analysis
 
 A difference-in-differences study of the 2021 round of state minimum wage
 increases, extended beyond a single average treatment effect to ask how the
