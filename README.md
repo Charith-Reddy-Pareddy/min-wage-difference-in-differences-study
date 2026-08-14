@@ -86,3 +86,23 @@ fallback was needed in practice.
 
 Processed outputs land in `data/processed/` (gitignored, reproducible by
 re-running the scripts in order).
+
+**Day 4:** `R/06_slr_mlr.R` builds the derived per-state outcome from
+Section 4.1 — each state's average log employment change, pre-period
+(2019-2020) to post-period (2021-2022) — separately for food service and
+retail, and fits:
+- **SLR** (Section 7): log employment change on the dollar size of the
+  wage increase, treated states only. Not significant for either industry
+  (food service p=0.46, retail p=0.62) — consistent with the proposal's
+  own pre-registered expectation (Section 15) of a small, possibly
+  inconclusive effect, not a modeling problem.
+- **MLR** (Section 6.1): log employment change on treatment status, GDP
+  growth, population growth, and Census region, all 25 states. GDP growth
+  is a significant positive predictor in both industries; the treated
+  coefficient itself is only marginal for food service (p=0.059) and
+  essentially zero for retail (p=0.996).
+
+Scatter/fitted-line/CI-band and residuals-vs-fitted plots for both SLR
+models are in `reports/figures/`. These are the STAT 240/340
+coursework-closure pieces (Section 9), not the study's identification
+strategy — that's Model A/C (Day 5) and the event study (Day 7).

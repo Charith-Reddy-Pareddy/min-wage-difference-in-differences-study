@@ -9,7 +9,7 @@ each day below is one focused commit, reviewed before moving to the next.
 | 1 | Research questions, analysis plan, treatment classification table (**done**) | Week 1 |
 | 2 | Pull real FRED/QCEW data; source-check treatment table against DOL/NCSL; scaffold the CPS-ORG pull (**done**) | Week 2 |
 | 3 | Exposure measure from CPS-ORG; QCEW correlation validation check; exposure-distribution check (**done**) | Week 2-3 |
-| 4 | Simple linear regression (§7) and multiple regression (§6.1) | Week 4 |
+| 4 | Simple linear regression (§7) and multiple regression (§6.1) (**done**) | Week 4 |
 | 5 | Model A (binary DiD) and Model C (exposure interaction), both industries | Week 5 |
 | 7 | Event study / parallel-trends check; COVID-sensitivity covariate spec | Week 6-7 |
 | 8 | Placebo test; cluster bootstrap for β₄; model diagnostics | Week 7 |
