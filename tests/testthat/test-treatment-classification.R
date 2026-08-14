@@ -37,7 +37,7 @@ test_that("mismatched increase column is caught", {
 
 test_that("unexpected group values are caught", {
   df <- make_valid_df()
-  df$group[1] <- "control"
+  df$group[1] <- "bogus"
   problems <- validate_treatment_table(df)
   expect_true(any(grepl("unexpected group values", problems)))
 })

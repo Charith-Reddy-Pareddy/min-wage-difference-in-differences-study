@@ -97,12 +97,26 @@ retail, and fits:
   own pre-registered expectation (Section 15) of a small, possibly
   inconclusive effect, not a modeling problem.
 - **MLR** (Section 6.1): log employment change on treatment status, GDP
-  growth, population growth, and Census region, all 25 states. GDP growth
-  is a significant positive predictor in both industries; the treated
-  coefficient itself is only marginal for food service (p=0.059) and
-  essentially zero for retail (p=0.996).
+  growth, population growth, and Census region.
 
 Scatter/fitted-line/CI-band and residuals-vs-fitted plots for both SLR
 models are in `reports/figures/`. These are the STAT 240/340
 coursework-closure pieces (Section 9), not the study's identification
 strategy — that's Model A/C (Day 5) and the event study (Day 7).
+
+**Correction (found while starting Day 5):** the proposal names the 20
+treated and 5 excluded/secondary states explicitly (Section 4.2) but never
+lists the actual control group ("states with no 2021 change") its own
+design depends on. The original Day 4 MLR ran on the only 25 states
+classified at the time (20 treated + the 5 later-2021-changer "excluded"
+states), which isn't a real treated-vs-control comparison — those 5 states
+raised wages too, just not on 1/1/2021. Added a real control group: the
+other 25 states, each source-checked against DOL snapshots from Dec 2020,
+Feb 2021, and Dec 2021, confirming zero minimum-wage movement across all
+of 2021 (see the note in `R/01_treatment_classification.R`). The MLR now
+runs on treated + control (45 states), with the "excluded" group correctly
+left out of the primary specification. Result changed in a meaningful way:
+the treated coefficient is now null for both industries (food service
+p=0.65, retail p=0.26) rather than marginally significant for food
+service — the earlier result was likely an artifact of the contaminated
+comparison group, not a real signal.

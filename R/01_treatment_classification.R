@@ -22,6 +22,17 @@
 # of the 20 states" below that threshold appears to be a minor error in
 # the proposal narrative itself, not a data problem in this table -- 10 is
 # what a direct DOL source check supports.
+#
+# CONTROL GROUP (added Day 5): the proposal names the 20 treated and 5
+# excluded/secondary states explicitly (Section 4.2) but never lists the
+# actual "no 2021 change" control group its own design calls for -- without
+# it there's no DiD to run. The remaining 25 states were source-checked the
+# same way (DOL snapshots from Dec 2020, Feb 2021, and Dec 2021) and all 25
+# had zero minimum-wage movement across the entire year, so all 25 are used
+# as controls (group = "control"). Five of them (Alabama, Louisiana,
+# Mississippi, South Carolina, Tennessee) have no state minimum wage law at
+# all and default to the federal $7.25 floor -- recorded as wage_2020 =
+# wage_2021 = 7.25 here, which is what DOL's own page shows them paying.
 
 library(dplyr)
 library(readr)
@@ -57,7 +68,7 @@ validate_treatment_table <- function(df) {
     problems <- c(problems, paste("expected 20 treated states, found", n_treated))
   }
 
-  bad_groups <- setdiff(unique(df$group), c("treated", "excluded"))
+  bad_groups <- setdiff(unique(df$group), c("treated", "excluded", "control"))
   if (length(bad_groups) > 0) {
     problems <- c(problems, paste("unexpected group values:", paste(bad_groups, collapse = ", ")))
   }
@@ -75,6 +86,7 @@ if (sys.nframe() == 0) {
 
   cat("Treated states:", sum(df$group == "treated"), "\n")
   cat("Excluded/secondary states:", sum(df$group == "excluded"), "\n")
+  cat("Control states:", sum(df$group == "control"), "\n")
   cat("Treated states below $0.50 increase (sensitivity threshold):",
       sum(df$group == "treated" & df$increase < 0.50), "\n")
 }

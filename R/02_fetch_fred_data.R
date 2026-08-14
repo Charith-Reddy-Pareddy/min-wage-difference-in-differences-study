@@ -22,7 +22,15 @@ STATE_FIPS <- c(
   Montana = "30", "New Jersey" = "34", "New Mexico" = "35", "New York" = "36",
   Ohio = "39", "South Dakota" = "46", Vermont = "50", Washington = "53",
   Connecticut = "09", Florida = "12", Nevada = "32", Oregon = "41",
-  Virginia = "51"
+  Virginia = "51",
+  # Control group (no 2021 change), added Day 5.
+  Alabama = "01", Delaware = "10", Georgia = "13", Hawaii = "15", Idaho = "16",
+  Indiana = "18", Iowa = "19", Kansas = "20", Kentucky = "21", Louisiana = "22",
+  Mississippi = "28", Nebraska = "31", "New Hampshire" = "33",
+  "North Carolina" = "37", "North Dakota" = "38", Oklahoma = "40",
+  Pennsylvania = "42", "Rhode Island" = "44", "South Carolina" = "45",
+  Tennessee = "47", Texas = "48", Utah = "49", "West Virginia" = "54",
+  Wisconsin = "55", Wyoming = "56"
 )
 
 STATE_ABBR <- c(
@@ -32,7 +40,14 @@ STATE_ABBR <- c(
   Montana = "MT", "New Jersey" = "NJ", "New Mexico" = "NM", "New York" = "NY",
   Ohio = "OH", "South Dakota" = "SD", Vermont = "VT", Washington = "WA",
   Connecticut = "CT", Florida = "FL", Nevada = "NV", Oregon = "OR",
-  Virginia = "VA"
+  Virginia = "VA",
+  Alabama = "AL", Delaware = "DE", Georgia = "GA", Hawaii = "HI", Idaho = "ID",
+  Indiana = "IN", Iowa = "IA", Kansas = "KS", Kentucky = "KY", Louisiana = "LA",
+  Mississippi = "MS", Nebraska = "NE", "New Hampshire" = "NH",
+  "North Carolina" = "NC", "North Dakota" = "ND", Oklahoma = "OK",
+  Pennsylvania = "PA", "Rhode Island" = "RI", "South Carolina" = "SC",
+  Tennessee = "TN", Texas = "TX", Utah = "UT", "West Virginia" = "WV",
+  Wisconsin = "WI", Wyoming = "WY"
 )
 
 #' Build a state CES employment series ID.

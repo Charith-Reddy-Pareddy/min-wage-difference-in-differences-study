@@ -23,7 +23,16 @@ CENSUS_REGION <- c(
   Arkansas = "South", Maryland = "South", Florida = "South", Virginia = "South",
   Alaska = "West", Arizona = "West", California = "West", Colorado = "West",
   Montana = "West", "New Mexico" = "West", Washington = "West", Nevada = "West",
-  Oregon = "West"
+  Oregon = "West",
+  # Control group (no 2021 change), added Day 5.
+  "New Hampshire" = "Northeast", Pennsylvania = "Northeast", "Rhode Island" = "Northeast",
+  Indiana = "Midwest", Iowa = "Midwest", Kansas = "Midwest", Nebraska = "Midwest",
+  "North Dakota" = "Midwest", Wisconsin = "Midwest",
+  Alabama = "South", Delaware = "South", Georgia = "South", Kentucky = "South",
+  Louisiana = "South", Mississippi = "South", "North Carolina" = "South",
+  Oklahoma = "South", "South Carolina" = "South", Tennessee = "South",
+  Texas = "South", "West Virginia" = "South",
+  Hawaii = "West", Idaho = "West", Utah = "West", Wyoming = "West"
 )
 
 census_region <- function(state) {
@@ -83,11 +92,16 @@ fit_slr <- function(state_level, outcome) {
   lm(formula, data = treated)
 }
 
-#' MLR (Section 6.1): all states, log employment change on treatment
-#' status, GDP growth, population growth, and region.
+#' MLR (Section 6.1): treated + control states, log employment change on
+#' treatment status, GDP growth, population growth, and region. Excludes
+#' the "excluded" (later-2021-changer) group -- those states raised wages
+#' too, just not on the primary 1/1/2021 date, so they aren't a clean
+#' comparison group for a binary "treated" indicator (Section 4.2 treats
+#' them as a separately-flagged group, not part of the primary sample).
 fit_mlr <- function(state_level, outcome) {
+  primary_sample <- state_level %>% filter(group != "excluded")
   formula <- as.formula(paste(outcome, "~ treated + gdp_growth + pop_growth + region"))
-  lm(formula, data = state_level)
+  lm(formula, data = primary_sample)
 }
 
 save_slr_plots <- function(model, state_level, outcome, out_dir) {
@@ -134,7 +148,7 @@ if (sys.nframe() == 0) {
     print(confint(slr))
     save_slr_plots(slr, state_level, outcome, out_dir)
 
-    cat("\n=== MLR:", outcome, "~ treated + gdp_growth + pop_growth + region (all 25 states) ===\n")
+    cat("\n=== MLR:", outcome, "~ treated + gdp_growth + pop_growth + region (treated + control states) ===\n")
     mlr <- fit_mlr(state_level, outcome)
     print(summary(mlr))
   }

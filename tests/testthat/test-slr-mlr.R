@@ -67,3 +67,18 @@ test_that("fit_slr uses only treated states", {
   model <- fit_slr(state_level, "log_change_food_service")
   expect_equal(nrow(model$model), 2)
 })
+
+test_that("fit_mlr drops the 'excluded' group and keeps treated + control", {
+  state_level <- tibble::tibble(
+    state = c("A", "B", "C", "D"),
+    group = c("treated", "control", "control", "excluded"),
+    treated = c(1, 0, 0, 1),
+    gdp_growth = c(0.01, 0.01, 0.02, 0.5), # state D is an outlier that should be excluded
+    pop_growth = c(0.01, 0.01, 0.02, 0.5),
+    region = c("West", "South", "South", "Northeast"),
+    log_change_food_service = c(0.01, 0.02, 0.015, 0.9)
+  )
+  model <- fit_mlr(state_level, "log_change_food_service")
+  expect_equal(nrow(model$model), 3)
+  expect_false("D" %in% rownames(model$model))
+})

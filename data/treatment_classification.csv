@@ -24,3 +24,28 @@ Florida,8.56,10.00,2021-09-30,1.44,ballot_measure,excluded
 Nevada,9.00,9.75,2021-07-01,0.75,legislation,excluded
 Oregon,12.00,12.75,2021-07-01,0.75,legislation,excluded
 Virginia,7.25,9.50,2021-05-01,2.25,legislation,excluded
+Alabama,7.25,7.25,,0.00,no_change,control
+Delaware,9.25,9.25,,0.00,no_change,control
+Georgia,5.15,5.15,,0.00,no_change,control
+Hawaii,10.10,10.10,,0.00,no_change,control
+Idaho,7.25,7.25,,0.00,no_change,control
+Indiana,7.25,7.25,,0.00,no_change,control
+Iowa,7.25,7.25,,0.00,no_change,control
+Kansas,7.25,7.25,,0.00,no_change,control
+Kentucky,7.25,7.25,,0.00,no_change,control
+Louisiana,7.25,7.25,,0.00,no_change,control
+Mississippi,7.25,7.25,,0.00,no_change,control
+Nebraska,9.00,9.00,,0.00,no_change,control
+New Hampshire,7.25,7.25,,0.00,no_change,control
+North Carolina,7.25,7.25,,0.00,no_change,control
+North Dakota,7.25,7.25,,0.00,no_change,control
+Oklahoma,7.25,7.25,,0.00,no_change,control
+Pennsylvania,7.25,7.25,,0.00,no_change,control
+Rhode Island,11.50,11.50,,0.00,no_change,control
+South Carolina,7.25,7.25,,0.00,no_change,control
+Tennessee,7.25,7.25,,0.00,no_change,control
+Texas,7.25,7.25,,0.00,no_change,control
+Utah,7.25,7.25,,0.00,no_change,control
+West Virginia,8.75,8.75,,0.00,no_change,control
+Wisconsin,7.25,7.25,,0.00,no_change,control
+Wyoming,5.15,5.15,,0.00,no_change,control
