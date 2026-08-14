@@ -120,3 +120,30 @@ the treated coefficient is now null for both industries (food service
 p=0.65, retail p=0.26) rather than marginally significant for food
 service — the earlier result was likely an artifact of the contaminated
 comparison group, not a real signal.
+
+**Day 5:** `R/07_model_a_c.R` is the study's actual identification
+strategy (Section 6.2) — everything before this was coursework-closure or
+setup. Two-way fixed-effects (state + quarter), state-clustered SEs, on
+the treated + control panel (2016Q1-2022Q4; the growth covariates need a
+4-quarter lag, which consumes 2015). Run for both industries and both the
+full 20-treated-state sample and the ≥$0.50-increase subsample:
+
+- **Model A** (β₃, the average effect): negative in all 4 specifications,
+  but only significant in the ≥$0.50 subsample (food service p=0.016,
+  retail p=0.049) — the full sample includes states with increases as
+  small as $0.00-0.19, which dilutes the average effect toward zero,
+  same story the proposal's own sensitivity threshold is designed to
+  surface.
+- **Model C** (β₄, the primary hypothesis): noisy and inconsistent in
+  sign across specifications — positive for food service, negative for
+  retail, significant only in the ≥$0.50 subsample. This is close to
+  what Section 4.4 pre-registers as the expected outcome: a design that
+  may not reliably distinguish "no gradient" from "real gradient" given
+  the sample size. The formal power simulation (later day) will state
+  that limit quantitatively rather than just qualitatively.
+- Every `fixest` Model A estimate was cross-checked against an
+  independent `lm()` + `sandwich::vcovCL()` fit — coefficients and
+  clustered SEs matched to 4+ decimal places in all 4 specifications.
+
+Full regression output and the 4-specification summary table are in
+`data/processed/model_a_c_results.csv` (gitignored, reproducible).
