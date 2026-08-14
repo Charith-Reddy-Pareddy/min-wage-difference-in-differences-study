@@ -63,6 +63,26 @@ New Mexico or South Dakota (confirmed 404, not assumed); those two states
 fall back to QCEW's Open Data API instead, converted to the same thousands
 scale FRED uses.
 
-`R/03_fetch_cps_org.R` (CPS-ORG exposure pull) is written but blocked on an
-IPUMS API key — see `.env.example`. Everything through Day 5 can be built
-against placeholder exposure data in the meantime.
+**Day 3:** `R/03_fetch_cps_org.R` pulled real CPS-ORG microdata (all 24
+monthly 2019-2020 Basic samples, ORG respondents only — a hardcoded
+"January of each year" guess turned out to be wrong on the first attempt;
+see the comment above `resolve_cps_org_samples()`).
+
+`R/04_exposure_measure.R` builds the exposure share (workers within 10%,
+12.5%, and 15% of the pre-2021 state minimum wage) per state-industry cell,
+weighted by `EARNWT`. All 50 state-industry cells clear the proposal's
+n=30 threshold on the full 2019-2020 pool, so no pooling-across-quarters
+fallback was needed in practice.
+
+`R/05_exposure_validation.R` runs both Day 3 validation checks:
+- **QCEW correlation check** (Section 3): QCEW's average wage (hourly
+  proxy) over the state minimum wage, correlated against the CPS-ORG
+  exposure share. Both industries show the expected negative relationship
+  (food service: -0.76, retail: -0.33) — neither flagged.
+- **Exposure-distribution check** (Section 5): food service exposure is
+  higher than retail in 24 of 25 states (mean 0.415 vs. 0.294, Wilcoxon
+  signed-rank p < 0.0001), confirming the two industries genuinely differ
+  in exposure before that difference is used in Model C.
+
+Processed outputs land in `data/processed/` (gitignored, reproducible by
+re-running the scripts in order).
