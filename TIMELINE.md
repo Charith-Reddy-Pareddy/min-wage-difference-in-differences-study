@@ -11,7 +11,7 @@ each day below is one focused commit, reviewed before moving to the next.
 | 3 | Exposure measure from CPS-ORG; QCEW correlation validation check; exposure-distribution check (**done**) | Week 2-3 |
 | 4 | Simple linear regression (§7) and multiple regression (§6.1) (**done**) | Week 4 |
 | 5 | Model A (binary DiD) and Model C (exposure interaction), both industries (**done**) | Week 5 |
-| 7 | Event study / parallel-trends check; COVID-sensitivity covariate spec | Week 6-7 |
+| 7 | Event study / parallel-trends check; COVID-sensitivity covariate spec (**done**) | Week 6-7 |
 | 8 | Placebo test; cluster bootstrap for β₄; model diagnostics | Week 7 |
 | 9 | Two-sample t-test; descriptive statistics; one-way regional ANOVA; Monte Carlo permutation | Week 8 |
 | 10 | Final R Markdown report, README pass, reproducibility check | Week 8 |

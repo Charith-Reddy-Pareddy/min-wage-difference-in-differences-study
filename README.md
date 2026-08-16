@@ -147,3 +147,33 @@ full 20-treated-state sample and the ≥$0.50-increase subsample:
 
 Full regression output and the 4-specification summary table are in
 `data/processed/model_a_c_results.csv` (gitignored, reproducible).
+
+**Day 7:** `R/08_event_study.R` (Sections 5, 6.4, 6.5) and
+`R/09_covid_sensitivity.R` (Section 6.5's supporting check).
+
+The event study is a real, meaningful finding — not a clean pass. The
+joint test that all pre-period leads equal zero **rejects** flat
+pre-trends for both industries (food service F=4.77, p<0.0001; retail
+F=3.09, p=0.001). The shape isn't a gradual pre-trend drift so much as a
+roughly stable, non-zero gap between treated and control states across
+most of the sample (both pre- and post-period), plus one sharp anomalous
+dip at quarter -3 relative to treatment — which is **2020 Q2, the COVID
+employment trough** — most visible in retail. Plots:
+`reports/figures/event_study_food_service.png` and `_retail.png`.
+
+The COVID-sensitivity spec confirms why: adding `covid_severity x post`
+(log employment change from 2019 Q4 to the 2020 Q2 trough, interacted
+with the post indicator — a bare state-constant term would be fully
+absorbed by the state fixed effect, the same collinearity `exposure` hit
+in Model C, so it has to enter interacted) is highly significant in every
+specification (p < 10⁻⁸). Once included, Model A's `treated_post`
+shrinks toward zero (food service: -0.025 → -0.002; retail: -0.010 →
++0.006) and Model C's β₄ shifts substantially, even flipping sign for
+retail (-0.005 → +0.102). Differential COVID recovery, not the minimum
+wage policy, explains a real share of what Day 5's baseline specification
+picked up.
+
+Per Section 6.5, this is reported as a direct limit on how much weight
+the Day-5 headline numbers can carry, not something to patch over — the
+event study and this sensitivity check are exactly the tools the proposal
+specifies for catching it, and they did.
