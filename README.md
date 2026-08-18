@@ -177,3 +177,44 @@ Per Section 6.5, this is reported as a direct limit on how much weight
 the Day-5 headline numbers can carry, not something to patch over — the
 event study and this sensitivity check are exactly the tools the proposal
 specifies for catching it, and they did.
+
+**Day 8:** `R/10_placebo_test.R`, `R/11_cluster_bootstrap.R`,
+`R/12_model_diagnostics.R` (Sections 6.4, 8, 11).
+
+**Placebo test**: a false treatment date (2018-01-01), restricted to a
+pre-COVID, pre-real-treatment window (2016-2019) so it isn't just
+re-detecting the confound Day 7 already found. Clean result: small,
+non-significant estimates for both industries (food service p=0.29,
+retail p=0.43) — the design doesn't manufacture effects from nothing when
+there's no real policy change to detect.
+
+**Wild cluster bootstrap for β₄** (Cameron-Gelbach-Miller): `fwildclusterboot`,
+the standard package for this, was pulled from CRAN in 2024 and doesn't
+install on current R, so the procedure is implemented directly (999
+Rademacher-weight replications, restricted-model residuals — see the
+header comment in `R/11_cluster_bootstrap.R`, including a note on where
+the proposal's own wording is internally inconsistent about which
+bootstrap variant it means). On the real 20-treated-state panel, bootstrap
+p-values track the asymptotic ones closely (food service: 0.367 vs. 0.338
+asymptotic; retail: 0.953 vs. 0.953) — both 95% CIs include zero,
+confirming Day 5's asymptotic β₄ result rather than overturning it.
+
+Building the test suite for this surfaced a real property of the method
+worth knowing, not a bug: with very few treated clusters (~5, tried
+first) and a treatment effect large enough to badly misspecify the
+restricted null model, the wild bootstrap's reference distribution
+becomes numerically unstable. Confirmed by testing 10 vs. 30 synthetic
+states directly. Real Day 5-8 data (20 treated states) is comfortably
+outside that regime.
+
+**Model diagnostics** (Section 11) for Model A, both industries — 4-panel
+plots in `reports/figures/model_a_diagnostics_{food_service,retail}.png`.
+Residuals are non-normal by a Shapiro-Wilk test (p≈0 both industries,
+though with 1,260 observations that test is hypersensitive to small
+deviations). More informative: the specific highest-leverage points in
+both industries are 2020 Q2-Q3 observations — Vermont and New York (Q2
+2020), Hawaii (Q3 2020, heavily tourism-dependent) — the same COVID window
+Day 7 already flagged as the central identification threat, not a new or
+separate data problem. No single observation is extreme by Cook's
+distance (max 0.046, food service), so results aren't being driven by one
+outlier state.
