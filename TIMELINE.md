@@ -14,7 +14,7 @@ each day below is one focused commit, reviewed before moving to the next.
 | 7 | Event study / parallel-trends check; COVID-sensitivity covariate spec (**done**) | Week 6-7 |
 | 8 | Placebo test; cluster bootstrap for β₄; model diagnostics (**done**) | Week 7 |
 | 9 | Two-sample t-test; descriptive statistics; one-way regional ANOVA; Monte Carlo permutation (**done**) | Week 8 |
-| 10 | Final R Markdown report, README pass, reproducibility check | Week 8 |
+| 10 | Final R Markdown report, README pass, reproducibility check (**done**) | Week 8 |
 
 **Resolved:** the Day 2/3 IPUMS blocker is cleared — a real `IPUMS_API_KEY`
 was set locally and the CPS-ORG pull ran for real (Day 3).
@@ -28,6 +28,16 @@ No history or data was lost, but this is why the repo now lives outside
 any iCloud-synced folder.
 
 **Power analysis note:** Section 4.4 of the proposal pre-registers this
-design as likely underpowered for the exposure-gradient question (β₄) — that
-is expected, not a bug to chase, and the power simulation (folded into a
-later day) exists to state that limit honestly rather than to "fix" it.
+design as likely underpowered for the exposure-gradient question (β₄) —
+that's expected, not a bug to chase. **Correction, written at the end of
+Day 10:** earlier entries in this file said the formal Monte Carlo power
+simulation (Section 4.4's `sim_power`, estimating the minimum detectable
+effect) was "folded into a later day." It wasn't -- there was no later
+day it got folded into, and it was never built. What actually happened is
+the *qualitative* pre-registered expectation (design likely underpowered
+for β₄) got carried through the write-up and was borne out by the
+results (noisy, sign-inconsistent β₄ across every specification), but the
+quantitative MDE calculation itself was never run. That's a real gap in
+this build, not a rounding error, and it's flagged as such in the final
+report's Limitations section rather than left to look like it happened
+somewhere it didn't.

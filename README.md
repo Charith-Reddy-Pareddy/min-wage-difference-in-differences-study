@@ -22,23 +22,70 @@ The contribution isn't a new question but a specific empirical angle: moving
 from one average treatment effect to modeling how that effect scales with
 exposure.
 
+## Final report
+
+**[reports/final_report.Rmd](reports/final_report.Rmd)** is the complete
+write-up — render it with `Rscript -e 'rmarkdown::render("reports/final_report.Rmd")'`
+(needs [pandoc](https://pandoc.org), `brew install pandoc` on macOS) to get
+`reports/final_report.html`. It reads the pre-computed results in
+`data/processed/` and the figures in `reports/figures/`, so rendering it
+is fast; regenerating those from scratch is the "How to reproduce" section
+below.
+
+**Headline finding:** the credibility checks (event study, a two-sample
+t-test, a COVID-sensitivity spec, a placebo test) found a real problem,
+not a clean result. Pre-COVID trends between treated and control states
+weren't parallel for food service employment — confirmed by two
+independent methods — and the baseline average-effect estimate is highly
+sensitive to differential COVID recovery across states. That's reported
+as a direct limit on how much weight the headline number can carry, which
+is what the proposal's own design built these checks to catch.
+
 ## Data sources
 
 | Source | Role |
 |---|---|
-| FRED | State-quarter employment (food service, retail), GDP, population |
-| U.S. DOL (cross-checked against NCSL) | Treatment classification (wage change dates/amounts) |
-| QCEW wage-band tables / CPS ORG (IPUMS-CPS) | Exposure measure construction |
-| CPS (IPUMS-CPS) | Teen employment (16-19), secondary outcome |
+| FRED (public API) | State-quarter employment (food service, retail), GDP, population, 2015-2022 |
+| U.S. DOL minimum wage history (Wayback Machine snapshots) | Treatment classification |
+| QCEW Open Data API | Fallback employment series for 2 states FRED doesn't publish; wage-ratio validation check |
+| CPS-ORG via IPUMS-CPS | Exposure measure construction (2019-2020 earnings only) |
 
 ## Repo layout
 
 ```
 data/raw/        source pulls, not committed (see .gitignore)
-data/processed/  cleaned panel data, not committed
-R/               data prep and analysis scripts
-reports/         R Markdown report and figures
+data/processed/  cleaned panel data + all analysis results, not committed
+R/               numbered scripts, 01 through 15, run in order
+reports/         final_report.Rmd, rendered HTML, and all figures
 ```
+
+## How to reproduce
+
+Run the numbered scripts in `R/` in order from the repo root. Each one
+reads the previous scripts' outputs from `data/processed/` and writes its
+own back there (plus figures to `reports/figures/`), so order matters:
+
+```
+R/01_treatment_classification.R
+R/02_fetch_fred_data.R          # ~2 min, pulls all 50 states from FRED
+R/03_fetch_cps_org.R            # needs IPUMS_API_KEY in .env; ~2-5 min
+R/04_exposure_measure.R
+R/05_exposure_validation.R
+R/06_slr_mlr.R
+R/07_model_a_c.R
+R/08_event_study.R
+R/09_covid_sensitivity.R
+R/10_placebo_test.R
+R/11_cluster_bootstrap.R        # ~20 sec, 999-rep wild bootstrap
+R/12_model_diagnostics.R
+R/13_two_sample_ttest.R
+R/14_regional_anova.R
+R/15_permutation_test.R         # ~3 min, 10,000-rep permutation test
+```
+
+Then `testthat::test_dir("tests/testthat")` should show every test passing,
+and `reports/final_report.Rmd` should render cleanly against the outputs
+those scripts just produced.
 
 ## Status
 
@@ -139,8 +186,11 @@ full 20-treated-state sample and the ≥$0.50-increase subsample:
   retail, significant only in the ≥$0.50 subsample. This is close to
   what Section 4.4 pre-registers as the expected outcome: a design that
   may not reliably distinguish "no gradient" from "real gradient" given
-  the sample size. The formal power simulation (later day) will state
-  that limit quantitatively rather than just qualitatively.
+  the sample size. (Note added Day 10: the formal quantitative power
+  simulation from Section 4.4 was never actually built in this 10-day
+  compressed build — this line originally promised it for "a later
+  day" that never came. See TIMELINE.md's Day-10 power-analysis note
+  and the final report's Limitations section.)
 - Every `fixest` Model A estimate was cross-checked against an
   independent `lm()` + `sandwich::vcovCL()` fit — coefficients and
   clustered SEs matched to 4+ decimal places in all 4 specifications.
@@ -250,3 +300,23 @@ asymptotic Day-5 ones closely (food service: 0.09 vs. 0.118 asymptotic;
 retail: 0.377 vs. 0.385 asymptotic) — another confirmation, not a
 reversal. Null-distribution histograms in
 `reports/figures/permutation_test_{food_service,retail}.png`.
+
+**Day 10:** [reports/final_report.Rmd](reports/final_report.Rmd) — the
+full write-up, structured per the proposal's own required narrative order
+(Section 6.5: credibility checks presented and interpreted before any DiD
+coefficient, not in the order they were actually built).
+
+**Reproducibility check**: ran every script, `R/01` through `R/15`, in a
+single clean sequential pass from the repo root. It caught one real bug
+before this was called done: `R/05_exposure_validation.R` had its own
+duplicated copy of `R/02`'s `STATE_FIPS` table (a deliberate Day-3 choice
+to avoid a fragile relative `source()` path), and that copy silently went
+stale the moment Day 5 added 25 control states to `R/02`'s version —
+`R/05` still only knew the original 25 states, so it errored on the
+26th (`Unknown state: Alabama`) the moment something outside its own test
+suite actually exercised the full 50-state list. Fixed by switching
+`R/05` to the same source()-both-paths pattern `R/07` onward already
+uses, which can't drift out of sync since there's only one copy of the
+table left. Re-ran the full 14-script chain afterward: clean pass,
+and every regenerated number in `data/processed/` matched the figures
+already cited in the report to full precision.
