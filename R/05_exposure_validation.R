@@ -18,24 +18,17 @@
 
 library(dplyr)
 
-# Duplicated from R/02_fetch_fred_data.R's STATE_FIPS rather than
-# source()-ing that file: a source() path here would need to resolve
-# differently depending on whether this script runs from the repo root
-# or gets source()-d from tests/testthat, and this mapping is 25 short
-# lines, not worth the path fragility.
-STATE_FIPS <- c(
-  Alaska = "02", Arizona = "04", Arkansas = "05", California = "06",
-  Colorado = "08", Illinois = "17", Maine = "23", Maryland = "24",
-  Massachusetts = "25", Michigan = "26", Minnesota = "27", Missouri = "29",
-  Montana = "30", "New Jersey" = "34", "New Mexico" = "35", "New York" = "36",
-  Ohio = "39", "South Dakota" = "46", Vermont = "50", Washington = "53",
-  Connecticut = "09", Florida = "12", Nevada = "32", Oregon = "41",
-  Virginia = "51"
-)
-
-qcew_area_fips <- function(state) {
-  if (!state %in% names(STATE_FIPS)) stop("Unknown state: ", state)
-  paste0(STATE_FIPS[[state]], "000")
+# R/02_fetch_fred_data.R's STATE_FIPS used to be duplicated here instead
+# of source()-d, on the reasoning that a 25-line mapping wasn't worth
+# path fragility. That duplicate silently went stale the moment Day 5
+# added 25 control states to R/02's copy -- caught by the Day 10
+# reproducibility check ("Unknown state: Alabama"), not by inspection.
+# Switched to the same source()-both-paths pattern R/07 onward already
+# uses, which can't drift out of sync since there's only one copy.
+if (file.exists("R/02_fetch_fred_data.R")) {
+  source("R/02_fetch_fred_data.R")
+} else {
+  source("../../R/02_fetch_fred_data.R")
 }
 
 QCEW_WAGE_INDUSTRY <- c(food_service = "722", retail = "44-45")
