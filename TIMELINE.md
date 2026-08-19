@@ -13,7 +13,7 @@ each day below is one focused commit, reviewed before moving to the next.
 | 5 | Model A (binary DiD) and Model C (exposure interaction), both industries (**done**) | Week 5 |
 | 7 | Event study / parallel-trends check; COVID-sensitivity covariate spec (**done**) | Week 6-7 |
 | 8 | Placebo test; cluster bootstrap for β₄; model diagnostics (**done**) | Week 7 |
-| 9 | Two-sample t-test; descriptive statistics; one-way regional ANOVA; Monte Carlo permutation | Week 8 |
+| 9 | Two-sample t-test; descriptive statistics; one-way regional ANOVA; Monte Carlo permutation (**done**) | Week 8 |
 | 10 | Final R Markdown report, README pass, reproducibility check | Week 8 |
 
 **Resolved:** the Day 2/3 IPUMS blocker is cleared — a real `IPUMS_API_KEY`

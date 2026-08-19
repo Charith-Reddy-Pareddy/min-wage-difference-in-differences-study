@@ -218,3 +218,35 @@ Day 7 already flagged as the central identification threat, not a new or
 separate data problem. No single observation is extreme by Cook's
 distance (max 0.046, food service), so results aren't being driven by one
 outlier state.
+
+**Day 9:** `R/13_two_sample_ttest.R`, `R/14_regional_anova.R`,
+`R/15_permutation_test.R` (Section 10, STAT 240/340 coursework closure).
+
+**Two-sample t-test** on pre-period (2019 Q1 → 2020 Q4) employment
+trends, treated vs. control: **food service shows a real, significant
+difference** (treated -0.197 vs. control -0.118, t=3.03, p=0.0043) —
+treated states' food-service employment was already declining faster
+than control states' *before* treatment started. This independently
+corroborates Day 7's event-study pre-trend violation using a completely
+different, simpler method — not a new problem, the same one confirmed a
+second way. Retail shows no such difference (p=0.30), consistent with
+its weaker pre-trend violation in Day 7.
+
+**Descriptive statistics** (mean/SD of the pre-period trend, by group ×
+industry × increase type) in `data/processed/descriptive_statistics.csv`.
+
+**One-way regional ANOVA** (exploratory, Section 6.3): regions differ
+significantly in log employment change for both industries (food service
+F=5.10, p=0.0039; retail F=5.64, p=0.0022) — West notably higher than
+Midwest/South. Real geographic heterogeneity, unrelated to treatment;
+doesn't override Model C, which remains the formal heterogeneity test.
+Boxplots (by region and group) in
+`reports/figures/regional_boxplot_{food_service,retail}.png`.
+
+**Monte Carlo permutation test**, Model A only, 10,000 relabelings of
+which states are "treated" (state-level, not row-level, holding n_treated
+fixed at the real design's count): permutation p-values track the
+asymptotic Day-5 ones closely (food service: 0.09 vs. 0.118 asymptotic;
+retail: 0.377 vs. 0.385 asymptotic) — another confirmation, not a
+reversal. Null-distribution histograms in
+`reports/figures/permutation_test_{food_service,retail}.png`.
