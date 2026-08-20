@@ -1,8 +1,9 @@
-# 10-day build timeline
+# Build timeline: a 10-day compressed implementation of an 8-week design
 
 The proposal (`docs/` — original PDF, not committed) scopes this as an 8-week
-project. This repo builds the same confirmatory family on a 10-day schedule:
-each day below is one focused commit, reviewed before moving to the next.
+project. This repo compresses the same confirmatory family into a 10-day
+schedule: each day below is one focused commit, reviewed before moving to
+the next.
 
 | Day | Milestone | Proposal ref |
 |---|---|---|
@@ -41,3 +42,14 @@ quantitative MDE calculation itself was never run. That's a real gap in
 this build, not a rounding error, and it's flagged as such in the final
 report's Limitations section rather than left to look like it happened
 somewhere it didn't.
+
+**Post-build addition (not one of the 10 days above):** the quantitative
+power simulation flagged as missing above was built afterward, in
+`R/16_power_analysis.R` — a residual-based Monte Carlo simulation on the
+real panel (same method `R/11_cluster_bootstrap.R` already uses), giving
+a power curve and a minimum detectable effect (MDE) for β₄ per industry.
+Result: MDE at 80% power is β₄≈0.50 for food service and β₄≈0.22 for
+retail — both well above the actual observed estimates (0.167 and
+-0.005), confirming the design's qualitative "likely underpowered"
+expectation with a number. See `reports/figures/power_analysis.png` and
+`data/processed/power_analysis_results.csv`.

@@ -20,7 +20,7 @@ library(knitr)
 # knit -- the CPS-ORG pull, the wild cluster bootstrap, and the 10,000-rep
 # permutation test alone take several minutes combined. Everything here is
 # reproducible by running R/01_treatment_classification.R through
-# R/15_permutation_test.R in numeric order (see README.md), which is what
+# R/16_power_analysis.R in numeric order (see README.md), which is what
 # actually produced every number and figure this report displays.
 proc <- function(f) readr::read_csv(file.path("..", "data", "processed", f), show_col_types = FALSE)
 fig <- function(f) file.path("figures", f)
@@ -350,6 +350,30 @@ Permutation p-values track the asymptotic Model A p-values closely (food
 service 0.09 vs. 0.118; retail 0.377 vs. 0.385) -- another confirmation
 of the Model A result via a completely different inferential route.
 
+### 7.4 Power Analysis for β₄ (added after the original build)
+
+Section 4.4 pre-registered a qualitative expectation that the design is
+underpowered for β₄, the exposure-gradient hypothesis. The quantitative
+version -- a residual-based Monte Carlo power simulation on the real
+panel, added after the original 10-day build (`R/16_power_analysis.R`;
+see `TIMELINE.md` for why it wasn't part of the original build) -- makes
+that concrete.
+
+```{r power-analysis}
+proc("power_analysis_results.csv") %>% kable(digits = 3, caption = "Observed beta4 vs. minimum detectable effect at 80% power")
+```
+
+```{r power-analysis-plot, out.width="100%"}
+include_graphics(fig("power_analysis.png"))
+```
+
+Both industries' observed β₄ estimates fall well short of their own
+minimum detectable effect at 80% power -- the design would need a true
+exposure gradient roughly 3x (retail) to 5x (food service) larger than
+what was actually estimated before it could reliably distinguish that
+effect from noise. This is consistent with, and quantifies, the
+qualitative pre-registered expectation.
+
 ## 8. Limitations
 
 - **Non-random policy adoption**; parallel trends is a tested assumption,
@@ -361,12 +385,14 @@ of the Model A result via a completely different inferential route.
 - **Limited power**, especially for β₄ -- pre-registered in Section 4.4
   of the proposal as a qualitative expectation, and borne out by the
   actual results (noisy, sign-inconsistent β₄ across every
-  specification). **The formal quantitative piece was never built**,
-  though: Section 4.4's Monte Carlo power simulation (estimating the
-  minimum detectable effect at assumed sizes of 0.5%-3%) was scoped out
-  of the 10-day compressed build and is not part of this report. The
-  qualitative pre-registration held up; the number that would have
-  quantified it going in doesn't exist.
+  specification). The formal quantitative piece was scoped out of the
+  original 10-day build, but was added afterward
+  (`R/16_power_analysis.R`, a residual-based Monte Carlo simulation on
+  the real panel): the minimum detectable effect at 80% power is
+  β₄≈0.50 for food service and β₄≈0.22 for retail, both well above the
+  actual observed estimates (0.167 and -0.005). The qualitative
+  pre-registration held up, and the number that would have quantified
+  it going in now exists too -- see `reports/figures/power_analysis.png`.
 - **Exposure-measure construction risk**: band width (10-15%) and cell
   pooling rules are documented choices, not the only defensible ones.
 - **Multi-change states excluded** from the primary comparison; the
@@ -386,10 +412,11 @@ infrastructure to catch: a real, COVID-driven confound that meaningfully
 changes how much weight the headline estimate can carry. Success here
 isn't a clean significant result -- it's that the event study, two-sample
 t-test, placebo test, and COVID-sensitivity spec did their jobs and
-surfaced a real problem before it could be reported as a clean finding
-(the formal quantitative power simulation itself was never built, per
-Section 8's limitation above -- only the qualitative pre-registered
-expectation, which the results independently bore out).
+surfaced a real problem before it could be reported as a clean finding.
+The quantitative power simulation added after the original build
+(Section 8) independently confirms the same story: the design is
+underpowered for β₄ at the effect sizes actually observed, not just in
+the qualitative pre-registered expectation.
 
 ---
 
