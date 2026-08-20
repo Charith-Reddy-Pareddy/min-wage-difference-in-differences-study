@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.5.1'
+
+      - uses: r-lib/actions/setup-renv@v2
+
+      - name: Parse-check every R script
+        run: |
+          Rscript -e '
+            files <- list.files("R", pattern = "\\.R$", full.names = TRUE)
+            errors <- Filter(Negate(is.null), lapply(files, function(f) {
+              result <- tryCatch({ parse(f); NULL }, error = function(e) paste(f, "-", conditionMessage(e)))
+              result
+            }))
+            if (length(errors) > 0) {
+              cat(paste(unlist(errors), collapse = "\n"), "\n")
+              quit(status = 1)
+            }
+            cat("All", length(files), "R scripts parse cleanly.\n")
+          '
+
+      - name: Run tests
+        run: Rscript -e 'testthat::test_dir("tests/testthat")'
+
+  # The full pipeline needs a live IPUMS_API_KEY (R/03) and several
+  # minutes of network calls (FRED, QCEW, IPUMS), and reports/final_report.Rmd
+  # reads data/processed/ and reports/figures/, both gitignored and not
+  # regenerated here. Running the pipeline and rendering the report end to
+  # end is a local `make all` / `make report` step (see README.md), not a
+  # CI job -- this workflow validates that the code is correct, not that
+  # the live data pull still works.
