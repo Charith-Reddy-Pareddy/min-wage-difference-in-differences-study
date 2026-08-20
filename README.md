@@ -4,6 +4,19 @@ A difference-in-differences study of the 2021 round of state minimum wage
 increases, extended beyond a single average treatment effect to ask how the
 employment response varies with pre-policy wage exposure.
 
+**30-second version:**
+
+| | |
+|---|---|
+| **Question** | Does the employment effect of 2021 state minimum-wage increases vary with pre-policy exposure? |
+| **Data** | 50 states, quarterly 2015-2022 — FRED/QCEW employment + CPS-ORG (IPUMS) exposure |
+| **Method** | Two-way fixed-effects DiD, event study, placebo test, state-clustered and wild-bootstrap inference, permutation test, Monte Carlo power analysis |
+| **Baseline estimate** | Small negative average effect, significant only in the ≥$0.50-increase subsample |
+| **Main finding** | The baseline estimate is not robust: pre-trends fail for food service, and a COVID-recovery confound explains a real share of it |
+| **Main limitation** | The exposure-gradient hypothesis (β₄) is underpowered at the effect sizes actually observed — quantified, not just assumed |
+
+See [Key Figures](#key-figures) below or jump to the [full report](reports/final_report.Rmd) / [Limitations](#limitations).
+
 ## Research questions
 
 **Primary:** How does the employment response to state minimum-wage
@@ -21,6 +34,43 @@ This builds on a standard Card-Krueger-style state minimum wage DiD design.
 The contribution isn't a new question but a specific empirical angle: moving
 from one average treatment effect to modeling how that effect scales with
 exposure.
+
+## Key Figures
+
+<table>
+<tr>
+<td width="50%">
+
+**Which states were treated, and by how much**
+<img src="reports/figures/treatment_control_overview.png" width="100%">
+
+</td>
+<td width="50%">
+
+**Event study: pre-trends don't hold for food service**
+<img src="reports/figures/event_study_food_service.png" width="100%">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Baseline vs. COVID-adjusted estimate**
+<img src="reports/figures/covid_adjustment_comparison.png" width="100%">
+
+</td>
+<td width="50%">
+
+**Pre-2021 exposure distribution by industry**
+<img src="reports/figures/exposure_distribution.png" width="100%">
+
+</td>
+</tr>
+</table>
+
+More figures — model diagnostics, permutation-test null distributions,
+the power-analysis curve — are in `reports/figures/` and embedded in the
+[full report](reports/final_report.Rmd).
 
 ## Final report
 
@@ -41,6 +91,42 @@ sensitive to differential COVID recovery across states. That's reported
 as a direct limit on how much weight the headline number can carry, which
 is what the proposal's own design built these checks to catch.
 
+## Limitations
+
+- **Parallel trends are violated**, particularly for food service —
+  confirmed by both the event study's joint pre-trend test and an
+  independent two-sample t-test.
+- **COVID-era differential recovery confounds the treatment window**: a
+  real share of the baseline estimate is attributable to differential
+  COVID recovery across states, not minimum-wage policy.
+- **The exposure-gradient specification (β₄) is underpowered** at the
+  effect sizes actually observed — quantified by a post-hoc Monte Carlo
+  power analysis (`R/16_power_analysis.R`), not just assumed.
+- **A relatively small number of treated states** (20, or 10 in the
+  ≥$0.50 subsample) — addressed via state-clustered SEs and a wild
+  cluster bootstrap for β₄, but inference with this few clusters always
+  carries some caution.
+- **Exposure-measure construction is a documented choice, not the only
+  defensible one** (band width, cell-pooling rules).
+- Results should be read as **DiD estimates under this specification**,
+  not as definitive causal effects — see the [full report](reports/final_report.Rmd)'s
+  Limitations section for the complete list and detail.
+
+## What I learned
+
+A statistically significant DiD estimate isn't sufficient evidence of a
+causal effect on its own. The event study revealed a parallel-trends
+violation, and the COVID-sensitivity spec showed that differential
+recovery across states explained a substantial share of the baseline
+estimate — both are exactly the failure modes the proposal's own
+credibility-check design was built to catch, and they showed up. Adding
+the quantitative power analysis afterward reinforced the same lesson
+from a different angle: a null or noisy result on the exposure-gradient
+hypothesis isn't itself evidence of "no gradient" when the design can't
+reliably detect an effect that size in the first place. I treat the
+causal interpretation here as limited, not the baseline coefficient as
+definitive.
+
 ## Data sources
 
 | Source | Role |
@@ -55,15 +141,49 @@ is what the proposal's own design built these checks to catch.
 ```
 data/raw/        source pulls, not committed (see .gitignore)
 data/processed/  cleaned panel data + all analysis results, not committed
-R/               numbered scripts, 01 through 15, run in order
+R/               numbered scripts, 01 through 16, run in order
+scripts/         presentation-only figure generation (not part of the analysis pipeline)
 reports/         final_report.Rmd, rendered HTML, and all figures
+tests/testthat/  unit tests, one file per R/ script
+.github/workflows/ CI: parse-checks R/ and runs the test suite on every push
+renv.lock        pinned package versions (see Environment below)
 ```
+
+## Environment
+
+Package versions are pinned via [renv](https://rstudio.github.io/renv/)
+in `renv.lock` (R 4.5.1). To restore the exact environment:
+
+```
+Rscript -e 'renv::restore()'
+```
+
+Key packages: `fixest`, `dplyr`, `readr`, `sandwich`, `testthat`,
+`rmarkdown`, `knitr`, `ggplot2`. Rendering the report additionally needs
+[pandoc](https://pandoc.org) (`brew install pandoc` on macOS), which
+isn't an R package and isn't in `renv.lock`.
 
 ## How to reproduce
 
-Run the numbered scripts in `R/` in order from the repo root. Each one
-reads the previous scripts' outputs from `data/processed/` and writes its
-own back there (plus figures to `reports/figures/`), so order matters:
+**One command**, from the repo root, after `renv::restore()`:
+
+```
+make all      # runs R/01 through R/16, the test suite, the summary figures, then the report
+make test     # just the test suite
+make figures  # just the README's summary figures (scripts/generate_readme_figures.R)
+make report   # just renders reports/final_report.Rmd against existing data/processed/
+```
+
+`make all` needs `IPUMS_API_KEY` set in `.env` (see `.env.example`) for
+`R/03`, and takes several minutes end to end (`R/03`'s CPS-ORG pull,
+`R/11`'s wild bootstrap, `R/15`'s permutation test, and `R/16`'s power
+simulation are each the slowest part of their respective scripts,
+roughly 2-5 min combined).
+
+Equivalently, without `make`, run the numbered scripts in `R/` directly
+in order from the repo root — each one reads the previous scripts'
+outputs from `data/processed/` and writes its own back there (plus
+figures to `reports/figures/`), so order matters:
 
 ```
 R/01_treatment_classification.R
@@ -81,11 +201,15 @@ R/12_model_diagnostics.R
 R/13_two_sample_ttest.R
 R/14_regional_anova.R
 R/15_permutation_test.R         # ~3 min, 10,000-rep permutation test
+R/16_power_analysis.R           # ~5 min, 30-point x 500-rep power simulation
 ```
 
 Then `testthat::test_dir("tests/testthat")` should show every test passing,
 and `reports/final_report.Rmd` should render cleanly against the outputs
-those scripts just produced.
+those scripts just produced. CI (`.github/workflows/ci.yml`) runs the
+parse-check and test suite on every push — it doesn't run the full
+pipeline or render the report, since those need live API credentials and
+several minutes; see the workflow file for why.
 
 ## Status
 
@@ -189,8 +313,9 @@ full 20-treated-state sample and the ≥$0.50-increase subsample:
   the sample size. (Note added Day 10: the formal quantitative power
   simulation from Section 4.4 was never actually built in this 10-day
   compressed build — this line originally promised it for "a later
-  day" that never came. See TIMELINE.md's Day-10 power-analysis note
-  and the final report's Limitations section.)
+  day" that never came. **Later update:** it was built afterward, as a
+  post-build addition — see `R/16_power_analysis.R` and TIMELINE.md's
+  power-analysis notes.)
 - Every `fixest` Model A estimate was cross-checked against an
   independent `lm()` + `sandwich::vcovCL()` fit — coefficients and
   clustered SEs matched to 4+ decimal places in all 4 specifications.
@@ -320,3 +445,9 @@ uses, which can't drift out of sync since there's only one copy of the
 table left. Re-ran the full 14-script chain afterward: clean pass,
 and every regenerated number in `data/processed/` matched the figures
 already cited in the report to full precision.
+
+**Post-build additions (not part of the original 10 days):** `R/16_power_analysis.R`
+(the Monte Carlo power simulation for β₄ flagged as missing above),
+`renv.lock` for pinned dependencies, `Makefile` for one-command
+reproduction, `.github/workflows/ci.yml` for CI, and the summary figures
+in the [Key Figures](#key-figures) section. See TIMELINE.md for detail.
