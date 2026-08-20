@@ -1,0 +1,6 @@
+# The rendered report embeds all figures as base64 PNG data inline, which
+# makes it ~2.9MB of mostly-image bytes with an .html extension -- GitHub's
+# language stats otherwise count that as 95%+ of the repo, drowning out the
+# 30 R scripts (~123KB) that are the actual project. Marking it generated
+# excludes it from the language bar without removing the file.
+reports/final_report.html linguist-generated=true
