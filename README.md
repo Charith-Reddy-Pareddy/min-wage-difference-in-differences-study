@@ -144,7 +144,7 @@ data/processed/  cleaned panel data + all analysis results, not committed
 R/               numbered scripts, 01 through 16, run in order
 scripts/         presentation-only figure generation (not part of the analysis pipeline)
 reports/         final_report.Rmd, rendered HTML, and all figures
-tests/testthat/  unit tests, one file per R/ script
+tests/           unit tests, one file per R/ script
 .github/workflows/ CI: parse-checks R/ and runs the test suite on every push
 renv.lock        pinned package versions (see Environment below)
 ```
@@ -204,7 +204,7 @@ R/15_permutation_test.R         # ~3 min, 10,000-rep permutation test
 R/16_power_analysis.R           # ~5 min, 30-point x 500-rep power simulation
 ```
 
-Then `testthat::test_dir("tests/testthat")` should show every test passing,
+Then `testthat::test_dir("tests")` should show every test passing,
 and `reports/final_report.Rmd` should render cleanly against the outputs
 those scripts just produced. CI (`.github/workflows/ci.yml`) runs the
 parse-check and test suite on every push — it doesn't run the full

@@ -21,7 +21,7 @@ library(dplyr)
 if (file.exists("R/07_model_a_c.R")) {
   source("R/07_model_a_c.R")
 } else {
-  source("../../R/07_model_a_c.R")
+  source("../R/07_model_a_c.R")
 }
 
 permutation_test_model_a <- function(panel, n_reps = 10000, seed = 1) {

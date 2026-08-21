@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/04_exposure_measure.R")
+source("../R/04_exposure_measure.R")
 
 test_that("hourly-paid workers use HOURWAGE directly", {
   wage <- derive_hourly_wage(hourwage = 15.5, paidhour = 2, earnweek = 999.99, uhrsworkorg = 999)

@@ -22,12 +22,12 @@ library(ggplot2)
 
 # Reuses build_panel(), yoy_log_growth(), etc. from R/07. source() needs a
 # different relative path depending on whether this runs from the repo
-# root (Rscript R/08_event_study.R) or gets source()-d from
-# tests/testthat -- try both rather than duplicating R/07's functions.
+# root (Rscript R/08_event_study.R) or gets source()-d from tests/ --
+# try both rather than duplicating R/07's functions.
 if (file.exists("R/07_model_a_c.R")) {
   source("R/07_model_a_c.R")
 } else {
-  source("../../R/07_model_a_c.R")
+  source("../R/07_model_a_c.R")
 }
 
 #' Quarters between `quarter` and `treatment_quarter` (can be negative).

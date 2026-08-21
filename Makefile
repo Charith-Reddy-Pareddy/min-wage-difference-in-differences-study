@@ -28,7 +28,7 @@ pipeline:
 	done
 
 test:
-	Rscript -e 'testthat::test_dir("tests/testthat")'
+	Rscript -e 'testthat::test_dir("tests")'
 
 figures:
 	Rscript scripts/generate_readme_figures.R

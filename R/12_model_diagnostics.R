@@ -15,7 +15,7 @@
 if (file.exists("R/07_model_a_c.R")) {
   source("R/07_model_a_c.R")
 } else {
-  source("../../R/07_model_a_c.R")
+  source("../R/07_model_a_c.R")
 }
 
 save_model_a_diagnostics <- function(panel, industry, out_dir) {

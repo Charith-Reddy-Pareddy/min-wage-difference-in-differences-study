@@ -1,9 +1,9 @@
 library(testthat)
-source("../../R/06_slr_mlr.R")
+source("../R/06_slr_mlr.R")
 
 test_that("census_region covers every state in the treatment table and errors on an unknown one", {
-  source("../../R/01_treatment_classification.R")
-  treatment_table <- load_treatment_table("../../data/treatment_classification.csv")
+  source("../R/01_treatment_classification.R")
+  treatment_table <- load_treatment_table("../data/treatment_classification.csv")
   expect_length(census_region(treatment_table$state), nrow(treatment_table))
   expect_error(census_region("Nowhere"), "No Census region")
 })

@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/13_two_sample_ttest.R")
+source("../R/13_two_sample_ttest.R")
 
 test_that("compute_pre_period_trend is log(2020Q4) - log(2019Q1), per state", {
   fred_panel <- tibble::tibble(

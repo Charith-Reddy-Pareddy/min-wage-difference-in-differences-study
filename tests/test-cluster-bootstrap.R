@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/11_cluster_bootstrap.R")
+source("../R/11_cluster_bootstrap.R")
 
 make_bootstrap_panel <- function(n_states = 10, beta4 = 0) {
   quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")

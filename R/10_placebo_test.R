@@ -18,7 +18,7 @@ library(dplyr)
 if (file.exists("R/07_model_a_c.R")) {
   source("R/07_model_a_c.R")
 } else {
-  source("../../R/07_model_a_c.R")
+  source("../R/07_model_a_c.R")
 }
 
 PLACEBO_DATE <- as.Date("2018-01-01")

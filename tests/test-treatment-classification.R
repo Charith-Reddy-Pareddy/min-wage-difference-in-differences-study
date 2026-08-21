@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/01_treatment_classification.R")
+source("../R/01_treatment_classification.R")
 
 make_valid_df <- function() {
   tibble::tibble(
@@ -43,7 +43,7 @@ test_that("unexpected group values are caught", {
 })
 
 test_that("the real treatment table passes validation", {
-  df <- load_treatment_table("../../data/treatment_classification.csv")
+  df <- load_treatment_table("../data/treatment_classification.csv")
   problems <- validate_treatment_table(df)
   expect_length(problems, 0)
 })

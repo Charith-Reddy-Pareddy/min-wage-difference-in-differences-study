@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/16_power_analysis.R") # transitively sources R/07 for build_panel
+source("../R/16_power_analysis.R") # transitively sources R/07 for build_panel
 
 make_power_panel <- function(n_states = 30, beta4 = 0) {
   quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")

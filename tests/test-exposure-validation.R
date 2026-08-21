@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/05_exposure_validation.R")
+source("../R/05_exposure_validation.R")
 
 test_that("qcew_wage_ratio converts weekly wage to an hourly proxy over minimum wage", {
   # $800/week -> $20/hour proxy; min wage $10 -> ratio 2.0

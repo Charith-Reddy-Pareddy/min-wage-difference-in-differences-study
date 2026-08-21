@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/03_fetch_cps_org.R")
+source("../R/03_fetch_cps_org.R")
 
 make_catalog <- function() {
   months <- sprintf("%02d", 1:12)

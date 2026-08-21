@@ -30,7 +30,7 @@ library(ggplot2)
 if (file.exists("R/07_model_a_c.R")) {
   source("R/07_model_a_c.R")
 } else {
-  source("../../R/07_model_a_c.R")
+  source("../R/07_model_a_c.R")
 }
 
 BETA4_TERM <- "treated_post:exposure"

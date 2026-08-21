@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/14_regional_anova.R")
+source("../R/14_regional_anova.R")
 
 test_that("regional_anova detects a region effect that's actually there", {
   set.seed(1)

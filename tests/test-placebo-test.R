@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/10_placebo_test.R")
+source("../R/10_placebo_test.R")
 
 make_synthetic_inputs <- function() {
   quarters <- seq(as.Date("2015-01-01"), as.Date("2022-10-01"), by = "quarter")

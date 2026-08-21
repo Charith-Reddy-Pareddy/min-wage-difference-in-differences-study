@@ -25,7 +25,7 @@ library(dplyr)
 if (file.exists("R/07_model_a_c.R")) {
   source("R/07_model_a_c.R")
 } else {
-  source("../../R/07_model_a_c.R")
+  source("../R/07_model_a_c.R")
 }
 
 PRE_COVID_QUARTER <- as.Date("2019-10-01")

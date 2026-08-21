@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/12_model_diagnostics.R")
+source("../R/12_model_diagnostics.R")
 
 test_that("save_model_a_diagnostics returns well-formed summary stats and writes a plot file", {
   quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")

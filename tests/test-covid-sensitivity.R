@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/09_covid_sensitivity.R")
+source("../R/09_covid_sensitivity.R")
 
 test_that("compute_covid_severity is log(trough) - log(pre-COVID), per state", {
   fred_panel <- tibble::tibble(

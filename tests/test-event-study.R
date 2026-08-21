@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/08_event_study.R")
+source("../R/08_event_study.R")
 
 test_that("relative_quarter is 0 at the treatment quarter and correct on either side", {
   expect_equal(relative_quarter(as.Date("2021-01-01")), 0L)

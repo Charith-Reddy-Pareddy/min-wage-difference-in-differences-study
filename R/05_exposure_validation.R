@@ -28,7 +28,7 @@ library(dplyr)
 if (file.exists("R/02_fetch_fred_data.R")) {
   source("R/02_fetch_fred_data.R")
 } else {
-  source("../../R/02_fetch_fred_data.R")
+  source("../R/02_fetch_fred_data.R")
 }
 
 QCEW_WAGE_INDUSTRY <- c(food_service = "722", retail = "44-45")

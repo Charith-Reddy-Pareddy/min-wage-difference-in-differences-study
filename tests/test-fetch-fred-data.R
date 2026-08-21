@@ -1,6 +1,6 @@
 library(testthat)
-source("../../R/01_treatment_classification.R")
-source("../../R/02_fetch_fred_data.R")
+source("../R/01_treatment_classification.R")
+source("../R/02_fetch_fred_data.R")
 
 test_that("employment series IDs match confirmed-working FRED IDs", {
   # These exact IDs were verified against live FRED data before being
@@ -21,7 +21,7 @@ test_that("unknown states are rejected rather than silently producing a bad ID",
 })
 
 test_that("every state in the treatment table has a FIPS code and abbreviation", {
-  treated <- load_treatment_table("../../data/treatment_classification.csv")
+  treated <- load_treatment_table("../data/treatment_classification.csv")
   missing_fips <- setdiff(treated$state, names(STATE_FIPS))
   missing_abbr <- setdiff(treated$state, names(STATE_ABBR))
   expect_length(missing_fips, 0)

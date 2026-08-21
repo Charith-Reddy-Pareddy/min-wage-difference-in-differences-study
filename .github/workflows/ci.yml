@@ -34,7 +34,7 @@ jobs:
           '
 
       - name: Run tests
-        run: Rscript -e 'testthat::test_dir("tests/testthat")'
+        run: Rscript -e 'testthat::test_dir("tests")'
 
   # The full pipeline needs a live IPUMS_API_KEY (R/03) and several
   # minutes of network calls (FRED, QCEW, IPUMS), and reports/final_report.Rmd

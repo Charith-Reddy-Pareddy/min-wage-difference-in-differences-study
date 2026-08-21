@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/07_model_a_c.R")
+source("../R/07_model_a_c.R")
 
 test_that("yoy_log_growth is NA for the first 4 quarters and correct afterward", {
   quarter <- seq(as.Date("2019-01-01"), as.Date("2020-10-01"), by = "quarter")

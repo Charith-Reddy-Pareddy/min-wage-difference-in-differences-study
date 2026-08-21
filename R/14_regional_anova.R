@@ -20,7 +20,7 @@ library(ggplot2)
 if (file.exists("R/06_slr_mlr.R")) {
   source("R/06_slr_mlr.R")
 } else {
-  source("../../R/06_slr_mlr.R")
+  source("../R/06_slr_mlr.R")
 }
 
 regional_anova <- function(state_level, outcome) {

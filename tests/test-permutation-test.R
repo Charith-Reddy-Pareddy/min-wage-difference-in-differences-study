@@ -1,5 +1,5 @@
 library(testthat)
-source("../../R/15_permutation_test.R")
+source("../R/15_permutation_test.R")
 
 make_permutation_panel <- function(n_states = 20, treated_effect = 0) {
   quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")
