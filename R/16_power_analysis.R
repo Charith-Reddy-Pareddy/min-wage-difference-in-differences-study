@@ -1,13 +1,21 @@
-# Post-build addition: the quantitative Monte Carlo power simulation for
-# beta4 (Section 4.4 of the proposal) that TIMELINE.md and the final
-# report both flagged as scoped out of the original 10-day build. This
-# script fills that gap; it was not part of the original 10 days -- see
-# the note added to TIMELINE.md and README.md alongside it.
+# Post-build addition: the quantitative Monte Carlo power simulations for
+# beta3 and beta4 (Section 4.4 of the proposal) that TIMELINE.md and the
+# final report both flagged as scoped out of the original 10-day build.
+# This script fills that gap; it was not part of the original 10 days --
+# see the note added to TIMELINE.md and README.md alongside it.
+#
+# Section 4.4 specifies two separate power analyses:
+#   1. Average-effect power for beta3 (Model A's treated_post), at
+#      assumed effect sizes 0.5%/1%/2%/3%, reporting the MDE.
+#   2. Heterogeneity-detection power for beta4 (Model C's exposure
+#      interaction) -- can the design tell "no gradient" from "real
+#      gradient" apart?
+# Both live in this file: simulate_power_at_effect_a()/power_curve_a()
+# for (1), simulate_power_at_effect()/power_curve() for (2).
 #
 # Question: at the sample actually collected (20 treated + 25 control
 # states, quarterly 2016-2022), what's the power to detect a given true
-# beta4 (the treated_post x exposure interaction), and what effect size
-# is detectable at 80% power?
+# beta3 or beta4, and what effect size is detectable at 80% power?
 #
 # Method: same restricted-model-plus-Rademacher-residual machinery
 # R/11_cluster_bootstrap.R already uses, adapted for a power curve
@@ -33,7 +41,61 @@ if (file.exists("R/07_model_a_c.R")) {
   source("../R/07_model_a_c.R")
 }
 
+BETA3_TERM <- "treated_post"
 BETA4_TERM <- "treated_post:exposure"
+
+#' Model A with treated_post dropped entirely (beta3 = 0) -- the null
+#' model for the beta3 power sim, analogous to fit_model_a() itself
+#' serving as the beta4 = 0 null for the beta4 sim below.
+fit_model_a_restricted <- function(panel) {
+  feols(log_employment ~ gdp_growth + pop_growth | state + quarter,
+        cluster = ~state, data = panel)
+}
+
+#' Simulate `reps` synthetic datasets under an assumed true beta3, refit
+#' Model A each time, and return the share where the beta3 p-value < 0.05.
+#' Same restricted-model-plus-Rademacher-residual method as the beta4
+#' version below, applied to Model A's treated_post instead of Model C's
+#' exposure interaction.
+simulate_power_at_effect_a <- function(panel, true_beta3, reps = 500, seed = 1) {
+  old_notes <- fixest::getFixest_notes()
+  fixest::setFixest_notes(FALSE)
+  on.exit(fixest::setFixest_notes(old_notes), add = TRUE)
+
+  restricted <- fit_model_a_restricted(panel) # beta3 = 0
+  fitted_restricted <- fitted(restricted)
+  resid_restricted <- resid(restricted)
+  clusters <- panel$state
+  unique_clusters <- unique(clusters)
+
+  set.seed(seed)
+  panel_sim <- panel
+  significant <- logical(reps)
+  for (r in seq_len(reps)) {
+    weights <- stats::setNames(sample(c(-1, 1), length(unique_clusters), replace = TRUE), unique_clusters)
+    panel_sim$log_employment <- fitted_restricted +
+      true_beta3 * panel$treated_post +
+      resid_restricted * weights[clusters]
+    fit_r <- fit_model_a(panel_sim)
+    p_r <- fixest::coeftable(fit_r)[BETA3_TERM, "Pr(>|t|)"]
+    significant[r] <- !is.na(p_r) && p_r < 0.05
+  }
+  mean(significant)
+}
+
+#' Power curve for beta3 across a grid of assumed effect sizes, plus the
+#' MDE at 80% power. Mirrors power_curve() below, for Model A.
+power_curve_a <- function(panel, effect_grid, reps = 500, seed = 1) {
+  power <- vapply(
+    seq_along(effect_grid),
+    function(i) simulate_power_at_effect_a(panel, effect_grid[i], reps = reps, seed = seed + i),
+    numeric(1)
+  )
+  list(
+    table = tibble::tibble(effect_size = effect_grid, power = power),
+    mde_80 = select_mde(effect_grid, power, threshold = 0.80)
+  )
+}
 
 #' Simulate `reps` synthetic datasets under an assumed true beta4, refit
 #' Model C each time, and return the share where the beta4 p-value < 0.05.
@@ -93,6 +155,64 @@ if (sys.nframe() == 0) {
   fred_panel <- readr::read_csv("data/processed/fred_state_quarter.csv", show_col_types = FALSE)
   exposure_table <- readr::read_csv("data/processed/exposure_state_industry.csv", show_col_types = FALSE)
 
+  # --- Part 1: average-effect power for beta3 (Model A), Section 4.4's
+  # own assumed grid: 0.5%, 1%, 2%, 3%. ---
+  effect_grid_a <- c(0.005, 0.01, 0.02, 0.03)
+
+  results_a <- list()
+  curves_a <- list()
+
+  for (ind in list(
+    list(industry = "food_service", col = "employment_food_service"),
+    list(industry = "retail", col = "employment_retail")
+  )) {
+    cat("\n============================================================\n")
+    cat("Power simulation for beta3 (Model A) --", ind$industry, "(full 20-state treated sample)\n")
+
+    panel <- build_panel(fred_panel, treatment_table, exposure_table, ind$industry, ind$col)
+    t0 <- Sys.time()
+    curve_a <- power_curve_a(panel, effect_grid_a, reps = 500, seed = 100)
+    elapsed <- round(as.numeric(Sys.time() - t0, units = "secs"), 1)
+
+    cat("MDE at 80% power:", ifelse(is.na(curve_a$mde_80), "not reached on this grid", round(curve_a$mde_80, 4)),
+        " (", length(effect_grid_a), "grid points x 500 reps,", elapsed, "sec )\n")
+
+    curves_a[[ind$industry]] <- curve_a$table %>% mutate(industry = ind$industry)
+    results_a[[ind$industry]] <- tibble::tibble(
+      industry = ind$industry,
+      observed_beta3 = fixest::coeftable(fit_model_a(panel))[BETA3_TERM, "Estimate"],
+      mde_80 = curve_a$mde_80
+    )
+  }
+
+  curves_a_table <- dplyr::bind_rows(curves_a)
+  results_a_table <- dplyr::bind_rows(results_a)
+  readr::write_csv(curves_a_table, "data/processed/power_analysis_beta3_curve.csv")
+  readr::write_csv(results_a_table, "data/processed/power_analysis_beta3_results.csv")
+
+  cat("\n\n=== Beta3 (Model A, average effect) power analysis summary ===\n")
+  print(results_a_table, width = Inf)
+
+  p_a <- ggplot(curves_a_table, aes(x = effect_size, y = power, color = industry)) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 2) +
+    geom_hline(yintercept = 0.80, linetype = "dashed", color = "grey40") +
+    scale_x_continuous(labels = scales::label_percent(accuracy = 1)) +
+    scale_y_continuous(labels = scales::label_percent(accuracy = 1), limits = c(0, 1)) +
+    labs(
+      title = "Power to detect beta3 (Model A average effect), by assumed effect size",
+      subtitle = "Section 4.4's own assumed grid (0.5%-3%), 20 treated + 25 control states",
+      x = "Assumed true beta3 (log-point average effect)",
+      y = "Simulated power",
+      color = "Industry"
+    ) +
+    theme_minimal()
+
+  dir.create("reports/figures", recursive = TRUE, showWarnings = FALSE)
+  ggsave("reports/figures/power_analysis_beta3.png", p_a, width = 7, height = 5, dpi = 150)
+  cat("Saved reports/figures/power_analysis_beta3.png\n")
+
+  # --- Part 2: heterogeneity-detection power for beta4 (Model C). ---
   # Section 4.4's own assumed range (0.5%-3%) was written for beta3 (Model
   # A's average effect, same units as log employment). beta4 is on a
   # different scale -- it's the coefficient on treated_post x exposure,
@@ -133,8 +253,13 @@ if (sys.nframe() == 0) {
   readr::write_csv(curves_table, "data/processed/power_analysis_curve.csv")
   readr::write_csv(results_table, "data/processed/power_analysis_results.csv")
 
-  cat("\n\n=== Power analysis summary ===\n")
+  cat("\n\n=== Beta4 (Model C, heterogeneity-detection) power analysis summary ===\n")
   print(results_table, width = Inf)
+  cat("\nSection 4.4's heterogeneity-detection question -- can this design tell 'no\n",
+      "gradient' from 'real gradient' apart -- is answered directly by this curve:\n",
+      "observed beta4 sits below its own MDE for both industries, so the answer is\n",
+      "no, not at the sizes actually estimated. See power_analysis_beta3_results.csv\n",
+      "for the separate average-effect (beta3) power analysis.\n", sep = "")
 
   p <- ggplot(curves_table, aes(x = effect_size, y = power, color = industry)) +
     geom_line(linewidth = 1) +
