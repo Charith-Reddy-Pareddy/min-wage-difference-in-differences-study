@@ -2455,8 +2455,34 @@ effect from noise. This is consistent with, and quantifies, the
 qualitative pre-registered expectation.</p>
 </div>
 </div>
+<div id="multiple-testing-and-inferential-hierarchy" class="section level2">
+<h2>8. Multiple Testing and Inferential Hierarchy</h2>
+<p>Two things are true at once in this report, and they’re not in
+tension: Model A (Section 5.1, β₃) is the headline result, and β₄
+(Section 5.2) is the primary scientific hypothesis. They answer
+different questions – “is there an average effect” versus “does it vary
+with exposure” – and one is never substituted for the other. Model A is
+reported first because it’s the best-powered result (Section 7.4
+quantifies exactly how well-powered); β₄ is reported alongside its own
+power ceiling (Section 7.5) rather than read as a clean null just
+because it came back noisy.</p>
+<p>The <strong>confirmatory family</strong> is small and explicit, fixed
+before any model was run rather than assembled after seeing results:
+Model A and Model C for both industries (Sections 5.1, 5.2), the event
+study (Section 4.1), the exposure-measurement validation (Section 2),
+both power analyses (Sections 7.4, 7.5), the wild cluster bootstrap
+(Section 6.1), and the placebo/COVID-sensitivity checks (Sections 4.3,
+4.4). This family is what determines the headline claim.</p>
+<p>The <strong>regional ANOVA</strong> (Section 7.2), the
+<strong>SLR/MLR</strong> coursework-closure pieces (Section 7.1), and
+the <strong>Monte Carlo permutation test</strong> (Section 7.3) are
+exploratory. They inform the picture – the permutation test in
+particular corroborates Model A from a distribution-free angle – but
+none of them validate or overturn the confirmatory family’s result, and
+none are treated as if they could.</p>
+</div>
 <div id="limitations" class="section level2">
-<h2>8. Limitations</h2>
+<h2>9. Limitations</h2>
 <ul>
 <li><strong>Non-random policy adoption</strong>; parallel trends is a
 tested assumption, not a proven one, and Section 4 above shows it
@@ -2518,7 +2544,7 @@ begin with.</li>
 </ul>
 </div>
 <div id="conclusion" class="section level2">
-<h2>9. Conclusion</h2>
+<h2>10. Conclusion</h2>
 <p>The working hypothesis going in was a small average effect with an
 inconclusive exposure gradient, reported honestly regardless of
 significance (Section 15 of the proposal). That’s what happened, plus
@@ -2529,7 +2555,7 @@ isn’t a clean significant result – it’s that the event study, two-sample
 t-test, placebo test, and COVID-sensitivity spec did their jobs and
 surfaced a real problem before it could be reported as a clean finding.
 The quantitative power simulation added after the original build
-(Section 8) independently confirms the same story: the design is
+(Section 9) independently confirms the same story: the design is
 underpowered for β₄ at the effect sizes actually observed, not just in
 the qualitative pre-registered expectation.</p>
 <hr />
