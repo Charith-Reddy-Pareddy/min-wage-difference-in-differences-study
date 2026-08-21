@@ -46,10 +46,18 @@ somewhere it didn't.
 **Post-build addition (not one of the 10 days above):** the quantitative
 power simulation flagged as missing above was built afterward, in
 `R/16_power_analysis.R` — a residual-based Monte Carlo simulation on the
-real panel (same method `R/11_cluster_bootstrap.R` already uses), giving
-a power curve and a minimum detectable effect (MDE) for β₄ per industry.
-Result: MDE at 80% power is β₄≈0.50 for food service and β₄≈0.22 for
-retail — both well above the actual observed estimates (0.167 and
--0.005), confirming the design's qualitative "likely underpowered"
-expectation with a number. See `reports/figures/power_analysis.png` and
-`data/processed/power_analysis_results.csv`.
+real panel (same method `R/11_cluster_bootstrap.R` already uses). The
+proposal's Section 4.4 actually specifies two separate power analyses,
+and both are now built:
+
+- **β₃ (Model A, average effect)**, at the proposal's own assumed grid
+  of 0.5%/1%/2%/3%: MDE at 80% power isn't reached anywhere in that
+  range for either industry. See `reports/figures/power_analysis_beta3.png`
+  and `data/processed/power_analysis_beta3_results.csv`.
+- **β₄ (Model C, exposure gradient)**: MDE at 80% power is β₄≈0.50 for
+  food service and β₄≈0.22 for retail — both well above the actual
+  observed estimates (0.167 and -0.005). See `reports/figures/power_analysis.png`
+  and `data/processed/power_analysis_results.csv`.
+
+Both confirm the design's qualitative "likely underpowered" expectation
+with a number, for both parameters the proposal named.

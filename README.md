@@ -99,15 +99,30 @@ is what the proposal's own design built these checks to catch.
 - **COVID-era differential recovery confounds the treatment window**: a
   real share of the baseline estimate is attributable to differential
   COVID recovery across states, not minimum-wage policy.
-- **The exposure-gradient specification (β₄) is underpowered** at the
-  effect sizes actually observed — quantified by a post-hoc Monte Carlo
-  power analysis (`R/16_power_analysis.R`), not just assumed.
+- **Both the average effect (β₃) and the exposure-gradient specification
+  (β₄) are underpowered** at the effect sizes actually observed —
+  quantified by a post-hoc Monte Carlo power analysis
+  (`R/16_power_analysis.R`), not just assumed. β₃'s MDE isn't reached
+  anywhere in the proposal's own 0.5%-3% assumed range for either
+  industry, which is why Model A only came back significant in the
+  ≥$0.50-increase subsample.
+- **The ≥$0.50-increase subsample and the legislated-only subsample are
+  the exact same 10 states** — the dollar-threshold cut and the
+  legislated-vs-automatic mechanism cut can't be disentangled in this
+  data, not just partially confounded.
 - **A relatively small number of treated states** (20, or 10 in the
   ≥$0.50 subsample) — addressed via state-clustered SEs and a wild
   cluster bootstrap for β₄, but inference with this few clusters always
   carries some caution.
 - **Exposure-measure construction is a documented choice, not the only
   defensible one** (band width, cell-pooling rules).
+- **Spillovers between neighboring states, anticipation effects ahead of
+  the 1/1/2021 effective date, and the COVID-era window's external
+  validity** are none of them modeled or corrected for.
+- **The permutation test is a reference distribution, not evidence of a
+  randomized experiment** — states chose whether and when to raise
+  wages, so permuting labels tests against a null of no effect, not a
+  null of as-if-random assignment.
 - Results should be read as **DiD estimates under this specification**,
   not as definitive causal effects — see the [full report](reports/final_report.Rmd)'s
   Limitations section for the complete list and detail.
@@ -447,7 +462,13 @@ and every regenerated number in `data/processed/` matched the figures
 already cited in the report to full precision.
 
 **Post-build additions (not part of the original 10 days):** `R/16_power_analysis.R`
-(the Monte Carlo power simulation for β₄ flagged as missing above),
-`renv.lock` for pinned dependencies, `Makefile` for one-command
-reproduction, `.github/workflows/ci.yml` for CI, and the summary figures
-in the [Key Figures](#key-figures) section. See TIMELINE.md for detail.
+(the Monte Carlo power simulations for both β₃ and β₄ flagged as
+missing above — the proposal's Section 4.4 specifies both), the
+increase-type composition columns in `model_a_c_results.csv` (Section
+4.2's "carried through the results tables" requirement), four
+limitations items from the proposal's Section 13 that hadn't made it
+into the report (spillovers, anticipation effects, external validity,
+the permutation test's reference-distribution caveat), `renv.lock` for
+pinned dependencies, `Makefile` for one-command reproduction,
+`.github/workflows/ci.yml` for CI, and the summary figures in the
+[Key Figures](#key-figures) section. See TIMELINE.md for detail.
