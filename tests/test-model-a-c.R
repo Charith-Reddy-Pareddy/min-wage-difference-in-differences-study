@@ -1,6 +1,28 @@
 library(testthat)
 source("../R/07_model_a_c.R")
 
+test_that("count_treated_by_type counts legislated and inflation-adjusted separately", {
+  treatment_table <- tibble::tibble(
+    state = c("A", "B", "C", "D", "E"),
+    group = c("treated", "treated", "treated", "treated", "control"),
+    increase_type = c("legislation", "legislation", "inflation_adj", "inflation_adj_paused", "no_change")
+  )
+  counts <- count_treated_by_type(treatment_table)
+  expect_equal(counts$n_legislated, 2)
+  expect_equal(counts$n_inflation_adjusted, 2) # inflation_adj + inflation_adj_paused
+})
+
+test_that("count_treated_by_type ignores non-treated rows entirely", {
+  treatment_table <- tibble::tibble(
+    state = c("A", "B"),
+    group = c("excluded", "control"),
+    increase_type = c("ballot_measure", "no_change")
+  )
+  counts <- count_treated_by_type(treatment_table)
+  expect_equal(counts$n_legislated, 0)
+  expect_equal(counts$n_inflation_adjusted, 0)
+})
+
 test_that("yoy_log_growth is NA for the first 4 quarters and correct afterward", {
   quarter <- seq(as.Date("2019-01-01"), as.Date("2020-10-01"), by = "quarter")
   value <- 100 * 1.01^(0:7) # steady growth

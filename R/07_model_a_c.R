@@ -86,6 +86,18 @@ fit_model_a_lm_crosscheck <- function(panel) {
      data = panel)
 }
 
+#' Proposal Section 4.2: the increase-type tag (legislated vs.
+#' automatic/CPI-indexed) is carried as a labeled column through the
+#' results tables, not just used as a filter. Counts treated states by
+#' mechanism in a given (possibly already-filtered) treatment table.
+count_treated_by_type <- function(treatment_table) {
+  treated <- treatment_table %>% filter(group == "treated")
+  list(
+    n_legislated = sum(treated$increase_type == "legislation"),
+    n_inflation_adjusted = sum(treated$increase_type %in% c("inflation_adj", "inflation_adj_paused"))
+  )
+}
+
 if (sys.nframe() == 0) {
   source("R/01_treatment_classification.R")
   treatment_table <- load_treatment_table()
@@ -99,6 +111,14 @@ if (sys.nframe() == 0) {
     list(label = ">=$0.50-increase subsample", treatment_table = treatment_table %>%
            filter(group != "treated" | increase >= 0.50))
   )) {
+    # In this data the >=$0.50 cut and the legislated-vs-automatic cut
+    # turn out to be identical: the 10 states with >=$0.50 increases are
+    # exactly the 10 "legislation"-type states (n_legislated ==
+    # n_treated_states in that row below), so a separate legislated-only
+    # model spec would just reproduce it -- the composition counts are
+    # what makes the by-mechanism split visible instead.
+    type_counts <- count_treated_by_type(spec$treatment_table)
+
     for (ind in list(
       list(industry = "food_service", col = "employment_food_service"),
       list(industry = "retail", col = "employment_retail")
@@ -132,6 +152,8 @@ if (sys.nframe() == 0) {
         industry = ind$industry,
         n_treated_states = n_distinct(panel$state[panel$treated == 1]),
         n_control_states = n_distinct(panel$state[panel$treated == 0]),
+        n_legislated_treated = type_counts$n_legislated,
+        n_inflation_adjusted_treated = type_counts$n_inflation_adjusted,
         model_a_treated_post = ct_a["treated_post", "Estimate"],
         model_a_se = ct_a["treated_post", "Std. Error"],
         model_a_p = ct_a["treated_post", "Pr(>|t|)"],
