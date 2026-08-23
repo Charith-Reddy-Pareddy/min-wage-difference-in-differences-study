@@ -95,6 +95,9 @@ the power-analysis curves, exposure-bandwidth sensitivity — are in
 
 ## Final report
 
+**[Read the rendered report](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/tag/v1.0-report)** —
+no cloning required.
+
 **[reports/final_report.Rmd](reports/final_report.Rmd)** is the complete
 write-up — render it with `Rscript -e 'rmarkdown::render("reports/final_report.Rmd")'`
 (needs [pandoc](https://pandoc.org), `brew install pandoc` on macOS) to get
