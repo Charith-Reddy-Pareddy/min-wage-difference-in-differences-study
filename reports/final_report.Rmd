@@ -415,7 +415,13 @@ result for food service; that turned out to be an artifact of the
 contamination, not a real signal, corrected once the real control group
 was built.
 
-### 7.2 Regional ANOVA
+### 7.2 Regional ANOVA -- exploratory regional variation in employment growth, not a treatment-effect estimate
+
+This uses the full sample -- treated, excluded, *and* control states
+together -- as a general regional comparison, not a causal test of
+minimum-wage policy. Labeled explicitly here so it isn't mistaken for
+another heterogeneity check on the treatment itself: that's Model C
+(Section 5.2), the formal test.
 
 ```{r anova}
 proc("regional_anova_results.csv") %>% kable(digits = 4, caption = "One-way ANOVA: log employment change ~ Census region")
@@ -497,7 +503,31 @@ minimum detectable effect at 80% power -- the design would need a true
 exposure gradient roughly 3x (retail) to 5x (food service) larger than
 what was actually estimated before it could reliably distinguish that
 effect from noise. This is consistent with, and quantifies, the
-qualitative pre-registered expectation.
+qualitative pre-registered expectation. **The simulation quantifies
+which effect sizes this design could realistically distinguish from
+zero** -- it is a design property, not a way of explaining away the
+noisy β₄ result above after the fact.
+
+### 7.6 Exploratory Treatment-Intensity Model
+
+**Exploratory, not confirmatory** -- not part of the six-check
+confirmatory family in Section 8. The dollar size of a state's increase
+is not randomly assigned; states that raised wages by \$1.00 vs. \$0.08
+may differ systematically in ways unrelated to the policy itself. With
+that caveat: does a *larger* increase correspond to a larger employment
+response, rather than a simple treated/not-treated split?
+
+```{r treatment-intensity}
+proc("treatment_intensity_results.csv") %>%
+  kable(digits = 4, caption = "Exploratory: log employment ~ (wage increase x post), continuous dollar amount")
+```
+
+Food service's coefficient is negative and marginally significant (p =
+0.04); retail's is negative but not significant. Directionally
+consistent with Model A's binary result, but given the non-random
+assignment of increase size, this doesn't upgrade the evidence -- it's
+one more piece of exploratory information, not a sharper confirmatory
+estimate.
 
 ## 8. Multiple Testing and Inferential Hierarchy
 

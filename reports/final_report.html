@@ -2423,8 +2423,14 @@ marginally significant result for food service; that turned out to be an
 artifact of the contamination, not a real signal, corrected once the
 real control group was built.</p>
 </div>
-<div id="regional-anova" class="section level3">
-<h3>7.2 Regional ANOVA</h3>
+<div id="regional-anova-exploratory-regional-variation-in-employment-growth-not-a-treatment-effect-estimate" class="section level3">
+<h3>7.2 Regional ANOVA – exploratory regional variation in employment
+growth, not a treatment-effect estimate</h3>
+<p>This uses the full sample – treated, excluded, <em>and</em> control
+states together – as a general regional comparison, not a causal test of
+minimum-wage policy. Labeled explicitly here so it isn’t mistaken for
+another heterogeneity check on the treatment itself: that’s Model C
+(Section 5.2), the formal test.</p>
 <pre class="r"><code>proc(&quot;regional_anova_results.csv&quot;) %&gt;% kable(digits = 4, caption = &quot;One-way ANOVA: log employment change ~ Census region&quot;)</code></pre>
 <table>
 <caption>One-way ANOVA: log employment change ~ Census region</caption>
@@ -2604,7 +2610,54 @@ minimum detectable effect at 80% power – the design would need a true
 exposure gradient roughly 3x (retail) to 5x (food service) larger than
 what was actually estimated before it could reliably distinguish that
 effect from noise. This is consistent with, and quantifies, the
-qualitative pre-registered expectation.</p>
+qualitative pre-registered expectation. <strong>The simulation
+quantifies which effect sizes this design could realistically
+distinguish from zero</strong> – it is a design property, not a way of
+explaining away the noisy β₄ result above after the fact.</p>
+</div>
+<div id="exploratory-treatment-intensity-model" class="section level3">
+<h3>7.6 Exploratory Treatment-Intensity Model</h3>
+<p><strong>Exploratory, not confirmatory</strong> – not part of the
+six-check confirmatory family in Section 8. The dollar size of a state’s
+increase is not randomly assigned; states that raised wages by $1.00
+vs. $0.08 may differ systematically in ways unrelated to the policy
+itself. With that caveat: does a <em>larger</em> increase correspond to
+a larger employment response, rather than a simple treated/not-treated
+split?</p>
+<pre class="r"><code>proc(&quot;treatment_intensity_results.csv&quot;) %&gt;%
+  kable(digits = 4, caption = &quot;Exploratory: log employment ~ (wage increase x post), continuous dollar amount&quot;)</code></pre>
+<table>
+<caption>Exploratory: log employment ~ (wage increase x post),
+continuous dollar amount</caption>
+<thead>
+<tr class="header">
+<th align="left">industry</th>
+<th align="right">beta1_wage_increase_post</th>
+<th align="right">beta1_se</th>
+<th align="right">beta1_p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">food_service</td>
+<td align="right">-0.0358</td>
+<td align="right">0.0172</td>
+<td align="right">0.0429</td>
+</tr>
+<tr class="even">
+<td align="left">retail</td>
+<td align="right">-0.0196</td>
+<td align="right">0.0140</td>
+<td align="right">0.1689</td>
+</tr>
+</tbody>
+</table>
+<p>Food service’s coefficient is negative and marginally significant (p
+= 0.04); retail’s is negative but not significant. Directionally
+consistent with Model A’s binary result, but given the non-random
+assignment of increase size, this doesn’t upgrade the evidence – it’s
+one more piece of exploratory information, not a sharper confirmatory
+estimate.</p>
 </div>
 </div>
 <div id="multiple-testing-and-inferential-hierarchy" class="section level2">
