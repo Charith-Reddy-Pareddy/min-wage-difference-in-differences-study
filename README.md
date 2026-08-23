@@ -1,5 +1,11 @@
 # State Minimum Wage Increases and Low-Wage Employment: A Difference-in-Differences Study with Power, Heterogeneity, and Robustness Analysis
 
+**Finding:** the baseline DiD estimate is negative but not credible as a
+causal estimate — pre-trends are violated for food service, and the
+estimate is highly sensitive to differential COVID recovery. The
+exposure-gradient hypothesis is underpowered at the effect sizes actually
+observed. See [Results at a Glance](#results-at-a-glance) below.
+
 A difference-in-differences study of the 2021 round of state minimum wage
 increases, extended beyond a single average treatment effect to ask how the
 employment response varies with pre-policy wage exposure.
@@ -16,6 +22,18 @@ employment response varies with pre-policy wage exposure.
 | **Main limitation** | The exposure-gradient hypothesis (β₄) is underpowered at the effect sizes actually observed — quantified, not just assumed |
 
 See [Key Figures](#key-figures) below or jump to the [full report](reports/final_report.Rmd) / [Limitations](#limitations).
+
+## Results at a Glance
+
+| Question | Result | Interpretation |
+|---|---|---|
+| Average employment effect | Negative but not robust | Weak causal evidence |
+| Parallel trends | Violated (food service) | Major identification concern |
+| COVID sensitivity | Large change once controlled for | Confounding likely |
+| Exposure gradient (β₄) | Inconclusive | Underpowered, not "no effect" |
+| Exposure bandwidth (10%/12.5%/15%) | Consistent across all three | Not an artifact of band choice |
+| Placebo test | Null | Helpful credibility check |
+| Treatment-intensity (exploratory) | Directionally consistent | Not confirmatory — increase size isn't randomly assigned |
 
 ## Research questions
 
@@ -68,9 +86,12 @@ exposure.
 </tr>
 </table>
 
+**The central scientific question, visually: does the treatment effect scale with exposure?**
+<img src="reports/figures/marginal_effects.png" width="100%">
+
 More figures — model diagnostics, permutation-test null distributions,
-the power-analysis curve — are in `reports/figures/` and embedded in the
-[full report](reports/final_report.Rmd).
+the power-analysis curves, exposure-bandwidth sensitivity — are in
+`reports/figures/` and embedded in the [full report](reports/final_report.Rmd).
 
 ## Final report
 
@@ -101,11 +122,13 @@ is what the proposal's own design built these checks to catch.
   COVID recovery across states, not minimum-wage policy.
 - **Both the average effect (β₃) and the exposure-gradient specification
   (β₄) are underpowered** at the effect sizes actually observed —
-  quantified by a post-hoc Monte Carlo power analysis
-  (`R/16_power_analysis.R`), not just assumed. β₃'s MDE isn't reached
-  anywhere in the proposal's own 0.5%-3% assumed range for either
-  industry, which is why Model A only came back significant in the
-  ≥$0.50-increase subsample.
+  quantified by a design-based Monte Carlo sensitivity analysis
+  (`R/16_power_analysis.R`), not just assumed. The simulation quantifies
+  which effect sizes this design could realistically distinguish from
+  zero — it's a property of the design, not a way of explaining away a
+  noisy result after the fact. β₃'s MDE isn't reached anywhere in the
+  proposal's own 0.5%-3% assumed range for either industry, which is why
+  Model A only came back significant in the ≥$0.50-increase subsample.
 - **The ≥$0.50-increase subsample and the legislated-only subsample are
   the exact same 10 states** — the dollar-threshold cut and the
   legislated-vs-automatic mechanism cut can't be disentangled in this
