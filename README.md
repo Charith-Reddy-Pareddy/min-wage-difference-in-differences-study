@@ -174,6 +174,15 @@ definitive.
 | QCEW Open Data API | Fallback employment series for 2 states FRED doesn't publish; wage-ratio validation check |
 | CPS-ORG via IPUMS-CPS | Exposure measure construction (2019-2020 earnings only) |
 
+## Analysis Pipeline
+
+<img src="reports/figures/pipeline_diagram.png" width="60%">
+
+Sixteen scripts (nineteen counting the post-build additions) run in
+order, each reading the previous one's output from `data/processed/`
+and writing its own back. See [How to reproduce](#how-to-reproduce) for
+the exact commands.
+
 ## Repo layout
 
 ```
