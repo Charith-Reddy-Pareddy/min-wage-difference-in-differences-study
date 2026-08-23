@@ -40,12 +40,16 @@ yoy_log_growth <- function(value, quarter) {
 #' State-quarter panel with growth covariates, treatment/post indicators,
 #' and (for Model C) the state-industry exposure share. One row per
 #' state-quarter; `outcome_col` picks which industry's employment series
-#' becomes `log_employment`.
+#' becomes `log_employment`. `exposure_band_col` picks which exposure
+#' bandwidth column to use (exposure_share_10/125/15) -- defaults to the
+#' primary 12.5% band; R/17's bandwidth sensitivity check is the only
+#' caller that overrides it.
 build_panel <- function(fred_panel, treatment_table, exposure_table, industry, outcome_col,
-                         treatment_effective = as.Date("2021-01-01")) {
+                         treatment_effective = as.Date("2021-01-01"),
+                         exposure_band_col = "exposure_share_125") {
   exposure_col <- exposure_table %>%
     filter(industry == !!industry) %>%
-    select(state, exposure = exposure_share_125)
+    select(state, exposure = all_of(exposure_band_col))
 
   fred_panel %>%
     group_by(state) %>%
