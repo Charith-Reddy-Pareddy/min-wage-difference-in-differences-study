@@ -17,7 +17,10 @@ PIPELINE := R/01_treatment_classification.R \
             R/13_two_sample_ttest.R \
             R/14_regional_anova.R \
             R/15_permutation_test.R \
-            R/16_power_analysis.R
+            R/16_power_analysis.R \
+            R/17_exposure_bandwidth_sensitivity.R \
+            R/18_marginal_effects.R \
+            R/19_treatment_intensity.R
 
 all: pipeline test figures report
 
