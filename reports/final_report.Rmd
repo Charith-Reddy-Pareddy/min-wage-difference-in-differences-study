@@ -291,6 +291,67 @@ design may not reliably distinguish "no gradient" from "real gradient"
 given the sample size. A noisy β₄ is a valid, expected outcome under that
 pre-registration, not a failed analysis.
 
+### 5.3 Coefficient Interpretation
+
+Neither coefficient is self-explanatory from the table alone, so spelled
+out explicitly:
+
+- **Model A (β₃).** The full-sample food-service estimate is
+  `r round(mac$model_a_treated_post[1], 4)` -- because the outcome is
+  log employment, this corresponds to an approximately
+  `r sprintf("%.1f%%", abs(mac$model_a_treated_post[1]) * 100)` **lower**
+  employment level for treated states relative to control states after
+  the 2021 increase, holding GDP growth, population growth, and the
+  state/quarter fixed effects constant. It is not a dollar figure, a
+  job count, or a percentage-point change in an employment rate --
+  purely a relative log-scale gap between the two groups.
+- **Model C (β₄).** β₄ measures how the *estimated treatment effect
+  itself* changes as a state-industry's pre-treatment exposure share
+  increases -- formally, ∂(treatment effect)/∂(exposure) = β₄. A
+  positive β₄ (food service, this report) means the treatment effect
+  becomes more positive as exposure rises; a negative β₄ (retail) means
+  it becomes more negative. β₄ is not itself an employment effect --
+  it's the *slope* of the employment effect with respect to exposure,
+  which is why Section 5.4 plots it as a curve rather than a single
+  number.
+
+### 5.4 Marginal Effect of Treatment by Exposure Level
+
+```{r marginal-effects-plot, out.width="100%"}
+include_graphics(fig("marginal_effects.png"))
+```
+
+This is Model C's practical content: the estimated treatment effect
+(β₃ + β₄ × exposure) across the actual range of pre-2021 exposure
+observed, with a 95% confidence band from the model's clustered
+variance-covariance matrix (delta method). Food service's line has a
+visible upward slope -- higher-exposure states show a smaller
+(less-negative) estimated effect -- while retail's is nearly flat. The
+band's width, not just its slope, is the point: it comfortably contains
+zero across the entire exposure range for both industries, which is the
+same underpowering conclusion Section 7.5's formal power analysis
+reaches by simulation instead of visually.
+
+### 5.5 Exposure Bandwidth Sensitivity
+
+Is β₄ an artifact of the arbitrary 12.5% exposure-band choice? Model C
+refit at the two alternative bandwidths R/04 already computes (10%, 15%)
+but never previously used downstream:
+
+```{r bandwidth-sensitivity}
+bw <- proc("exposure_bandwidth_sensitivity.csv")
+bw %>%
+  select(bandwidth, industry, beta4, beta4_se, beta4_p) %>%
+  kable(digits = 4, caption = "Model C beta4 across exposure bandwidths")
+```
+
+Food service stays positive and never significant across all three
+bandwidths; retail stays small and never significant, though its sign
+flips between the 10% band and the wider two. Nothing here overturns
+Section 5.2's conclusion -- the result is not an artifact of picking
+12.5% specifically, but it was never precise enough to distinguish a
+real gradient from noise at any of the three definitions either.
+
 ## 6. Robustness
 
 ### 6.1 Wild Cluster Bootstrap for β₄
