@@ -48,6 +48,57 @@ estimated effect by roughly 90%. This is reported as a direct limit on
 how much weight the average-effect estimate can carry, exactly as the
 proposal's own design anticipated it might have to be (Section 6.5).
 
+## Identification Strategy
+
+Before any regression equation, the causal logic this design relies on,
+stated in plain language:
+
+- **Treatment.** States with a minimum-wage increase effective in Q1
+  2021.
+- **Comparison.** States with no minimum-wage change at all in 2021.
+- **Outcome.** Quarterly log employment, food service and retail,
+  tracked separately.
+- **Counterfactual.** Absent the minimum-wage increase, treated states
+  would have followed the same employment trajectory as the comparison
+  states -- the parallel-trends assumption every DiD design rests on.
+- **Main threat.** The 2021 treatment window sits immediately after an
+  extraordinary, unevenly-distributed labor-market shock. If COVID
+  caused states to recover on different trajectories for reasons
+  unrelated to minimum-wage policy, and that difference happens to
+  correlate with treatment status, the counterfactual above fails.
+- **Evidence.** Three independent checks, run before any DiD coefficient
+  is reported: an event study of the dynamic pre- and post-treatment
+  effects, a joint statistical test of whether the pre-treatment
+  coefficients are consistent with zero, and a COVID-sensitivity
+  specification that directly tests whether differential recovery
+  explains the baseline result.
+
+```{r pretrend-test-early}
+pretrend <- proc("pretrend_joint_test.csv")
+```
+
+**Figure 1 -- Pre-treatment trends and dynamic treatment effects**
+
+```{r event-study-plots-early, out.width="100%"}
+include_graphics(fig("event_study_food_service.png"))
+include_graphics(fig("event_study_retail.png"))
+```
+
+The formal joint test that every pre-treatment lead equals zero
+**rejects flat pre-trends for both industries** (food service F =
+`r round(pretrend$pretrend_f_stat[1], 2)`, p < 0.0001; retail F =
+`r round(pretrend$pretrend_f_stat[2], 2)`, p =
+`r round(pretrend$pretrend_p_value[2], 4)`).
+
+**Because the pre-treatment coefficients are not jointly consistent with
+zero, the parallel-trends assumption is not credible for this outcome.
+Consequently, the baseline DiD coefficient should not be interpreted as
+a clean causal estimate.** Section 4 below tests why directly (a
+COVID-recovery confound explains a substantial share of it), and Section
+9's Limitations section states this plainly rather than qualifying it
+away. Every result that follows in this report is presented with that
+finding already on the table, not as a caveat added at the end.
+
 ## 1. Data and Treatment Classification
 
 | Source | Role |
@@ -136,22 +187,9 @@ itself can carry if pre-trends look poor."
 
 Dynamic treated × quarter-relative-to-treatment effects, state and
 quarter fixed effects, state-clustered SEs, 2016 Q1-2022 Q4 (the longest
-window the growth covariates allow).
-
-```{r pretrend-test}
-pretrend <- proc("pretrend_joint_test.csv")
-```
-
-The formal joint test that every pre-treatment lead equals zero
-**rejects flat pre-trends for both industries** (food service F =
-`r round(pretrend$pretrend_f_stat[1], 2)`, p < 0.0001; retail F =
-`r round(pretrend$pretrend_f_stat[2], 2)`, p =
-`r round(pretrend$pretrend_p_value[2], 4)`).
-
-```{r event-study-plots, out.width="100%"}
-include_graphics(fig("event_study_food_service.png"))
-include_graphics(fig("event_study_retail.png"))
-```
+window the growth covariates allow). Shown as Figure 1 in the
+Identification Strategy section above, ahead of any DiD coefficient;
+repeated here in a testing context rather than re-embedded.
 
 The pattern isn't a gradual pre-trend drift so much as a roughly stable,
 non-zero gap between treated and control states across most of the
