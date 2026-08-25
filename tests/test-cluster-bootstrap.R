@@ -1,16 +1,27 @@
 library(testthat)
 source("../R/11_cluster_bootstrap.R")
 
-make_bootstrap_panel <- function(n_states = 10, beta4 = 0) {
+make_bootstrap_panel <- function(n_states = 10, beta4 = 0, beta3 = 0) {
   quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")
   states <- paste0("S", seq_len(n_states))
   exposure_by_state <- stats::setNames(seq(0.1, 0.9, length.out = n_states), states)
 
   fred_panel <- tidyr::expand_grid(state = states, quarter = quarters) %>%
-    dplyr::arrange(state, quarter) %>%
+    dplyr::arrange(state, quarter)
+  # gdp/population as a pure function of quarter (no state variation) is
+  # fine for the beta4 tests below, since fit_model_c()/fit_model_a()
+  # always retain treated_post to soak up variation -- but
+  # fit_model_a_restricted() (gdp_growth + pop_growth, no treated_post)
+  # has nothing left once quarter FE absorbs a quarter-only series, and
+  # errors as "collinear with the fixed effects." Needs real
+  # state-by-quarter variation, same fix as test-power-analysis.R.
+  set.seed(456)
+  noise_gdp <- rnorm(nrow(fred_panel), sd = 0.01)
+  noise_pop <- rnorm(nrow(fred_panel), sd = 0.01)
+  fred_panel <- fred_panel %>%
     dplyr::mutate(
-      gdp = 1000 * 1.005^as.integer(factor(quarter)),
-      population = 5000 * 1.001^as.integer(factor(quarter))
+      gdp = 1000 * 1.005^as.integer(factor(quarter)) * exp(noise_gdp),
+      population = 5000 * 1.001^as.integer(factor(quarter)) * exp(noise_pop)
     )
 
   treatment_table <- tibble::tibble(
@@ -24,7 +35,7 @@ make_bootstrap_panel <- function(n_states = 10, beta4 = 0) {
   is_treated <- treatment_table$group[match(fred_panel$state, treatment_table$state)] == "treated"
   is_post <- fred_panel$quarter >= as.Date("2021-01-01")
   exposure <- exposure_by_state[fred_panel$state]
-  effect <- beta4 * exposure * is_treated * is_post
+  effect <- beta4 * exposure * is_treated * is_post + beta3 * is_treated * is_post
   quarter_trend <- as.integer(factor(fred_panel$quarter)) * 0.01
   # A little state-quarter noise: without it the series is a perfectly
   # deterministic function of state/quarter, the model fits it exactly,
@@ -82,6 +93,36 @@ test_that("no designed effect gives a non-tiny bootstrap p-value", {
   panel <- build_panel(inputs$fred_panel, inputs$treatment_table, inputs$exposure_table,
                         "food_service", "employment_food_service")
   boot <- wild_cluster_bootstrap_beta4(panel, B = 199, seed = 42)
+
+  expect_true(boot$p_value > 0.05)
+})
+
+test_that("wild_cluster_bootstrap_beta3 returns well-formed output", {
+  inputs <- make_bootstrap_panel(n_states = 30, beta3 = 0)
+  panel <- build_panel(inputs$fred_panel, inputs$treatment_table, inputs$exposure_table,
+                        "food_service", "employment_food_service")
+  boot <- wild_cluster_bootstrap_beta3(panel, B = 199, seed = 42)
+
+  expect_length(boot$boot_t, 199)
+  expect_true(boot$p_value >= 0 && boot$p_value <= 1)
+  expect_true(boot$ci_low < boot$ci_high)
+})
+
+test_that("a designed beta3 effect is picked up as significant", {
+  inputs <- make_bootstrap_panel(n_states = 30, beta3 = 0.1)
+  panel <- build_panel(inputs$fred_panel, inputs$treatment_table, inputs$exposure_table,
+                        "food_service", "employment_food_service")
+  boot <- wild_cluster_bootstrap_beta3(panel, B = 199, seed = 42)
+
+  expect_true(boot$p_value < 0.05)
+  expect_true(boot$ci_low > 0) # CI should exclude zero given the designed positive effect
+})
+
+test_that("no designed beta3 effect gives a non-tiny bootstrap p-value", {
+  inputs <- make_bootstrap_panel(n_states = 30, beta3 = 0)
+  panel <- build_panel(inputs$fred_panel, inputs$treatment_table, inputs$exposure_table,
+                        "food_service", "employment_food_service")
+  boot <- wild_cluster_bootstrap_beta3(panel, B = 199, seed = 42)
 
   expect_true(boot$p_value > 0.05)
 })
