@@ -20,7 +20,10 @@ PIPELINE := R/01_treatment_classification.R \
             R/16_power_analysis.R \
             R/17_exposure_bandwidth_sensitivity.R \
             R/18_marginal_effects.R \
-            R/19_treatment_intensity.R
+            R/19_treatment_intensity.R \
+            R/20_leave_one_out.R \
+            R/21_coefficient_forest_plot.R \
+            R/22_multiple_testing_correction.R
 
 all: pipeline test figures report
 

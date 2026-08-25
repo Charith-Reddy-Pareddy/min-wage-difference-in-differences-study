@@ -255,7 +255,13 @@ method.
 ## 5. Core Confirmatory Results
 
 Given Section 4 above, these are reported with the caveat already
-attached, not as a clean average effect.
+attached, not as a clean average effect. All four confirmatory
+estimates, at a glance, before the specification-by-specification
+detail:
+
+```{r coefficient-forest-plot, out.width="100%"}
+include_graphics(fig("coefficient_forest_plot.png"))
+```
 
 ### 5.1 Model A -- Headline Average Effect (β₃)
 
@@ -351,6 +357,31 @@ flips between the 10% band and the wider two. Nothing here overturns
 Section 5.2's conclusion -- the result is not an artifact of picking
 12.5% specifically, but it was never precise enough to distinguish a
 real gradient from noise at any of the three definitions either.
+
+### 5.6 Leave-One-State-Out Sensitivity
+
+Is Model A's estimate driven by any single treated state? Section 6.2's
+model diagnostics already flag Vermont, New York, and Hawaii as
+high-leverage (2020 Q2-Q3 observations) -- this checks what actually
+happens to the *coefficient*, not just the leverage diagnostic, refitting
+Model A once per treated state with that state dropped entirely.
+
+```{r leave-one-out-plot, out.width="100%"}
+include_graphics(fig("leave_one_out.png"))
+```
+
+```{r leave-one-out-range}
+loo <- proc("leave_one_out_results.csv")
+loo %>%
+  group_by(industry) %>%
+  summarise(min_estimate = min(treated_post), max_estimate = max(treated_post)) %>%
+  kable(digits = 4, caption = "Range of treated_post across all 20 single-state exclusions")
+```
+
+The estimate stays negative and moves only modestly regardless of which
+state is dropped, for both industries -- reassuring on its own terms,
+though it doesn't touch the pre-trend violation or COVID confound
+already established above.
 
 ## 6. Robustness
 
@@ -555,6 +586,20 @@ pieces (Section 7.1), and the **Monte Carlo permutation test** (Section
 particular corroborates Model A from a distribution-free angle -- but
 none of them validate or overturn the confirmatory family's result, and
 none are treated as if they could.
+
+Naming the confirmatory family also means it can be corrected for
+formally, not just described narratively. Holm-adjusted p-values across
+the 4 primary tests (β₃ and β₄, both industries, headline specification):
+
+```{r multiple-testing-correction}
+proc("multiple_testing_correction.csv") %>%
+  kable(digits = 4, caption = "Holm-adjusted p-values, confirmatory family")
+```
+
+None of the 4 survive correction at the headline specification -- the
+same conclusion Sections 5 and 7 already reach individually, now stated
+as a formal joint test rather than four separate uncorrected p-values
+that happen to agree.
 
 ## 9. Limitations
 

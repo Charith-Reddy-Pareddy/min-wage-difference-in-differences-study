@@ -218,7 +218,7 @@ isn't an R package and isn't in `renv.lock`.
 **One command**, from the repo root, after `renv::restore()`:
 
 ```
-make all      # runs R/01 through R/19, the test suite, the summary figures, then the report
+make all      # runs R/01 through R/22, the test suite, the summary figures, then the report
 make test     # just the test suite
 make figures  # just the README's summary figures (scripts/generate_readme_figures.R)
 make report   # just renders reports/final_report.Rmd against existing data/processed/
@@ -255,6 +255,9 @@ R/16_power_analysis.R           # ~5 min, 30-point x 500-rep power simulation
 R/17_exposure_bandwidth_sensitivity.R  # refits Model C at 10%/12.5%/15% exposure bands
 R/18_marginal_effects.R         # treatment-effect-vs-exposure curve with 95% CI
 R/19_treatment_intensity.R      # exploratory continuous-dollar-increase model
+R/20_leave_one_out.R            # ~20 sec, drop each treated state once, refit Model A
+R/21_coefficient_forest_plot.R  # unified beta3/beta4 CI plot across all specifications
+R/22_multiple_testing_correction.R  # Holm-adjusted p-values, confirmatory family
 ```
 
 Then `testthat::test_dir("tests")` should show every test passing,
