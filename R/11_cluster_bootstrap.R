@@ -43,7 +43,61 @@ if (file.exists("R/07_model_a_c.R")) {
   source("../R/07_model_a_c.R")
 }
 
+BETA3_TERM <- "treated_post"
 BETA4_TERM <- "treated_post:exposure"
+
+#' Model A with treated_post dropped entirely (beta3 = 0) -- the
+#' restricted model for the beta3 bootstrap below, same role
+#' fit_model_a() plays as the beta4 = 0 restriction for Model C.
+fit_model_a_restricted <- function(panel) {
+  fixest::feols(log_employment ~ gdp_growth + pop_growth | state + quarter,
+                cluster = ~state, data = panel)
+}
+
+#' Wild cluster bootstrap for beta3 (Model A's treated_post), same
+#' Cameron-Gelbach-Miller procedure as wild_cluster_bootstrap_beta4()
+#' below, restricted model this time has no treated_post term at all.
+wild_cluster_bootstrap_beta3 <- function(panel, B = 999, seed = 1) {
+  old_notes <- fixest::getFixest_notes()
+  fixest::setFixest_notes(FALSE)
+  on.exit(fixest::setFixest_notes(old_notes), add = TRUE)
+
+  restricted <- fit_model_a_restricted(panel)
+  full <- fit_model_a(panel)
+
+  ct_full <- fixest::coeftable(full)
+  observed_coef <- ct_full[BETA3_TERM, "Estimate"]
+  observed_se <- ct_full[BETA3_TERM, "Std. Error"]
+  observed_t <- ct_full[BETA3_TERM, "t value"]
+
+  fitted_restricted <- fitted(restricted)
+  resid_restricted <- resid(restricted)
+  clusters <- panel$state
+  unique_clusters <- unique(clusters)
+
+  set.seed(seed)
+  boot_t <- numeric(B)
+  panel_boot <- panel
+  for (b in seq_len(B)) {
+    weights <- stats::setNames(sample(c(-1, 1), length(unique_clusters), replace = TRUE), unique_clusters)
+    panel_boot$log_employment <- fitted_restricted + resid_restricted * weights[clusters]
+    fit_b <- fit_model_a(panel_boot)
+    boot_t[b] <- fixest::coeftable(fit_b)[BETA3_TERM, "t value"]
+  }
+
+  p_value <- mean(abs(boot_t) >= abs(observed_t))
+  ci <- observed_coef - stats::quantile(boot_t, c(0.975, 0.025)) * observed_se
+
+  list(
+    observed_coef = unname(observed_coef),
+    observed_se = unname(observed_se),
+    observed_t = unname(observed_t),
+    boot_t = boot_t,
+    p_value = p_value,
+    ci_low = unname(ci[1]),
+    ci_high = unname(ci[2])
+  )
+}
 
 #' fit_model_c() correctly drops exposure's bare main effect every single
 #' bootstrap replication (documented in R/07: it's collinear with the
@@ -99,6 +153,7 @@ if (sys.nframe() == 0) {
   exposure_table <- readr::read_csv("data/processed/exposure_state_industry.csv", show_col_types = FALSE)
 
   results <- list()
+  results_beta3 <- list()
 
   for (ind in list(
     list(industry = "food_service", col = "employment_food_service"),
@@ -127,10 +182,35 @@ if (sys.nframe() == 0) {
       wild_boot_ci_low = boot$ci_low,
       wild_boot_ci_high = boot$ci_high
     )
+
+    cat("\nWild cluster bootstrap for beta3 --", ind$industry, "(full 20-state treated sample)\n")
+    t0 <- Sys.time()
+    boot3 <- wild_cluster_bootstrap_beta3(panel, B = 999, seed = 1)
+    elapsed3 <- round(as.numeric(Sys.time() - t0, units = "secs"), 1)
+
+    cat("beta3 (Model A, asymptotic):", round(boot3$observed_coef, 4),
+        " SE:", round(boot3$observed_se, 4), " t:", round(boot3$observed_t, 3), "\n")
+    cat("Wild cluster bootstrap: p =", round(boot3$p_value, 4),
+        " 95% CI = [", round(boot3$ci_low, 4), ",", round(boot3$ci_high, 4), "]",
+        " (999 reps,", elapsed3, "sec )\n")
+
+    results_beta3[[ind$industry]] <- tibble::tibble(
+      industry = ind$industry,
+      beta3 = boot3$observed_coef,
+      beta3_se_asymptotic = boot3$observed_se,
+      beta3_t_asymptotic = boot3$observed_t,
+      wild_boot_p_value = boot3$p_value,
+      wild_boot_ci_low = boot3$ci_low,
+      wild_boot_ci_high = boot3$ci_high
+    )
   }
 
   results_table <- dplyr::bind_rows(results)
+  results_beta3_table <- dplyr::bind_rows(results_beta3)
   readr::write_csv(results_table, "data/processed/cluster_bootstrap_results.csv")
-  cat("\n\n=== Wild cluster bootstrap summary ===\n")
+  readr::write_csv(results_beta3_table, "data/processed/cluster_bootstrap_beta3_results.csv")
+  cat("\n\n=== Wild cluster bootstrap summary (beta4) ===\n")
   print(results_table, width = Inf)
+  cat("\n=== Wild cluster bootstrap summary (beta3) ===\n")
+  print(results_beta3_table, width = Inf)
 }
