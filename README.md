@@ -34,6 +34,8 @@ See [Key Figures](#key-figures) below or jump to the [full report](reports/final
 | Exposure bandwidth (10%/12.5%/15%) | Consistent across all three | Not an artifact of band choice |
 | Placebo test | Null | Helpful credibility check |
 | Treatment-intensity (exploratory) | Directionally consistent | Not confirmatory — increase size isn't randomly assigned |
+| Leave-one-state-out | Estimate stable across all 20 drops | No single state is driving Model A |
+| Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
 
 ## Research questions
 
@@ -89,9 +91,13 @@ exposure.
 **The central scientific question, visually: does the treatment effect scale with exposure?**
 <img src="reports/figures/marginal_effects.png" width="100%">
 
+**All four confirmatory estimates at a glance**
+<img src="reports/figures/coefficient_forest_plot.png" width="100%">
+
 More figures — model diagnostics, permutation-test null distributions,
-the power-analysis curves, exposure-bandwidth sensitivity — are in
-`reports/figures/` and embedded in the [full report](reports/final_report.Rmd).
+the power-analysis curves, exposure-bandwidth sensitivity, leave-one-out
+sensitivity — are in `reports/figures/` and embedded in the
+[full report](reports/final_report.Rmd).
 
 ## Final report
 
