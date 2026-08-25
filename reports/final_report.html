@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2026-08-24" />
+<meta name="date" content="2026-08-25" />
 
 <title>State Minimum Wage Increases and Low-Wage Employment</title>
 
@@ -1588,7 +1588,7 @@ border-radius: 0px;
 Employment</h1>
 <h3 class="subtitle">A Difference-in-Differences Study with Power,
 Heterogeneity, and Robustness Analysis</h3>
-<h4 class="date">August 24, 2026</h4>
+<h4 class="date">August 25, 2026</h4>
 
 </div>
 
@@ -2339,12 +2339,14 @@ already established above.</p>
 </div>
 <div id="robustness" class="section level2">
 <h2>6. Robustness</h2>
-<div id="wild-cluster-bootstrap-for-β₄" class="section level3">
-<h3>6.1 Wild Cluster Bootstrap for β₄</h3>
+<div id="wild-cluster-bootstrap-for-β₃-and-β₄" class="section level3">
+<h3>6.1 Wild Cluster Bootstrap for β₃ and β₄</h3>
 <p><code>fwildclusterboot</code>, the standard package for this, was
 archived by CRAN in 2024 and doesn’t build on current R, so the
 Cameron-Gelbach-Miller procedure (999 Rademacher-weight replications on
-the restricted-model residuals) is implemented directly.</p>
+the restricted-model residuals) is implemented directly, for both
+coefficients – the proposal’s Section 8 only specified β₄, but the same
+low-cluster-count concern applies equally to β₃.</p>
 <pre class="r"><code>proc(&quot;cluster_bootstrap_results.csv&quot;) %&gt;%
   kable(digits = 4, caption = &quot;Wild cluster bootstrap, beta4 (full 20-treated-state sample)&quot;)</code></pre>
 <table>
@@ -2391,9 +2393,58 @@ sample)</caption>
 </tr>
 </tbody>
 </table>
-<p>Bootstrap p-values track the asymptotic ones closely (food service
-0.367 vs. 0.338 asymptotic; retail 0.953 vs. 0.953) – confirms rather
-than overturns the Model C result above.</p>
+<pre class="r"><code>proc(&quot;cluster_bootstrap_beta3_results.csv&quot;) %&gt;%
+  kable(digits = 4, caption = &quot;Wild cluster bootstrap, beta3 (full 20-treated-state sample)&quot;)</code></pre>
+<table>
+<caption>Wild cluster bootstrap, beta3 (full 20-treated-state
+sample)</caption>
+<colgroup>
+<col width="11%" />
+<col width="6%" />
+<col width="17%" />
+<col width="16%" />
+<col width="16%" />
+<col width="15%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">industry</th>
+<th align="right">beta3</th>
+<th align="right">beta3_se_asymptotic</th>
+<th align="right">beta3_t_asymptotic</th>
+<th align="right">wild_boot_p_value</th>
+<th align="right">wild_boot_ci_low</th>
+<th align="right">wild_boot_ci_high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">food_service</td>
+<td align="right">-0.025</td>
+<td align="right">0.0157</td>
+<td align="right">-1.5948</td>
+<td align="right">0.1071</td>
+<td align="right">-0.0560</td>
+<td align="right">0.0062</td>
+</tr>
+<tr class="even">
+<td align="left">retail</td>
+<td align="right">-0.010</td>
+<td align="right">0.0114</td>
+<td align="right">-0.8770</td>
+<td align="right">0.3874</td>
+<td align="right">-0.0339</td>
+<td align="right">0.0124</td>
+</tr>
+</tbody>
+</table>
+<p>Bootstrap p-values track the asymptotic ones closely for both
+coefficients (β₄: food service 0.367 vs. 0.338 asymptotic, retail 0.953
+vs. 0.953; β₃: food service 0.107 vs. 0.118 asymptotic, retail 0.387 vs.
+0.385) – confirms rather than overturns the Model A and Model C results
+above, under an inference method built specifically for this few
+clusters.</p>
 </div>
 <div id="model-diagnostics" class="section level3">
 <h3>6.2 Model Diagnostics</h3>

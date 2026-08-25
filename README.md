@@ -144,8 +144,8 @@ is what the proposal's own design built these checks to catch.
   data, not just partially confounded.
 - **A relatively small number of treated states** (20, or 10 in the
   ≥$0.50 subsample) — addressed via state-clustered SEs and a wild
-  cluster bootstrap for β₄, but inference with this few clusters always
-  carries some caution.
+  cluster bootstrap for both β₃ and β₄, but inference with this few
+  clusters always carries some caution.
 - **Exposure-measure construction is a documented choice, not the only
   defensible one** (band width, cell-pooling rules).
 - **Spillovers between neighboring states, anticipation effects ahead of
@@ -232,9 +232,9 @@ make report   # just renders reports/final_report.Rmd against existing data/proc
 
 `make all` needs `IPUMS_API_KEY` set in `.env` (see `.env.example`) for
 `R/03`, and takes several minutes end to end (`R/03`'s CPS-ORG pull,
-`R/11`'s wild bootstrap, `R/15`'s permutation test, and `R/16`'s power
-simulation are each the slowest part of their respective scripts,
-roughly 2-5 min combined).
+`R/11`'s wild bootstrap (now both β₃ and β₄, ~4 min), `R/15`'s
+permutation test, and `R/16`'s power simulation are each the slowest
+part of their respective scripts, roughly 2-9 min combined).
 
 Equivalently, without `make`, run the numbered scripts in `R/` directly
 in order from the repo root — each one reads the previous scripts'
@@ -252,7 +252,7 @@ R/07_model_a_c.R
 R/08_event_study.R
 R/09_covid_sensitivity.R
 R/10_placebo_test.R
-R/11_cluster_bootstrap.R        # ~20 sec, 999-rep wild bootstrap
+R/11_cluster_bootstrap.R        # ~4 min, 999-rep wild bootstrap for beta3 and beta4
 R/12_model_diagnostics.R
 R/13_two_sample_ttest.R
 R/14_regional_anova.R

@@ -385,21 +385,31 @@ already established above.
 
 ## 6. Robustness
 
-### 6.1 Wild Cluster Bootstrap for β₄
+### 6.1 Wild Cluster Bootstrap for β₃ and β₄
 
 `fwildclusterboot`, the standard package for this, was archived by CRAN
 in 2024 and doesn't build on current R, so the Cameron-Gelbach-Miller
 procedure (999 Rademacher-weight replications on the restricted-model
-residuals) is implemented directly.
+residuals) is implemented directly, for both coefficients -- the
+proposal's Section 8 only specified β₄, but the same low-cluster-count
+concern applies equally to β₃.
 
 ```{r bootstrap}
 proc("cluster_bootstrap_results.csv") %>%
   kable(digits = 4, caption = "Wild cluster bootstrap, beta4 (full 20-treated-state sample)")
 ```
 
-Bootstrap p-values track the asymptotic ones closely (food service 0.367
-vs. 0.338 asymptotic; retail 0.953 vs. 0.953) -- confirms rather than
-overturns the Model C result above.
+```{r bootstrap-beta3}
+proc("cluster_bootstrap_beta3_results.csv") %>%
+  kable(digits = 4, caption = "Wild cluster bootstrap, beta3 (full 20-treated-state sample)")
+```
+
+Bootstrap p-values track the asymptotic ones closely for both
+coefficients (β₄: food service 0.367 vs. 0.338 asymptotic, retail 0.953
+vs. 0.953; β₃: food service 0.107 vs. 0.118 asymptotic, retail 0.387 vs.
+0.385) -- confirms rather than overturns the Model A and Model C results
+above, under an inference method built specifically for this few
+clusters.
 
 ### 6.2 Model Diagnostics
 
