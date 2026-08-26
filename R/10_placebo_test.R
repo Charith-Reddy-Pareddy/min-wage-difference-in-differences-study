@@ -39,6 +39,17 @@ fit_placebo_model <- function(panel) {
         cluster = ~state, data = panel)
 }
 
+#' Post-build addition: the placebo check above only covers Model A's
+#' average effect (beta3). Model C's exposure interaction (beta4) is the
+#' report's primary hypothesis (Section 5.2) and needs the same
+#' false-date credibility check -- does the design manufacture a
+#' heterogeneous "effect" out of pure noise, the same way it might
+#' manufacture an average one.
+fit_placebo_model_c <- function(panel) {
+  feols(log_employment ~ placebo_treated_post * exposure + gdp_growth + pop_growth | state + quarter,
+        cluster = ~state, data = panel)
+}
+
 if (sys.nframe() == 0) {
   source("R/01_treatment_classification.R")
   treatment_table <- load_treatment_table()
@@ -46,6 +57,7 @@ if (sys.nframe() == 0) {
   exposure_table <- readr::read_csv("data/processed/exposure_state_industry.csv", show_col_types = FALSE)
 
   results <- list()
+  results_c <- list()
 
   for (ind in list(
     list(industry = "food_service", col = "employment_food_service"),
@@ -69,10 +81,29 @@ if (sys.nframe() == 0) {
       placebo_se = ct["placebo_treated_post", "Std. Error"],
       placebo_p = ct["placebo_treated_post", "Pr(>|t|)"]
     )
+
+    cat("\nPlacebo Model C (exposure interaction) --", ind$industry, "\n")
+    model_c <- fit_placebo_model_c(panel)
+    print(summary(model_c))
+
+    ct_c <- summary(model_c)$coeftable
+    term_c <- "placebo_treated_post:exposure"
+    results_c[[ind$industry]] <- tibble::tibble(
+      industry = ind$industry,
+      placebo_date = PLACEBO_DATE,
+      placebo_beta4 = ct_c[term_c, "Estimate"],
+      placebo_beta4_se = ct_c[term_c, "Std. Error"],
+      placebo_beta4_p = ct_c[term_c, "Pr(>|t|)"]
+    )
   }
 
   results_table <- dplyr::bind_rows(results)
   readr::write_csv(results_table, "data/processed/placebo_test_results.csv")
-  cat("\n\n=== Placebo test summary ===\n")
+  cat("\n\n=== Placebo test summary (beta3) ===\n")
   print(results_table, width = Inf)
+
+  results_c_table <- dplyr::bind_rows(results_c)
+  readr::write_csv(results_c_table, "data/processed/placebo_test_beta4_results.csv")
+  cat("\n=== Placebo test summary (beta4, exposure interaction) ===\n")
+  print(results_c_table, width = Inf)
 }
