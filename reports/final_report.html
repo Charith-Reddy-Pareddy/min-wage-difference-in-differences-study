@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2026-08-25" />
+<meta name="date" content="2026-08-26" />
 
 <title>State Minimum Wage Increases and Low-Wage Employment</title>
 
@@ -1588,7 +1588,7 @@ border-radius: 0px;
 Employment</h1>
 <h3 class="subtitle">A Difference-in-Differences Study with Power,
 Heterogeneity, and Robustness Analysis</h3>
-<h4 class="date">August 25, 2026</h4>
+<h4 class="date">August 26, 2026</h4>
 
 </div>
 
@@ -2004,9 +2004,10 @@ share of what the baseline specification below picks up.</p>
 <p>A false treatment date (2018-01-01), restricted to a pre-COVID window
 (2016-2019) so it can’t just re-detect the confound already found
 above.</p>
-<pre class="r"><code>proc(&quot;placebo_test_results.csv&quot;) %&gt;% kable(digits = 4, caption = &quot;Placebo test, false treatment date 2018-01-01&quot;)</code></pre>
+<pre class="r"><code>proc(&quot;placebo_test_results.csv&quot;) %&gt;% kable(digits = 4, caption = &quot;Placebo test, Model A (beta3), false treatment date 2018-01-01&quot;)</code></pre>
 <table>
-<caption>Placebo test, false treatment date 2018-01-01</caption>
+<caption>Placebo test, Model A (beta3), false treatment date
+2018-01-01</caption>
 <colgroup>
 <col width="19%" />
 <col width="19%" />
@@ -2040,11 +2041,65 @@ above.</p>
 </tr>
 </tbody>
 </table>
-<p>Clean result: small, non-significant estimates for both industries.
-The design doesn’t manufacture effects from nothing when there’s no real
-policy change to detect – the pre-trend problem above is real and
-specific to the actual treatment window, not a general flaw in the
-method.</p>
+<p>Clean result for the average effect: small, non-significant estimates
+for both industries. The design doesn’t manufacture a Model A-style
+effect from nothing when there’s no real policy change to detect – the
+pre-trend problem above is real and specific to the actual treatment
+window, not a general flaw in the method.</p>
+<p>The same check on Model C’s exposure interaction (β₄, Section 5.2,
+this report’s primary hypothesis) tells a different story:</p>
+<pre class="r"><code>proc(&quot;placebo_test_beta4_results.csv&quot;) %&gt;%
+  kable(digits = 4, caption = &quot;Placebo test, Model C (beta4), false treatment date 2018-01-01&quot;)</code></pre>
+<table>
+<caption>Placebo test, Model C (beta4), false treatment date
+2018-01-01</caption>
+<colgroup>
+<col width="17%" />
+<col width="17%" />
+<col width="19%" />
+<col width="23%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">industry</th>
+<th align="left">placebo_date</th>
+<th align="right">placebo_beta4</th>
+<th align="right">placebo_beta4_se</th>
+<th align="right">placebo_beta4_p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">food_service</td>
+<td align="left">2018-01-01</td>
+<td align="right">0.1113</td>
+<td align="right">0.0257</td>
+<td align="right">0.0001</td>
+</tr>
+<tr class="even">
+<td align="left">retail</td>
+<td align="left">2018-01-01</td>
+<td align="right">0.0640</td>
+<td align="right">0.0256</td>
+<td align="right">0.0164</td>
+</tr>
+</tbody>
+</table>
+<p>Both industries come back significant at the fake date (food service
+p &lt; 0.001, retail p = 0.016) – the opposite of the clean Model A
+result above. This means states with higher pre-2021 exposure already
+had systematically different employment trends in 2016-2019, for reasons
+that have nothing to do with the real 2021 minimum-wage increases. Since
+that same exposure measure is what the real Model C relies on to
+identify β₄, this is a direct threat to the exposure-gradient result’s
+credibility specifically – not just a general caveat, but evidence that
+part of what Section 5.2’s β₄ estimate is picking up may be a
+pre-existing structural difference between high- and low-exposure states
+rather than a treatment effect. Combined with Section 6.3’s
+specification curve, this is the second independent piece of evidence
+that the exposure-gradient result should not be read as clean causal
+evidence.</p>
 </div>
 </div>
 <div id="core-confirmatory-results" class="section level2">
@@ -3016,6 +3071,15 @@ exist too.</li>
 <li><strong>Exposure-measure construction risk</strong>: band width
 (10-15%) and cell pooling rules are documented choices, not the only
 defensible ones.</li>
+<li><strong>The exposure-gradient placebo test fails</strong> (Section
+4.4): at a false 2018 treatment date, the exposure-interaction term is
+significant for both industries, meaning high- and low-exposure states
+already had different employment trends before 2021 for reasons
+unrelated to the real policy. This directly threatens β₄’s
+identification specifically – part of the real estimate may reflect this
+pre-existing structural difference rather than a treatment effect,
+consistent with Section 6.3’s specification curve showing the same
+result is fragile to sample and industry choice.</li>
 <li><strong>Multi-change states excluded</strong> from the primary
 comparison. The conflation of small legislated increases with automatic
 CPI adjustments turns out not to be separable at all in this data, not
