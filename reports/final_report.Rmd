@@ -430,6 +430,36 @@ heavily tourism-dependent) -- the same COVID window Section 4 already
 identified, not a separate data problem. No single observation is
 extreme by Cook's distance.
 
+### 6.3 Specification Curve
+
+Sections 5.5 and this report's sample cut each vary one analytical
+choice against β₄ in isolation -- exposure bandwidth alone, or the
+full-vs-subsample cut alone. A specification curve varies every
+combination of both, together with industry, in one view: 3 exposure
+bands x 2 samples x 2 industries = 12 specifications, all estimating
+the same β₄ hypothesis.
+
+```{r spec-curve-table}
+proc("specification_curve.csv") %>%
+  select(bandwidth, sample, industry, beta4, se, p_value, significant) %>%
+  arrange(desc(beta4)) %>%
+  kable(digits = 4, caption = "beta4 across all 12 specifications")
+```
+
+```{r spec-curve-plot, out.width="100%"}
+include_graphics(fig("specification_curve.png"))
+```
+
+Only 2 of the 12 specifications are significant at p < 0.05, and both
+are retail under the >=$0.50 subsample -- the same subsample already
+flagged in Section 5.1 as the only place Model A reaches significance.
+Food service is never significant in any of the 6 specifications that
+use it, and its point estimate is positive in all 6 while retail's is negative
+in all 6 -- the two industries don't even agree on sign. This
+is the clearest single piece of evidence in the report that the
+exposure-gradient result is fragile to analytical choices rather than a
+stable feature of the data.
+
 ## 7. Exploratory Analyses
 
 These inform the picture but don't validate or override the confirmatory
