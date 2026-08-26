@@ -36,6 +36,7 @@ See [Key Figures](#key-figures) below or jump to the [full report](reports/final
 | Treatment-intensity (exploratory) | Directionally consistent | Not confirmatory — increase size isn't randomly assigned |
 | Leave-one-state-out | Estimate stable across all 20 drops | No single state is driving Model A |
 | Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
+| Specification curve (12 specs) | Only 2 of 12 significant; sign flips by industry | Retail's negative effect is subsample-dependent, food service never significant |
 
 ## Research questions
 
@@ -93,6 +94,9 @@ exposure.
 
 **All four confirmatory estimates at a glance**
 <img src="reports/figures/coefficient_forest_plot.png" width="100%">
+
+**Every reasonable band x sample x industry choice, ranked**
+<img src="reports/figures/specification_curve.png" width="100%">
 
 More figures — model diagnostics, permutation-test null distributions,
 the power-analysis curves, exposure-bandwidth sensitivity, leave-one-out
@@ -224,7 +228,7 @@ isn't an R package and isn't in `renv.lock`.
 **One command**, from the repo root, after `renv::restore()`:
 
 ```
-make all      # runs R/01 through R/22, the test suite, the summary figures, then the report
+make all      # runs R/01 through R/23, the test suite, the summary figures, then the report
 make test     # just the test suite
 make figures  # just the README's summary figures (scripts/generate_readme_figures.R)
 make report   # just renders reports/final_report.Rmd against existing data/processed/
@@ -264,6 +268,7 @@ R/19_treatment_intensity.R      # exploratory continuous-dollar-increase model
 R/20_leave_one_out.R            # ~20 sec, drop each treated state once, refit Model A
 R/21_coefficient_forest_plot.R  # unified beta3/beta4 CI plot across all specifications
 R/22_multiple_testing_correction.R  # Holm-adjusted p-values, confirmatory family
+R/23_specification_curve.R      # beta4 across all 12 band x sample x industry specs
 ```
 
 Then `testthat::test_dir("tests")` should show every test passing,

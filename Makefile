@@ -23,7 +23,8 @@ PIPELINE := R/01_treatment_classification.R \
             R/19_treatment_intensity.R \
             R/20_leave_one_out.R \
             R/21_coefficient_forest_plot.R \
-            R/22_multiple_testing_correction.R
+            R/22_multiple_testing_correction.R \
+            R/23_specification_curve.R
 
 all: pipeline test figures report
 
