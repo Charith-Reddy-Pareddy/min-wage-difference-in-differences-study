@@ -32,7 +32,8 @@ See [Key Figures](#key-figures) below or jump to the [full report](reports/final
 | COVID sensitivity | Large change once controlled for | Confounding likely |
 | Exposure gradient (β₄) | Inconclusive | Underpowered, not "no effect" |
 | Exposure bandwidth (10%/12.5%/15%) | Consistent across all three | Not an artifact of band choice |
-| Placebo test | Null | Helpful credibility check |
+| Placebo test (β₃, average effect) | Null | Helpful credibility check |
+| Placebo test (β₄, exposure gradient) | Significant at the fake date | Threatens the exposure-gradient result's credibility specifically |
 | Treatment-intensity (exploratory) | Directionally consistent | Not confirmatory — increase size isn't randomly assigned |
 | Leave-one-state-out | Estimate stable across all 20 drops | No single state is driving Model A |
 | Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
@@ -152,6 +153,14 @@ is what the proposal's own design built these checks to catch.
   clusters always carries some caution.
 - **Exposure-measure construction is a documented choice, not the only
   defensible one** (band width, cell-pooling rules).
+- **The exposure-gradient placebo test fails**: at a false 2018
+  treatment date, the exposure-interaction term comes back significant
+  for both industries (`R/10_placebo_test.R`), meaning high- and
+  low-exposure states already had different employment trends before
+  2021 for reasons unrelated to the real policy. Part of β₄'s estimate
+  may reflect this pre-existing structural difference rather than a
+  treatment effect — one of two independent pieces of evidence (with the
+  specification curve) that the exposure-gradient result is fragile.
 - **Spillovers between neighboring states, anticipation effects ahead of
   the 1/1/2021 effective date, and the COVID-era window's external
   validity** are none of them modeled or corrected for.
