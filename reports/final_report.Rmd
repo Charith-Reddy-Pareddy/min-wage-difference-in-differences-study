@@ -531,7 +531,7 @@ Regions differ significantly in employment growth for both industries
 heterogeneity, unrelated to treatment. The exposure interaction in Model
 C remains the formal heterogeneity test; this is exploratory only.
 
-### 7.3 Monte Carlo Permutation Test (Model A only)
+### 7.3 Monte Carlo Permutation Test
 
 10,000 relabelings of which states are "treated" (state-level, holding
 n_treated fixed at 20), Model A refit each time.
@@ -548,6 +548,38 @@ include_graphics(fig("permutation_test_retail.png"))
 Permutation p-values track the asymptotic Model A p-values closely (food
 service 0.09 vs. 0.118; retail 0.377 vs. 0.385) -- another confirmation
 of the Model A result via a completely different inferential route.
+
+**Post-build addition:** this section originally covered Model A only.
+The same relabeling exercise applies to Model C's exposure interaction
+(β₄, Section 5.2, the primary scientific hypothesis) -- each replication
+keeps every state's own exposure value fixed and only randomizes which
+states count as "treated," the same logic as the Model A version above.
+
+```{r permutation-beta4}
+proc("permutation_test_beta4_results.csv") %>%
+  kable(digits = 4, caption = "Permutation test, Model C (beta4) treated_post:exposure")
+```
+
+```{r permutation-beta4-plots, out.width="50%"}
+include_graphics(fig("permutation_test_beta4_food_service.png"))
+include_graphics(fig("permutation_test_beta4_retail.png"))
+```
+
+Retail's permutation p-value (0.972) tracks its asymptotic one (0.953)
+about as closely as Model A's do. Food service's don't: permutation
+p = 0.100 versus an asymptotic p = 0.338 -- more than a 3x difference,
+though neither crosses the conventional 0.05 threshold. The reason is
+visible in the null distribution itself: its mean is -0.087, not
+approximately zero the way Model A's permutation null is (0.00001).
+Reassigning which states are "treated" while leaving each state's real,
+fixed exposure value in place produces a systematically negative
+placebo β₄ on average -- exactly the kind of exposure-linked,
+treatment-unrelated structure Section 4.4's placebo test already found
+at a false date. This is now the third independent check (with the
+specification curve and the placebo test) pointing at the same
+underlying issue: part of what looks like an exposure gradient in this
+data may be a pre-existing association between exposure and employment
+trends, not a treatment effect.
 
 ### 7.4 Power Analysis for β₃ (Model A average effect, added after the original build)
 
@@ -696,7 +728,12 @@ that happen to agree.
   -- part of the real estimate may reflect this pre-existing structural
   difference rather than a treatment effect, consistent with Section
   6.3's specification curve showing the same result is fragile to
-  sample and industry choice.
+  sample and industry choice. Section 7.3's permutation test corroborates
+  this from a third, unrelated angle: its placebo null distribution for
+  β₄ isn't centered at zero for food service (mean -0.087) the way Model
+  A's permutation null is -- reassigning treatment labels while keeping
+  each state's real exposure value fixed produces a systematically
+  negative "effect" on average, the same pattern the placebo test found.
 - **Multi-change states excluded** from the primary comparison. The
   conflation of small legislated increases with automatic CPI
   adjustments turns out not to be separable at all in this data, not

@@ -38,6 +38,7 @@ See [Key Figures](#key-figures) below or jump to the [full report](reports/final
 | Leave-one-state-out | Estimate stable across all 20 drops | No single state is driving Model A |
 | Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
 | Specification curve (12 specs) | Only 2 of 12 significant; sign flips by industry | Retail's negative effect is subsample-dependent, food service never significant |
+| Permutation test (β₄) | Food service's null isn't centered at zero (-0.087) | Third independent sign the exposure gradient may reflect a pre-existing association, not treatment |
 
 ## Research questions
 
@@ -159,8 +160,14 @@ is what the proposal's own design built these checks to catch.
   low-exposure states already had different employment trends before
   2021 for reasons unrelated to the real policy. Part of β₄'s estimate
   may reflect this pre-existing structural difference rather than a
-  treatment effect — one of two independent pieces of evidence (with the
-  specification curve) that the exposure-gradient result is fragile.
+  treatment effect. The permutation test (`R/15_permutation_test.R`)
+  corroborates this from a third, unrelated angle: its placebo null
+  distribution for β₄ isn't centered at zero for food service (mean
+  -0.087) the way Model A's permutation null is — reassigning treatment
+  labels while keeping each state's real exposure value fixed produces a
+  systematically negative "effect" on average. Three independent checks
+  (this, the placebo test, and the specification curve) now agree the
+  exposure-gradient result is fragile.
 - **Spillovers between neighboring states, anticipation effects ahead of
   the 1/1/2021 effective date, and the COVID-era window's external
   validity** are none of them modeled or corrected for.
