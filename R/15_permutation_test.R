@@ -53,6 +53,42 @@ permutation_test_model_a <- function(panel, n_reps = 10000, seed = 1) {
   )
 }
 
+#' Post-build addition: Section 10 explicitly scoped the permutation test
+#' to Model A only. Model C's exposure interaction (beta4, Section 5.2)
+#' is the primary scientific hypothesis and deserves the same
+#' distribution-free reference distribution -- same state-level label
+#' reassignment as above, but each state keeps its own (real, fixed)
+#' exposure value; only which states count as "treated" is randomized,
+#' since exposure isn't part of the treatment assignment being tested.
+permutation_test_model_c <- function(panel, n_reps = 10000, seed = 1) {
+  set.seed(seed)
+  states <- unique(panel$state)
+  n_treated <- n_distinct(panel$state[panel$treated == 1])
+
+  observed_model <- fit_model_c(panel)
+  observed_stat <- unname(coef(observed_model)["treated_post:exposure"])
+
+  null_stats <- numeric(n_reps)
+  panel_perm <- panel
+  for (i in seq_len(n_reps)) {
+    treated_states <- sample(states, n_treated)
+    new_treated <- as.integer(panel$state %in% treated_states)
+    panel_perm$treated_post <- new_treated * panel$post
+    fit <- fit_model_c(panel_perm)
+    null_stats[i] <- unname(coef(fit)["treated_post:exposure"])
+  }
+
+  p_value <- mean(abs(null_stats) >= abs(observed_stat))
+
+  list(
+    observed_stat = observed_stat,
+    null_stats = null_stats,
+    p_value = p_value,
+    null_mean = mean(null_stats),
+    null_sd = sd(null_stats)
+  )
+}
+
 if (sys.nframe() == 0) {
   source("R/01_treatment_classification.R")
   treatment_table <- load_treatment_table()
@@ -63,6 +99,7 @@ if (sys.nframe() == 0) {
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
   results <- list()
+  results_c <- list()
   for (ind in list(
     list(industry = "food_service", col = "employment_food_service"),
     list(industry = "retail", col = "employment_retail")
@@ -100,10 +137,46 @@ if (sys.nframe() == 0) {
       null_sd = perm$null_sd,
       permutation_p_value = perm$p_value
     )
+
+    cat("\nMonte Carlo permutation test, Model C (beta4) --", ind$industry, "\n")
+    t0 <- Sys.time()
+    perm_c <- permutation_test_model_c(panel, n_reps = 10000, seed = 1)
+    elapsed_c <- round(as.numeric(Sys.time() - t0, units = "secs"), 1)
+
+    cat("Observed treated_post:exposure:", round(perm_c$observed_stat, 5), "\n")
+    cat("Null distribution: mean =", round(perm_c$null_mean, 5), " sd =", round(perm_c$null_sd, 5), "\n")
+    cat("Permutation p-value:", perm_c$p_value, " (", 10000, "reps,", elapsed_c, "sec )\n")
+
+    plot_df_c <- tibble::tibble(null_stat = perm_c$null_stats)
+    p_c <- ggplot2::ggplot(plot_df_c, ggplot2::aes(x = null_stat)) +
+      ggplot2::geom_histogram(bins = 60, fill = "grey70", color = "white") +
+      ggplot2::geom_vline(xintercept = perm_c$observed_stat, color = "firebrick", linewidth = 1) +
+      ggplot2::labs(
+        x = "Model C treated_post:exposure coefficient under permuted labels",
+        y = "Count",
+        title = paste("Permutation null distribution (beta4):", ind$industry),
+        subtitle = paste0("Observed estimate (red line): ", round(perm_c$observed_stat, 4),
+                           ", permutation p = ", perm_c$p_value)
+      ) +
+      ggplot2::theme_minimal()
+    ggplot2::ggsave(file.path(out_dir, paste0("permutation_test_beta4_", ind$industry, ".png")), p_c, width = 8, height = 5)
+
+    results_c[[ind$industry]] <- tibble::tibble(
+      industry = ind$industry,
+      observed_beta4 = perm_c$observed_stat,
+      null_mean = perm_c$null_mean,
+      null_sd = perm_c$null_sd,
+      permutation_p_value = perm_c$p_value
+    )
   }
 
   results_table <- bind_rows(results)
   readr::write_csv(results_table, "data/processed/permutation_test_results.csv")
-  cat("\n\n=== Permutation test summary ===\n")
+  cat("\n\n=== Permutation test summary (Model A) ===\n")
   print(results_table, width = Inf)
+
+  results_c_table <- bind_rows(results_c)
+  readr::write_csv(results_c_table, "data/processed/permutation_test_beta4_results.csv")
+  cat("\n=== Permutation test summary (Model C, beta4) ===\n")
+  print(results_c_table, width = Inf)
 }
