@@ -709,10 +709,40 @@ This family is what determines the headline claim.
 
 The **regional ANOVA** (Section 7.2), the **SLR/MLR** coursework-closure
 pieces (Section 7.1), and the **Monte Carlo permutation test** (Section
-7.3) are exploratory. They inform the picture -- the permutation test in
-particular corroborates Model A from a distribution-free angle -- but
-none of them validate or overturn the confirmatory family's result, and
-none are treated as if they could.
+7.3) are exploratory. For Model A they inform the picture without
+changing it -- the permutation test corroborates β₃'s asymptotic p-value
+from a distribution-free angle. For β₄, the permutation test's role is
+different: its null distribution for food service isn't centered at
+zero, which is itself evidence about the exposure measure rather than
+just a robustness check on the p-value (Section 8.1 below). None of
+these exploratory pieces validate or overturn the confirmatory family's
+result, and none are treated as if they could.
+
+### 8.1 Convergent Evidence Against the Exposure-Gradient Interpretation
+
+Four independent checks, run for different reasons and living in four
+different sections, all point the same direction on β₄. Collected in one
+place rather than left scattered:
+
+```{r beta4-robustness-summary}
+proc("beta4_robustness_summary.csv") %>%
+  kable(caption = "Four independent checks on beta4's credibility")
+```
+
+No single one of these is individually damning -- a placebo test can
+fail by chance, a specification curve can look messy without meaning
+much, one permutation null can drift off-center in a finite sample. What
+makes this convergent rather than coincidental is that four
+methodologically unrelated approaches (a false-date comparison, a
+label-randomization null, an exhaustive grid of analytical choices, and
+a dynamic quarter-by-quarter decomposition) all land on the same
+conclusion: high- and low-exposure states differ systematically for
+reasons that predate the 2021 policy. β₄ is reported throughout this
+report exactly as designed -- honestly, regardless of significance --
+but it should be read as **inconclusive at best, and confounded by a
+pre-existing exposure-outcome association at worst**, not as evidence
+either for or against a real exposure gradient in the employment
+response.
 
 Naming the confirmatory family also means it can be corrected for
 formally, not just described narratively. Holm-adjusted p-values across

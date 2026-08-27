@@ -254,7 +254,7 @@ isn't an R package and isn't in `renv.lock`.
 **One command**, from the repo root, after `renv::restore()`:
 
 ```
-make all      # runs R/01 through R/23, the test suite, the summary figures, then the report
+make all      # runs R/01 through R/24, the test suite, the summary figures, then the report
 make test     # just the test suite
 make figures  # just the README's summary figures (scripts/generate_readme_figures.R)
 make report   # just renders reports/final_report.Rmd against existing data/processed/
@@ -295,6 +295,7 @@ R/20_leave_one_out.R            # ~20 sec, drop each treated state once, refit M
 R/21_coefficient_forest_plot.R  # unified beta3/beta4 CI plot across all specifications
 R/22_multiple_testing_correction.R  # Holm-adjusted p-values, confirmatory family
 R/23_specification_curve.R      # beta4 across all 12 band x sample x industry specs
+R/24_beta4_robustness_summary.R # ties the 4 beta4 fragility checks into one table
 ```
 
 Then `testthat::test_dir("tests")` should show every test passing,
