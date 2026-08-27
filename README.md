@@ -42,7 +42,8 @@ See [Key Figures](#key-figures) below or jump to the [full report](reports/final
 | Specification curve (12 specs) | Only 2 of 12 significant; sign flips by industry | Retail's negative effect is subsample-dependent, food service never significant |
 | Permutation test (β₄) | Food service's null isn't centered at zero (-0.087) | Third independent sign the exposure gradient may reflect a pre-existing association, not treatment |
 | Event study (β₄) | Pre-trend joint test rejects for both industries | Fourth independent sign — visible quarter by quarter, not just at one false date |
-| Exposure vs. COVID severity | Significant negative correlation, both industries | Gives the exposure-gradient confound a concrete mechanism |
+| Exposure vs. COVID severity | Significant negative correlation, both industries | A candidate mechanism for the exposure-gradient confound |
+| Controlling for COVID severity in the placebo test | Placebo effect barely shrinks (8% food service, grows for retail) | COVID severity alone doesn't explain the confound — something else is also going on |
 
 ## Research questions
 
@@ -181,12 +182,16 @@ is what the proposal's own design built these checks to catch.
   0.0001). Four independent checks (this, the placebo test, the
   specification curve, and the event study) now agree the
   exposure-gradient result is fragile. `R/25_exposure_covid_correlation.R`
-  gives this a concrete mechanism rather than leaving it unexplained: a
-  state's pre-2021 exposure share correlates significantly with its own
-  COVID severity (food service r = -0.35, p = 0.018; retail r = -0.54, p
-  = 0.0001) — the same differential-COVID-recovery confound that biases
-  Model A's average effect above plausibly drives the spurious
-  pre-existing exposure-outcome association too.
+  finds a real candidate mechanism: a state's pre-2021 exposure share
+  correlates significantly with its own COVID severity (food service r =
+  -0.35, p = 0.018; retail r = -0.54, p = 0.0001). But
+  `R/26_covid_controlled_placebo.R` tests it directly by adding
+  `covid_severity x post` to the placebo-date model, and the spurious
+  placebo β₄ barely moves (8% shrinkage for food service, retail actually
+  grows) — COVID severity is a real, correlated factor, not the full
+  explanation. The pre-existing exposure-outcome association documented
+  above is real regardless of which underlying variable ultimately
+  explains it.
 - **Spillovers between neighboring states, anticipation effects ahead of
   the 1/1/2021 effective date, and the COVID-era window's external
   validity** are none of them modeled or corrected for.
@@ -263,7 +268,7 @@ isn't an R package and isn't in `renv.lock`.
 **One command**, from the repo root, after `renv::restore()`:
 
 ```
-make all      # runs R/01 through R/25, the test suite, the summary figures, then the report
+make all      # runs R/01 through R/26, the test suite, the summary figures, then the report
 make test     # just the test suite
 make figures  # just the README's summary figures (scripts/generate_readme_figures.R)
 make report   # just renders reports/final_report.Rmd against existing data/processed/
@@ -306,6 +311,7 @@ R/22_multiple_testing_correction.R  # Holm-adjusted p-values, confirmatory famil
 R/23_specification_curve.R      # beta4 across all 12 band x sample x industry specs
 R/24_beta4_robustness_summary.R # ties the 4 beta4 fragility checks into one table
 R/25_exposure_covid_correlation.R # tests whether exposure predicts COVID severity
+R/26_covid_controlled_placebo.R # does controlling for it resolve the placebo failure?
 ```
 
 Then `testthat::test_dir("tests")` should show every test passing,
