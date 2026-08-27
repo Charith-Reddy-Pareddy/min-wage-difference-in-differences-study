@@ -3072,10 +3072,73 @@ both power analyses (Sections 7.4, 7.5), the wild cluster bootstrap
 <p>The <strong>regional ANOVA</strong> (Section 7.2), the
 <strong>SLR/MLR</strong> coursework-closure pieces (Section 7.1), and
 the <strong>Monte Carlo permutation test</strong> (Section 7.3) are
-exploratory. They inform the picture – the permutation test in
-particular corroborates Model A from a distribution-free angle – but
-none of them validate or overturn the confirmatory family’s result, and
-none are treated as if they could.</p>
+exploratory. For Model A they inform the picture without changing it –
+the permutation test corroborates β₃’s asymptotic p-value from a
+distribution-free angle. For β₄, the permutation test’s role is
+different: its null distribution for food service isn’t centered at
+zero, which is itself evidence about the exposure measure rather than
+just a robustness check on the p-value (Section 8.1 below). None of
+these exploratory pieces validate or overturn the confirmatory family’s
+result, and none are treated as if they could.</p>
+<div id="convergent-evidence-against-the-exposure-gradient-interpretation" class="section level3">
+<h3>8.1 Convergent Evidence Against the Exposure-Gradient
+Interpretation</h3>
+<p>Four independent checks, run for different reasons and living in four
+different sections, all point the same direction on β₄. Collected in one
+place rather than left scattered:</p>
+<pre class="r"><code>proc(&quot;beta4_robustness_summary.csv&quot;) %&gt;%
+  kable(caption = &quot;Four independent checks on beta4&#39;s credibility&quot;)</code></pre>
+<table>
+<caption>Four independent checks on beta4’s credibility</caption>
+<colgroup>
+<col width="32%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">check</th>
+<th align="left">food_service</th>
+<th align="left">retail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Placebo test (false 2018 date)</td>
+<td align="left">p &lt; 0.0001</td>
+<td align="left">p = 0.0164</td>
+</tr>
+<tr class="even">
+<td align="left">Permutation test (label reassignment)</td>
+<td align="left">p = 0.1001 (null not centered at zero)</td>
+<td align="left">p = 0.9717 (null not centered at zero)</td>
+</tr>
+<tr class="odd">
+<td align="left">Specification curve (12 specs)</td>
+<td align="left">0 of 6 significant, positive in 6 of 6</td>
+<td align="left">2 of 6 significant, negative in 6 of 6</td>
+</tr>
+<tr class="even">
+<td align="left">Event study (pre-trend joint test)</td>
+<td align="left">p &lt; 0.0001</td>
+<td align="left">p &lt; 0.0001</td>
+</tr>
+</tbody>
+</table>
+<p>No single one of these is individually damning – a placebo test can
+fail by chance, a specification curve can look messy without meaning
+much, one permutation null can drift off-center in a finite sample. What
+makes this convergent rather than coincidental is that four
+methodologically unrelated approaches (a false-date comparison, a
+label-randomization null, an exhaustive grid of analytical choices, and
+a dynamic quarter-by-quarter decomposition) all land on the same
+conclusion: high- and low-exposure states differ systematically for
+reasons that predate the 2021 policy. β₄ is reported throughout this
+report exactly as designed – honestly, regardless of significance – but
+it should be read as <strong>inconclusive at best, and confounded by a
+pre-existing exposure-outcome association at worst</strong>, not as
+evidence either for or against a real exposure gradient in the
+employment response.</p>
 <p>Naming the confirmatory family also means it can be corrected for
 formally, not just described narratively. Holm-adjusted p-values across
 the 4 primary tests (β₃ and β₄, both industries, headline
@@ -3123,6 +3186,7 @@ specification):</p>
 same conclusion Sections 5 and 7 already reach individually, now stated
 as a formal joint test rather than four separate uncorrected p-values
 that happen to agree.</p>
+</div>
 </div>
 <div id="limitations" class="section level2">
 <h2>9. Limitations</h2>
