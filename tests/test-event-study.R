@@ -65,6 +65,94 @@ test_that("fit_event_study recovers a known dynamic treatment effect", {
   expect_true(all(abs(post$estimate - log(1.10)) < 1e-6))
 })
 
+#' Post-build addition: fit_event_study_c, pretrend_joint_test_c,
+#' event_study_coefficients_c -- the beta4 (exposure-gradient) analog of
+#' the tests above. A single treated state is fine here (unlike Model
+#' C's cross-sectional wild bootstrap/specification-curve tests): each
+#' relative-quarter dummy is a separate term interacted with a constant
+#' scale factor (California's own exposure), not one global
+#' treated_post:exposure term needing cross-treated-state variation to
+#' be identified.
+test_that("build_event_study_panel attaches treated_exposure correctly", {
+  quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")
+  fred_panel <- tibble::tibble(
+    state = rep(c("California", "Texas"), each = length(quarters)),
+    quarter = rep(quarters, times = 2),
+    employment_food_service = rep(100, 2 * length(quarters)),
+    gdp = rep(1000 * 1.005^seq_along(quarters), times = 2),
+    population = rep(5000 * 1.001^seq_along(quarters), times = 2)
+  )
+  treatment_table <- tibble::tibble(state = c("California", "Texas"), group = c("treated", "control"), increase = c(1, 0))
+  exposure_table <- tibble::tibble(
+    state = c("California", "Texas"),
+    industry = "food_service",
+    exposure_share_125 = c(0.4, 0.3)
+  )
+  panel <- build_event_study_panel(fred_panel, treatment_table, exposure_table, "food_service", "employment_food_service")
+  expect_equal(unique(panel$treated_exposure[panel$state == "California"]), 0.4)
+  expect_true(all(panel$treated_exposure[panel$state == "Texas"] == 0)) # control, exposure never applies
+})
+
+test_that("fit_event_study_c recovers a known dynamic exposure-gradient effect", {
+  quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")
+  fred_panel <- tibble::tibble(
+    state = rep(c("California", "Texas"), each = length(quarters)),
+    quarter = rep(quarters, times = 2),
+    gdp = rep(1000 * 1.005^seq_along(quarters), times = 2),
+    population = rep(5000 * 1.001^seq_along(quarters), times = 2)
+  )
+  treatment_table <- tibble::tibble(state = c("California", "Texas"), group = c("treated", "control"), increase = c(1, 0))
+  exposure_table <- tibble::tibble(
+    state = c("California", "Texas"),
+    industry = "food_service",
+    exposure_share_125 = c(0.4, 0.3)
+  )
+  # A step-function jump equal to designed_beta4 * exposure, starting
+  # exactly at rel_q == 0 -- a clean dynamic exposure-gradient effect: all
+  # pre-period leads should come back at zero, all post-period effects at
+  # a constant designed_beta4 (not designed_beta4 * exposure, since the
+  # coefficient's own units are already "per unit of exposure").
+  designed_beta4 <- 0.25
+  quarter_index <- as.integer(factor(fred_panel$quarter))
+  is_treated_post <- fred_panel$state == "California" & fred_panel$quarter >= as.Date("2021-01-01")
+  fred_panel$employment_food_service <- 100 * 1.01^quarter_index * exp(designed_beta4 * 0.4 * is_treated_post)
+
+  panel <- build_event_study_panel(fred_panel, treatment_table, exposure_table, "food_service", "employment_food_service")
+  model_c <- fit_event_study_c(panel)
+  coefs_c <- event_study_coefficients_c(model_c)
+
+  pre <- coefs_c %>% dplyr::filter(rel_q < -1)
+  post <- coefs_c %>% dplyr::filter(rel_q >= 0)
+  expect_true(all(abs(pre$estimate) < 1e-6))
+  expect_true(all(abs(post$estimate - designed_beta4) < 1e-6))
+})
+
+test_that("event_study_coefficients_c adds the omitted reference quarter back in at zero", {
+  quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")
+  fred_panel <- tibble::tibble(
+    state = rep(c("California", "Texas"), each = length(quarters)),
+    quarter = rep(quarters, times = 2),
+    employment_food_service = rep(100 * 1.01^rep(seq_along(quarters), times = 2), 1),
+    gdp = rep(1000 * 1.005^seq_along(quarters), times = 2),
+    population = rep(5000 * 1.001^seq_along(quarters), times = 2)
+  )
+  treatment_table <- tibble::tibble(state = c("California", "Texas"), group = c("treated", "control"), increase = c(1, 0))
+  exposure_table <- tibble::tibble(
+    state = c("California", "Texas"),
+    industry = "food_service",
+    exposure_share_125 = c(0.4, 0.2)
+  )
+  panel <- build_event_study_panel(fred_panel, treatment_table, exposure_table, "food_service", "employment_food_service")
+  model_c <- fit_event_study_c(panel)
+  coefs_c <- event_study_coefficients_c(model_c)
+
+  ref_row <- coefs_c %>% dplyr::filter(rel_q == -1)
+  expect_equal(nrow(ref_row), 1)
+  expect_equal(ref_row$estimate, 0)
+  expect_equal(ref_row$ci_low, 0)
+  expect_equal(ref_row$ci_high, 0)
+})
+
 test_that("event_study_coefficients adds the omitted reference quarter back in at zero", {
   quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")
   fred_panel <- tibble::tibble(

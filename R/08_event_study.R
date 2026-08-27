@@ -41,7 +41,7 @@ relative_quarter <- function(quarter, treatment_quarter = as.Date("2021-01-01"))
 
 build_event_study_panel <- function(fred_panel, treatment_table, exposure_table, industry, outcome_col) {
   build_panel(fred_panel, treatment_table, exposure_table, industry, outcome_col) %>%
-    mutate(rel_q = relative_quarter(quarter))
+    mutate(rel_q = relative_quarter(quarter), treated_exposure = treated * exposure)
 }
 
 #' Dynamic treatment effect at every relative quarter except -1 (the
@@ -93,6 +93,58 @@ save_event_study_plot <- function(coefs, industry, out_dir) {
   ggsave(file.path(out_dir, paste0("event_study_", industry, ".png")), p, width = 8, height = 5)
 }
 
+#' Post-build addition: Model C's beta4 (Section 5.2) never got its own
+#' event study -- only Model A's average effect did. Same dynamic
+#' specification, but each relative-quarter dummy interacts with
+#' treated*exposure (continuous) instead of treated (binary), so each
+#' coefficient is the dynamic exposure gradient at that quarter rather
+#' than a dynamic average effect. Control states have treated_exposure ==
+#' 0 throughout regardless of their own exposure value, same logic as the
+#' binary version above.
+fit_event_study_c <- function(panel) {
+  feols(log_employment ~ i(rel_q, treated_exposure, ref = -1) + gdp_growth + pop_growth | state + quarter,
+        cluster = ~state, data = panel)
+}
+
+#' Joint test that every pre-period exposure-gradient lead is zero -- if
+#' this rejects, high- and low-exposure states were already diverging
+#' before treatment, which would explain rather than contradict the
+#' beta4 placebo-test and permutation-test findings (Sections 4.4, 7.3).
+pretrend_joint_test_c <- function(model) {
+  wald(model, keep = "^rel_q::-[0-9]+:treated_exposure$")
+}
+
+event_study_coefficients_c <- function(model) {
+  ct <- as.data.frame(summary(model)$coeftable)
+  ct$term <- rownames(ct)
+  ct <- ct[grepl("^rel_q::", ct$term), ]
+  ct$rel_q <- as.integer(sub("^rel_q::(-?[0-9]+):treated_exposure$", "\\1", ct$term))
+
+  result <- data.frame(
+    rel_q = ct$rel_q,
+    estimate = ct$Estimate,
+    ci_low = ct$Estimate - 1.96 * ct$`Std. Error`,
+    ci_high = ct$Estimate + 1.96 * ct$`Std. Error`
+  )
+  rbind(result, data.frame(rel_q = -1, estimate = 0, ci_low = 0, ci_high = 0)) %>%
+    arrange(rel_q)
+}
+
+save_event_study_plot_c <- function(coefs, industry, out_dir) {
+  p <- ggplot(coefs, aes(x = rel_q, y = estimate)) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+    geom_vline(xintercept = -0.5, linetype = "dotted", color = "firebrick") +
+    geom_pointrange(aes(ymin = ci_low, ymax = ci_high)) +
+    labs(
+      x = "Quarters relative to treatment (2021 Q1)",
+      y = "Estimated effect per unit of exposure on log employment",
+      title = paste("Event study (beta4, exposure gradient):", industry),
+      subtitle = "Reference quarter: -1 (the quarter just before treatment)"
+    ) +
+    theme_minimal()
+  ggsave(file.path(out_dir, paste0("event_study_beta4_", industry, ".png")), p, width = 8, height = 5)
+}
+
 if (sys.nframe() == 0) {
   source("R/01_treatment_classification.R")
   treatment_table <- load_treatment_table()
@@ -103,6 +155,7 @@ if (sys.nframe() == 0) {
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
   pretrend_summary <- list()
+  pretrend_summary_c <- list()
 
   for (ind in list(
     list(industry = "food_service", col = "employment_food_service"),
@@ -130,10 +183,35 @@ if (sys.nframe() == 0) {
       pretrend_f_stat = test_result$stat,
       pretrend_p_value = test_result$p
     )
+
+    cat("\nEvent study (beta4, exposure gradient) --", ind$industry, "\n")
+    model_c <- fit_event_study_c(panel)
+
+    cat("\n--- Full event-study coefficients (beta4) ---\n")
+    print(summary(model_c))
+
+    cat("\n--- Joint test: are all pre-period exposure-gradient leads zero? ---\n")
+    test_result_c <- pretrend_joint_test_c(model_c)
+    print(test_result_c)
+
+    coefs_c <- event_study_coefficients_c(model_c)
+    readr::write_csv(coefs_c, paste0("data/processed/event_study_beta4_", ind$industry, ".csv"))
+    save_event_study_plot_c(coefs_c, ind$industry, out_dir)
+
+    pretrend_summary_c[[ind$industry]] <- tibble::tibble(
+      industry = ind$industry,
+      pretrend_f_stat = test_result_c$stat,
+      pretrend_p_value = test_result_c$p
+    )
   }
 
   pretrend_table <- dplyr::bind_rows(pretrend_summary)
   readr::write_csv(pretrend_table, "data/processed/pretrend_joint_test.csv")
-  cat("\n\n=== Pre-trend joint test summary ===\n")
+  cat("\n\n=== Pre-trend joint test summary (Model A) ===\n")
   print(pretrend_table)
+
+  pretrend_table_c <- dplyr::bind_rows(pretrend_summary_c)
+  readr::write_csv(pretrend_table_c, "data/processed/pretrend_joint_test_beta4.csv")
+  cat("\n=== Pre-trend joint test summary (Model C, beta4) ===\n")
+  print(pretrend_table_c)
 }
