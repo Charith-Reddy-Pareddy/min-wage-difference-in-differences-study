@@ -39,6 +39,7 @@ See [Key Figures](#key-figures) below or jump to the [full report](reports/final
 | Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
 | Specification curve (12 specs) | Only 2 of 12 significant; sign flips by industry | Retail's negative effect is subsample-dependent, food service never significant |
 | Permutation test (β₄) | Food service's null isn't centered at zero (-0.087) | Third independent sign the exposure gradient may reflect a pre-existing association, not treatment |
+| Event study (β₄) | Pre-trend joint test rejects for both industries | Fourth independent sign — visible quarter by quarter, not just at one false date |
 
 ## Research questions
 
@@ -99,6 +100,9 @@ exposure.
 
 **Every reasonable band x sample x industry choice, ranked**
 <img src="reports/figures/specification_curve.png" width="100%">
+
+**The exposure gradient's own pre-trend problem, quarter by quarter**
+<img src="reports/figures/event_study_beta4_food_service.png" width="100%">
 
 More figures — model diagnostics, permutation-test null distributions,
 the power-analysis curves, exposure-bandwidth sensitivity, leave-one-out
@@ -165,8 +169,14 @@ is what the proposal's own design built these checks to catch.
   distribution for β₄ isn't centered at zero for food service (mean
   -0.087) the way Model A's permutation null is — reassigning treatment
   labels while keeping each state's real exposure value fixed produces a
-  systematically negative "effect" on average. Three independent checks
-  (this, the placebo test, and the specification curve) now agree the
+  systematically negative "effect" on average. A dedicated event study
+  for β₄ (`R/08_event_study.R`) shows this directly, quarter by quarter:
+  the exposure-gradient coefficient sits at a roughly constant, clearly
+  nonzero level across the *entire* pre-period and doesn't visibly shift
+  after the real 2021 treatment date — the joint pre-trend test rejects
+  even more strongly than Model A's (food service p < 0.0001, retail p <
+  0.0001). Four independent checks (this, the placebo test, the
+  specification curve, and the event study) now agree the
   exposure-gradient result is fragile.
 - **Spillovers between neighboring states, anticipation effects ahead of
   the 1/1/2021 effective date, and the COVID-era window's external

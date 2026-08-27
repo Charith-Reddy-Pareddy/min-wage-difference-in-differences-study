@@ -197,6 +197,38 @@ sample, plus one sharp anomalous dip at quarter -3 relative to
 treatment -- **2020 Q2, the COVID employment trough** -- most visible in
 retail.
 
+**Post-build addition: the same dynamic check for β₄.** The event study
+above only ever covered Model A's average effect. Model C's exposure
+gradient (β₄, Section 5.2) gets the identical treatment: each
+relative-quarter dummy interacts with `treated x exposure` (continuous)
+instead of `treated` (binary), so each coefficient is the dynamic
+exposure gradient at that quarter rather than a dynamic average effect.
+
+```{r pretrend-test-beta4}
+pretrend_beta4 <- proc("pretrend_joint_test_beta4.csv")
+```
+
+```{r event-study-beta4-plots, out.width="100%"}
+include_graphics(fig("event_study_beta4_food_service.png"))
+include_graphics(fig("event_study_beta4_retail.png"))
+```
+
+The joint pre-trend test rejects here too, more strongly than Model A's
+(food service F = `r round(pretrend_beta4$pretrend_f_stat[1], 2)`, p =
+`r formatC(pretrend_beta4$pretrend_p_value[1], format = "e", digits = 2)`;
+retail F = `r round(pretrend_beta4$pretrend_f_stat[2], 2)`, p =
+`r formatC(pretrend_beta4$pretrend_p_value[2], format = "e", digits = 2)`).
+The plots show why directly: the exposure-gradient coefficient sits at a
+roughly constant, clearly positive (food service) or noisy (retail)
+level across the *entire* pre-period, and doesn't visibly shift after
+the actual treatment date -- high- and low-exposure states were already
+diverging years before 2021, for reasons this design can't attribute to
+the real policy. This is the same conclusion the placebo test (Section
+4.4) and permutation test (Section 7.3) each reached independently; the
+event study just makes it visible quarter by quarter rather than at a
+single false date or through a randomization null. Four separate checks
+now agree that β₄ should not be read as clean causal evidence.
+
 ### 4.2 Two-Sample t-Test (independent corroboration)
 
 A simpler, STAT-240-level check using a completely different method:
