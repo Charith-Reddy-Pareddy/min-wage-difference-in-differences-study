@@ -59,25 +59,49 @@ credibility check the data will support.
 <tr>
 <td width="50%">
 
-**Event study: pre-trends don't hold for food service**
-<img src="reports/figures/event_study_food_service.png" width="100%">
+**Which states were treated, and by how much**
+<img src="reports/figures/treatment_control_overview.png" width="100%">
 
 </td>
 <td width="50%">
 
-**Does the treatment effect scale with exposure?**
-<img src="reports/figures/marginal_effects.png" width="100%">
+**Event study: pre-trends don't hold for food service**
+<img src="reports/figures/event_study_food_service.png" width="100%">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Baseline vs. COVID-adjusted estimate**
+<img src="reports/figures/covid_adjustment_comparison.png" width="100%">
+
+</td>
+<td width="50%">
+
+**Pre-2021 exposure distribution by industry**
+<img src="reports/figures/exposure_distribution.png" width="100%">
 
 </td>
 </tr>
 </table>
 
+**Does the treatment effect scale with exposure?**
+<img src="reports/figures/marginal_effects.png" width="100%">
+
+**All four confirmatory estimates at a glance**
+<img src="reports/figures/coefficient_forest_plot.png" width="100%">
+
 **Every reasonable band × sample × industry choice, ranked**
 <img src="reports/figures/specification_curve.png" width="100%">
 
-More figures — diagnostics, permutation nulls, power curves, the
-exposure/COVID correlation — are in `reports/figures/` and embedded in
-the [full report](reports/final_report.Rmd).
+**Exposure predicts COVID severity — a candidate mechanism for the confound**
+<img src="reports/figures/exposure_covid_correlation_retail.png" width="70%">
+
+More figures — model diagnostics, permutation-test null distributions,
+power-analysis curves, the beta4 event study and forest plot — are in
+`reports/figures/` and embedded in the
+[full report](reports/final_report.Rmd).
 
 ## Final Report
 
