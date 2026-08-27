@@ -3,8 +3,10 @@
 **Finding:** the baseline DiD estimate is negative but not credible as a
 causal estimate — pre-trends are violated for food service, and the
 estimate is highly sensitive to differential COVID recovery. The
-exposure-gradient hypothesis is underpowered at the effect sizes actually
-observed. See [Results at a Glance](#results-at-a-glance) below.
+exposure-gradient hypothesis is underpowered *and*, per four independent
+checks added after the original build, confounded by a pre-existing
+association between exposure and employment trends unrelated to the 2021
+policy. See [Results at a Glance](#results-at-a-glance) below.
 
 A difference-in-differences study of the 2021 round of state minimum wage
 increases, extended beyond a single average treatment effect to ask how the
@@ -19,7 +21,7 @@ employment response varies with pre-policy wage exposure.
 | **Method** | Two-way fixed-effects DiD, event study, placebo test, state-clustered and wild-bootstrap inference, permutation test, Monte Carlo power analysis |
 | **Baseline estimate** | Small negative average effect, significant only in the ≥$0.50-increase subsample |
 | **Main finding** | The baseline estimate is not robust: pre-trends fail for food service, and a COVID-recovery confound explains a real share of it |
-| **Main limitation** | The exposure-gradient hypothesis (β₄) is underpowered at the effect sizes actually observed — quantified, not just assumed |
+| **Main limitation** | The exposure-gradient hypothesis (β₄) is underpowered *and* confounded — 4 independent checks (placebo, permutation, spec curve, event study) find high/low-exposure states already differed pre-2021 |
 
 See [Key Figures](#key-figures) below or jump to the [full report](reports/final_report.Rmd) / [Limitations](#limitations).
 
@@ -30,7 +32,7 @@ See [Key Figures](#key-figures) below or jump to the [full report](reports/final
 | Average employment effect | Negative but not robust | Weak causal evidence |
 | Parallel trends | Violated (food service) | Major identification concern |
 | COVID sensitivity | Large change once controlled for | Confounding likely |
-| Exposure gradient (β₄) | Inconclusive | Underpowered, not "no effect" |
+| Exposure gradient (β₄) | Inconclusive and confounded | Underpowered, not "no effect" — and 4 checks below find a pre-existing exposure/outcome link |
 | Exposure bandwidth (10%/12.5%/15%) | Consistent across all three | Not an artifact of band choice |
 | Placebo test (β₃, average effect) | Null | Helpful credibility check |
 | Placebo test (β₄, exposure gradient) | Significant at the fake date | Threatens the exposure-gradient result's credibility specifically |
