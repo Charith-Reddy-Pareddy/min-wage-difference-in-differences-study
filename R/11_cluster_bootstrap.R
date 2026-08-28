@@ -46,13 +46,10 @@ if (file.exists("R/07_model_a_c.R")) {
 BETA3_TERM <- "treated_post"
 BETA4_TERM <- "treated_post:exposure"
 
-#' Model A with treated_post dropped entirely (beta3 = 0) -- the
-#' restricted model for the beta3 bootstrap below, same role
-#' fit_model_a() plays as the beta4 = 0 restriction for Model C.
-fit_model_a_restricted <- function(panel) {
-  fixest::feols(log_employment ~ gdp_growth + pop_growth | state + quarter,
-                cluster = ~state, data = panel)
-}
+# fit_model_a_restricted() (beta3 = 0, the restricted model for the
+# beta3 bootstrap below) now lives in R/07_model_a_c.R -- it was
+# previously duplicated here and in R/16_power_analysis.R, consolidated
+# since both already source that file.
 
 #' Wild cluster bootstrap for beta3 (Model A's treated_post), same
 #' Cameron-Gelbach-Miller procedure as wild_cluster_bootstrap_beta4()

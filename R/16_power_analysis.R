@@ -44,13 +44,10 @@ if (file.exists("R/07_model_a_c.R")) {
 BETA3_TERM <- "treated_post"
 BETA4_TERM <- "treated_post:exposure"
 
-#' Model A with treated_post dropped entirely (beta3 = 0) -- the null
-#' model for the beta3 power sim, analogous to fit_model_a() itself
-#' serving as the beta4 = 0 null for the beta4 sim below.
-fit_model_a_restricted <- function(panel) {
-  feols(log_employment ~ gdp_growth + pop_growth | state + quarter,
-        cluster = ~state, data = panel)
-}
+# fit_model_a_restricted() (beta3 = 0, the null model for the beta3
+# power sim below) now lives in R/07_model_a_c.R -- previously
+# duplicated here and in R/11_cluster_bootstrap.R, consolidated since
+# both already source that file.
 
 #' Simulate `reps` synthetic datasets under an assumed true beta3, refit
 #' Model A each time, and return the share where the beta3 p-value < 0.05.

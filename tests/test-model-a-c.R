@@ -127,3 +127,34 @@ test_that("fit_model_a recovers a known treated_post effect built into the synth
   expect_true("treated_post" %in% names(coef(model)))
   expect_equal(unname(coef(model)["treated_post"]), log(1.05), tolerance = 1e-6)
 })
+
+test_that("fit_model_a_restricted omits treated_post entirely", {
+  # Consolidated here from R/11 and R/16, which previously each defined
+  # this identically -- shared now since both source this file already.
+  # make_synthetic_panel_inputs()'s default flat employment=100 is fine
+  # for tests that build their own panel then discard the fitted model's
+  # actual coefficients, but here the model is fit and inspected
+  # directly, so it needs real quarter variation for state+quarter FE
+  # not to demean the outcome to an exact constant (same collinearity
+  # noted throughout tests/test-power-analysis.R and others).
+  inputs <- make_synthetic_panel_inputs()
+  # gdp/population in the shared fixture vary only by quarter, not by
+  # state, which is fine for tests that keep treated_post in the model
+  # (it soaks up the remaining variation) but leaves the restricted
+  # model here nothing to estimate once quarter FE absorbs a
+  # quarter-only series -- same fix as test-power-analysis.R and
+  # test-cluster-bootstrap.R: add real state-by-quarter noise.
+  quarter_index <- as.integer(factor(inputs$fred_panel$quarter))
+  set.seed(11)
+  noise_gdp <- rnorm(nrow(inputs$fred_panel), sd = 0.01)
+  noise_pop <- rnorm(nrow(inputs$fred_panel), sd = 0.01)
+  inputs$fred_panel$gdp <- inputs$fred_panel$gdp * exp(noise_gdp)
+  inputs$fred_panel$population <- inputs$fred_panel$population * exp(noise_pop)
+  inputs$fred_panel$employment_food_service <- 100 * 1.01^quarter_index
+
+  panel <- build_panel(inputs$fred_panel, inputs$treatment_table, inputs$exposure_table,
+                        "food_service", "employment_food_service")
+  model <- fit_model_a_restricted(panel)
+  expect_false("treated_post" %in% names(coef(model)))
+  expect_true(all(c("gdp_growth", "pop_growth") %in% names(coef(model))))
+})

@@ -81,6 +81,17 @@ fit_model_c <- function(panel) {
         cluster = ~state, data = panel)
 }
 
+#' Model A with treated_post dropped entirely (beta3 = 0) -- the
+#' restricted/null model shared by the beta3 wild cluster bootstrap
+#' (R/11) and the beta3 power simulation (R/16), both of which need to
+#' refit under the null many times. Previously defined identically in
+#' both of those files; consolidated here since both already source
+#' this file, so there's only one copy to keep in sync.
+fit_model_a_restricted <- function(panel) {
+  feols(log_employment ~ gdp_growth + pop_growth | state + quarter,
+        cluster = ~state, data = panel)
+}
+
 #' lm() + sandwich::vcovCL() cross-check for Model A -- same specification,
 #' fixed effects as dummies instead of fixest's demeaning, clustered SEs
 #' from a different implementation. Coefficients should match fixest
