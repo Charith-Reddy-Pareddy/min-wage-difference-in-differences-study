@@ -33,6 +33,9 @@ jobs:
             cat("All", length(files), "R scripts parse cleanly.\n")
           '
 
+      - name: Verify Makefile/tests stay in sync with R/
+        run: Rscript scripts/check_pipeline_sync.R
+
       - name: Run tests
         run: Rscript -e 'testthat::test_dir("tests")'
 

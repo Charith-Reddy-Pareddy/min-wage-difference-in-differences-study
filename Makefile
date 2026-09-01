@@ -1,4 +1,4 @@
-.PHONY: all pipeline test report figures clean
+.PHONY: all pipeline check-sync test report figures clean
 
 # Full pipeline, in order. Needs IPUMS_API_KEY in .env for R/03; see
 # .env.example and README.md.
@@ -29,13 +29,19 @@ PIPELINE := R/01_treatment_classification.R \
             R/25_exposure_covid_correlation.R \
             R/26_covid_controlled_placebo.R
 
-all: pipeline test figures report
+all: check-sync pipeline test figures report
 
 pipeline:
 	@for script in $(PIPELINE); do \
 		echo "== $$script =="; \
 		Rscript $$script || exit 1; \
 	done
+
+# Verifies every R/ script is listed in PIPELINE above and has a
+# matching tests/test-*.R file -- catches drift a manual check might
+# miss (see scripts/check_pipeline_sync.R for what it actually checks).
+check-sync:
+	Rscript scripts/check_pipeline_sync.R
 
 test:
 	Rscript -e 'testthat::test_dir("tests")'

@@ -172,8 +172,10 @@ report needs [pandoc](https://pandoc.org), separate from `renv.lock`.
 Repo layout: `R/` (26 numbered scripts, run in order), `tests/` (one
 file per script), `reports/` (`final_report.Rmd`, rendered HTML,
 figures), `data/processed/` (all results, gitignored, reproducible).
-CI (`.github/workflows/ci.yml`) parse-checks `R/` and runs the test
-suite on every push.
+CI (`.github/workflows/ci.yml`) parse-checks `R/`, verifies every script
+is wired into the Makefile and has a matching test file
+(`scripts/check_pipeline_sync.R` — also runnable locally as
+`make check-sync`), and runs the test suite, on every push.
 
 ## Status
 
