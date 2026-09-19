@@ -1,9 +1,10 @@
 """Predictive comparison, Python side: linear baseline, hand-rolled
-bagged trees, hand-rolled random forest, and a PyTorch feedforward net,
-all predicting employment_growth on the same held-out states -- an
-independent replication (different ecosystem, different
-implementations) of R/27_ml_prediction.R and R/28_neural_network.R's
-comparison. Not a causal claim; see those files' headers for why.
+bagged trees, hand-rolled random forest, hand-rolled gradient boosting,
+and a PyTorch feedforward net, all predicting employment_growth on the
+same held-out states -- an independent replication (different
+ecosystem, different implementations) of R/27_ml_prediction.R and
+R/28_neural_network.R's comparison. Not a causal claim; see those
+files' headers for why.
 
 Run from the python/ directory, after the R pipeline has produced
 data/processed/ml_panel.csv (`make pipeline` or at least
@@ -21,7 +22,7 @@ from src.linear_model import LinearRegression
 from src.metrics import r_squared, rmse
 from src.neural_net import train_neural_network
 from src.split import group_train_test_split
-from src.tree import BaggedTrees, RandomForest
+from src.tree import BaggedTrees, GradientBoostedTrees, RandomForest
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
@@ -44,20 +45,24 @@ def main() -> pd.DataFrame:
     forest = RandomForest(n_trees=100, max_depth=4, min_samples_leaf=5, seed=1).fit(X_train, y_train)
     forest_pred = forest.predict(X_test)
 
+    boosted = GradientBoostedTrees(n_estimators=150, learning_rate=0.05, max_depth=2, min_samples_leaf=5)
+    boosted.fit(X_train, y_train)
+    boosted_pred = boosted.predict(X_test)
+
     nn_pred, _ = train_neural_network(X_train, y_train, X_test, hidden_dim=8, epochs=300, lr=0.01, seed=1)
 
+    predictions = {
+        "linear_baseline": linear_pred,
+        "bagged_trees": bagged_pred,
+        "random_forest": forest_pred,
+        "gradient_boosting": boosted_pred,
+        "neural_network": nn_pred,
+    }
     results = pd.DataFrame(
         {
-            "model": ["linear_baseline", "bagged_trees", "random_forest", "neural_network"],
-            "rmse": [
-                rmse(y_test, linear_pred), rmse(y_test, bagged_pred), rmse(y_test, forest_pred), rmse(y_test, nn_pred)
-            ],
-            "r_squared": [
-                r_squared(y_test, linear_pred),
-                r_squared(y_test, bagged_pred),
-                r_squared(y_test, forest_pred),
-                r_squared(y_test, nn_pred),
-            ],
+            "model": list(predictions.keys()),
+            "rmse": [rmse(y_test, pred) for pred in predictions.values()],
+            "r_squared": [r_squared(y_test, pred) for pred in predictions.values()],
         }
     )
 

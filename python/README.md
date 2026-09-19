@@ -3,17 +3,21 @@
 An independent, Python-side replication of the predictive comparison in
 [`R/27_ml_prediction.R`](../R/27_ml_prediction.R) and
 [`R/28_neural_network.R`](../R/28_neural_network.R): a linear baseline,
-a bagged-trees ensemble, a random forest, and a feedforward neural
-network, all predicting `employment_growth` on states held out entirely
-from training (see those two files' headers for why the split is by
-state and why the target is growth, not employment level).
+a bagged-trees ensemble, a random forest, gradient boosting, and a
+feedforward neural network, all predicting `employment_growth` on
+states held out entirely from training (see those two files' headers
+for why the split is by state and why the target is growth, not
+employment level).
 
-`src/tree.py` has both `BaggedTrees` and `RandomForest` as genuinely
-different implementations, not the same thing under two names:
+`src/tree.py` has `BaggedTrees`, `RandomForest`, and
+`GradientBoostedTrees` as three genuinely different combination
+strategies, not the same ensemble under different names:
 `BaggedTrees` picks one random feature subset per tree (the "random
-subspace" method), while `RandomForest` re-picks a fresh random subset
-at *every* split node in every tree, which is the actual algorithm.
-See that file's docstring for why the distinction matters.
+subspace" method); `RandomForest` re-picks a fresh random subset at
+*every* split node in every tree (the actual Breiman algorithm); and
+`GradientBoostedTrees` doesn't bootstrap-resample at all — it fits
+trees sequentially, each one to the current residuals of the trees
+before it. See that file's docstring for the full distinction.
 
 **This is a predictive-accuracy comparison, not a causal claim.** The
 study's actual identification strategy is Model A/C in `R/07`, with the
@@ -28,11 +32,13 @@ un­related to this project's code, reproducible with a bare
 a library that doesn't import here, the classical models
 (`src/linear_model.py`, `src/tree.py`) are implemented directly on
 numpy: closed-form OLS via `numpy.linalg.lstsq`, and a CART-style
-regression tree with hand-rolled bagging and random-forest ensembles on
-top of it. If scikit-learn works in your environment, swapping in
-`sklearn.ensemble.RandomForestRegressor` for `src/tree.RandomForest` is
-a drop-in replacement — the split/metrics/data modules don't care which
-one produced the predictions.
+regression tree with hand-rolled bagging, random-forest, and
+gradient-boosting ensembles on top of it. If scikit-learn works in your
+environment, swapping in `sklearn.ensemble.RandomForestRegressor` or
+`GradientBoostingRegressor` for `src/tree.RandomForest` /
+`GradientBoostedTrees` is a drop-in replacement — the
+split/metrics/data modules don't care which one produced the
+predictions.
 
 PyTorch (`src/neural_net.py`) has no such issue and installs/imports
 cleanly.
@@ -68,7 +74,7 @@ Writes `results/comparison.csv` (gitignored, like the R side's
 - `src/data.py` — reads the shared panel CSV, one-hot encodes region
 - `src/split.py` — grouped (by-state) train/test split
 - `src/linear_model.py` — OLS via the normal equations
-- `src/tree.py` — regression tree + bagged-trees and random-forest ensembles, from scratch
+- `src/tree.py` — regression tree + bagged-trees, random-forest, and gradient-boosting ensembles, from scratch
 - `src/neural_net.py` — PyTorch feedforward net, train-only standardization
 - `src/metrics.py` — RMSE / R², matching R/27's definitions exactly
 - `train.py` — ties the above together, prints and saves the comparison
