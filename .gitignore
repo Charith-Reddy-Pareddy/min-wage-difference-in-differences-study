@@ -13,3 +13,8 @@ data/processed/*
 .env
 .DS_Store
 *.log
+
+python/.venv/
+python/results/
+python/**/__pycache__/
+python/.pytest_cache/
