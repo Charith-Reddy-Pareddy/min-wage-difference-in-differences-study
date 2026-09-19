@@ -18,6 +18,7 @@
 
 library(dplyr)
 library(rpart)
+library(randomForest)
 
 if (file.exists("R/07_model_a_c.R")) {
   source("R/07_model_a_c.R")
@@ -93,12 +94,19 @@ fit_linear_baseline <- function(train) {
   lm(employment_growth ~ treated_post + gdp_growth + pop_growth + exposure + region, data = train)
 }
 
-#' Bootstrap-aggregated ("bagged") decision trees -- a random forest
-#' assembled by hand from rpart trees rather than a randomForest-package
-#' call, so the ensembling mechanics (bootstrap resampling, a random
-#' feature subset per tree, averaging predictions across trees) are
-#' visible rather than a library internal. `mtry` below `length(predictors)`
-#' is what turns plain bagging into a random forest.
+#' Bootstrap-aggregated ("bagged") decision trees, assembled by hand from
+#' rpart trees rather than a library call, so the ensembling mechanics
+#' (bootstrap resampling, averaging predictions across trees) are visible
+#' rather than a black box. When `mtry` is set, each tree also gets a
+#' fixed random subset of features for its entire fit -- the "random
+#' subspace" method (Ho 1998), a cheap way to decorrelate trees without a
+#' custom tree-fitting routine. This is NOT Breiman's random forest
+#' algorithm: a real random forest re-samples the feature subset at
+#' EVERY split node, not once per tree, so different splits within the
+#' same tree can draw on different features. See fit_random_forest()
+#' below for that -- rpart doesn't expose per-node feature sampling, so
+#' this hand-rolled version is deliberately the simpler, different
+#' method, not an approximation of it.
 fit_bagged_trees <- function(train, predictors, response, n_trees = 25, mtry = NULL, seed = 1) {
   set.seed(seed)
   trees <- lapply(seq_len(n_trees), function(i) {
@@ -115,6 +123,20 @@ predict.bagged_trees <- function(object, newdata, ...) {
   preds <- vapply(object$trees, function(tree) predict(tree, newdata), numeric(nrow(newdata)))
   if (is.null(dim(preds))) preds <- matrix(preds, nrow = 1)
   rowMeans(preds)
+}
+
+#' Breiman's random forest, via the randomForest package: bagged trees
+#' where every split, in every tree, re-samples which `mtry` features are
+#' even candidates for that split -- the actual algorithm fit_bagged_trees
+#' above deliberately doesn't implement (rpart has no hook for per-node
+#' feature sampling). `mtry` defaults to the package's own regression
+#' default (floor(number of predictors / 3)).
+fit_random_forest <- function(train, predictors, response, n_trees = 500, mtry = NULL, seed = 1) {
+  set.seed(seed)
+  formula <- reformulate(predictors, response = response)
+  args <- list(formula = formula, data = train, ntree = n_trees)
+  if (!is.null(mtry)) args$mtry <- mtry
+  do.call(randomForest::randomForest, args)
 }
 
 if (sys.nframe() == 0) {
@@ -139,11 +161,16 @@ if (sys.nframe() == 0) {
   bagged_model <- fit_bagged_trees(split$train, predictors, "employment_growth", n_trees = 25, mtry = 3, seed = 1)
   bagged_pred <- predict(bagged_model, split$test)
 
+  rf_model <- fit_random_forest(split$train, predictors, "employment_growth", n_trees = 500, seed = 1)
+  rf_pred <- predict(rf_model, newdata = split$test)
+
   actual <- split$test$employment_growth
   results <- tibble::tibble(
-    model = c("linear_baseline", "bagged_trees"),
-    rmse = c(rmse(actual, linear_pred), rmse(actual, bagged_pred)),
-    r_squared = c(r_squared(actual, linear_pred), r_squared(actual, bagged_pred))
+    model = c("linear_baseline", "bagged_trees", "random_forest"),
+    rmse = c(rmse(actual, linear_pred), rmse(actual, bagged_pred), rmse(actual, rf_pred)),
+    r_squared = c(
+      r_squared(actual, linear_pred), r_squared(actual, bagged_pred), r_squared(actual, rf_pred)
+    )
   )
   readr::write_csv(results, "data/processed/ml_prediction_results.csv")
   cat("\n=== Held-out predictive accuracy (by state, not by row) ===\n")

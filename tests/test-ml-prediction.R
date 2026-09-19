@@ -61,6 +61,42 @@ test_that("fit_bagged_trees recovers a clear nonlinear split better than a coin 
   expect_true(all(preds[3:4] > 0))
 })
 
+test_that("fit_random_forest recovers a clear nonlinear split on held-out data", {
+  # Same synthetic step-function setup as the bagged-trees test above --
+  # a working random forest should recover it too, and this also
+  # exercises the actual randomForest-package call path (formula
+  # construction, mtry passthrough) rather than just the hand-rolled
+  # ensemble.
+  set.seed(42)
+  n <- 400
+  train <- tibble::tibble(
+    x = runif(n, -1, 1),
+    noise = rnorm(n, sd = 0.5),
+    y = ifelse(x > 0, 10, -10) + noise
+  )
+  test <- tibble::tibble(x = c(-0.8, -0.5, 0.5, 0.8))
+
+  model <- fit_random_forest(train, predictors = "x", response = "y", n_trees = 50, seed = 1)
+  preds <- predict(model, newdata = test)
+
+  expect_length(preds, 4)
+  expect_true(all(preds[1:2] < 0))
+  expect_true(all(preds[3:4] > 0))
+})
+
+test_that("fit_random_forest returns an actual randomForest object, not the hand-rolled ensemble", {
+  # Not a claim that predictions differ from fit_bagged_trees by any
+  # particular amount -- just that fit_random_forest genuinely calls into
+  # the randomForest package rather than silently reusing bagged_trees.
+  set.seed(1)
+  train <- tibble::tibble(
+    x1 = rnorm(50), x2 = rnorm(50),
+    y = 2 * rnorm(50)
+  )
+  rf <- fit_random_forest(train, c("x1", "x2"), "y", n_trees = 10, seed = 1)
+  expect_s3_class(rf, "randomForest")
+})
+
 test_that("build_ml_panel stacks food_service and retail with an industry column and region attached", {
   quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")
   fred_panel <- tibble::tibble(
