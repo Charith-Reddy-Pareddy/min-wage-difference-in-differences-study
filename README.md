@@ -1,5 +1,9 @@
 # State Minimum Wage Increases and Low-Wage Employment
 
+[![CI](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/actions/workflows/ci.yml/badge.svg)](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Live site](https://img.shields.io/badge/live%20site-charith--reddy--pareddy.github.io-9a3324)](https://charith-reddy-pareddy.github.io/min-wage-difference-in-differences-study/)
+
 A difference-in-differences study of the 2021 round of state minimum-wage
 increases, extended beyond a single average treatment effect to ask how
 the employment response varies with pre-policy wage exposure.
@@ -196,15 +200,21 @@ proposing a mechanism isn't the same as confirming one.
 
 ```
 Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
-make all                       # R/01-R/26, tests, figures, report end to end
-make test                      # just the test suite
+make all                       # R/01-R/28, tests, figures, report end to end
+make test                      # just the R test suite
 make report                    # just render reports/final_report.Rmd
+
+make python-setup               # one-time: creates python/.venv, installs requirements.txt
+make python-test                # Python ML/NN test suite (python/)
 ```
 
 `make all` needs `IPUMS_API_KEY` in `.env` (see `.env.example`) for
 `R/03`, and takes several minutes (CPS-ORG pull, wild bootstrap,
 permutation test, power simulation are the slow steps). Rendering the
 report needs [pandoc](https://pandoc.org), separate from `renv.lock`.
+`make python-test` needs `make python-setup` to have been run once
+first; see [python/README.md](python/README.md) for why it's a
+separate virtual environment rather than a renv-tracked dependency.
 
 Repo layout: `R/` (28 numbered scripts, run in order), `tests/` (one
 file per script), `reports/` (`final_report.Rmd`, rendered HTML,
@@ -226,3 +236,9 @@ including every defect found and corrected along the way. The original
 checks, and mechanism investigation summarized above; `R/27`-`R/28` and
 `python/` add the ML/neural-network predictive comparison described
 above.
+
+## License
+
+[MIT](LICENSE) — the code. Underlying data remains subject to each
+source's own terms (see [Data Sources](#data-sources) above); this
+license covers the analysis code, not the data itself.

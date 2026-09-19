@@ -1,4 +1,4 @@
-.PHONY: all pipeline check-sync test report figures clean
+.PHONY: all pipeline check-sync test report figures clean python-setup python-test
 
 # Full pipeline, in order. Needs IPUMS_API_KEY in .env for R/03; see
 # .env.example and README.md.
@@ -56,3 +56,12 @@ report:
 
 clean:
 	rm -f data/processed/*.csv reports/final_report.html
+
+# Python ML/NN subproject (python/) -- separate from the R pipeline
+# above; see python/README.md for why it's a separate venv rather than
+# a renv-tracked dependency.
+python-setup:
+	cd python && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+python-test:
+	cd python && .venv/bin/python -m pytest
