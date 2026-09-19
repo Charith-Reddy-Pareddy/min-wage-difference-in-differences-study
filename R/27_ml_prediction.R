@@ -199,15 +199,16 @@ if (sys.nframe() == 0) {
   gb_pred <- predict_gradient_boosting(gb_model, split$test)
 
   actual <- split$test$employment_growth
+  predictions <- list(
+    linear_baseline = linear_pred,
+    bagged_trees = bagged_pred,
+    random_forest = rf_pred,
+    gradient_boosting = gb_pred
+  )
   results <- tibble::tibble(
-    model = c("linear_baseline", "bagged_trees", "random_forest", "gradient_boosting"),
-    rmse = c(
-      rmse(actual, linear_pred), rmse(actual, bagged_pred), rmse(actual, rf_pred), rmse(actual, gb_pred)
-    ),
-    r_squared = c(
-      r_squared(actual, linear_pred), r_squared(actual, bagged_pred),
-      r_squared(actual, rf_pred), r_squared(actual, gb_pred)
-    )
+    model = names(predictions),
+    rmse = vapply(predictions, function(p) rmse(actual, p), numeric(1)),
+    r_squared = vapply(predictions, function(p) r_squared(actual, p), numeric(1))
   )
   readr::write_csv(results, "data/processed/ml_prediction_results.csv")
   cat("\n=== Held-out predictive accuracy (by state, not by row) ===\n")

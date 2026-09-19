@@ -15,7 +15,7 @@
 # nnet's gradient-based fitting is sensitive to input/output scale (unlike
 # the tree-based and linear methods above), so predictors and the
 # response are standardized using TRAIN-set mean/SD only, then
-# predictions are unstandardized back to log_employment's original
+# predictions are unstandardized back to employment_growth's original
 # scale -- fitting the scaler on the test set too would leak test-set
 # statistics into training.
 
@@ -32,9 +32,9 @@ standardize_by <- function(x, mean, sd) (x - mean) / sd
 unstandardize_by <- function(z, mean, sd) z * sd + mean
 
 #' Fit a single-hidden-layer feedforward network on `train`, predict on
-#' `test`. Returns the fitted model, the predictions (on log_employment's
-#' original scale), and the train-set scaling stats (kept for
-#' reproducibility/inspection, not reused across calls).
+#' `test`. Returns the fitted model, the predictions (on
+#' employment_growth's original scale), and the train-set scaling stats
+#' (kept for reproducibility/inspection, not reused across calls).
 fit_neural_network <- function(train, test, size = 5, seed = 1, maxit = 300) {
   scale_cols <- c("gdp_growth", "pop_growth", "exposure", "employment_growth")
   scale_stats <- lapply(scale_cols, function(col) {
@@ -63,8 +63,9 @@ fit_neural_network <- function(train, test, size = 5, seed = 1, maxit = 300) {
   list(model = fit, predictions = predictions, scale_stats = scale_stats)
 }
 
-#' Combine R/27's linear/bagged-trees results with the neural network's,
-#' into the single 3-row comparison table the report/README references.
+#' Combine R/27's results (linear baseline, bagged trees, random forest,
+#' gradient boosting) with the neural network's, into the single
+#' 5-row comparison table the report/README references.
 build_comparison_table <- function(prior_results, nn_rmse, nn_r_squared) {
   dplyr::bind_rows(
     prior_results,
@@ -76,8 +77,8 @@ if (sys.nframe() == 0) {
   ml_panel <- readr::read_csv("data/processed/ml_panel.csv", show_col_types = FALSE)
   prior_results <- readr::read_csv("data/processed/ml_prediction_results.csv", show_col_types = FALSE)
 
-  # Same seed as R/27 -- identical state-level split, so all three
-  # models are evaluated on the same held-out states.
+  # Same seed as R/27 -- identical state-level split, so every model
+  # is evaluated on the same held-out states.
   split <- split_by_state(ml_panel, test_frac = 0.2, seed = 1)
 
   nn <- fit_neural_network(split$train, split$test, size = 5, seed = 1, maxit = 300)
