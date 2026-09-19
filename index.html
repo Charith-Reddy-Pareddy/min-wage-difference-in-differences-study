@@ -313,7 +313,7 @@
       </div>
       <div class="metric-card">
         <div class="label">Engineering</div>
-        <div class="value">28 R scripts + a Python ML subproject, 141 R test blocks (all passing), CI on every push</div>
+        <div class="value">28 R scripts + a Python ML subproject, 143 R test blocks (all passing), CI on every push</div>
       </div>
     </div>
   </section>
@@ -398,6 +398,7 @@
           <li>Linear baseline (no fixed effects, so it can generalize to an unseen state)</li>
           <li>Hand-rolled <strong>bagged-trees ensemble</strong> &mdash; bootstrap-aggregated <code>rpart</code> trees, one fixed random feature subset per tree</li>
           <li>Real <strong>random forest</strong> (<code>randomForest</code> package) &mdash; re-samples the feature subset at every split, not once per tree</li>
+          <li>Real <strong>gradient boosting</strong> (<code>gbm</code> package) &mdash; sequential trees fit to residuals, with the number of trees chosen by 5-fold cross-validation</li>
           <li>Single-hidden-layer <strong>neural network</strong> (<code>nnet</code>), with train-only standardization</li>
         </ul>
       </div>
@@ -406,17 +407,38 @@
         <p style="margin:0;">An independent replication in a separate ecosystem (<code>python/</code>), reading the same exported panel:</p>
         <ul>
           <li>OLS via closed-form normal equations (numpy)</li>
-          <li>A regression tree built from scratch, with both a bagging ensemble and a true <strong>random forest</strong> (per-split feature re-sampling) on top of it</li>
+          <li>A regression tree built from scratch, with a bagging ensemble, a true <strong>random forest</strong>, and <strong>gradient boosting</strong> (sequential residual fitting) on top of it</li>
           <li><strong>PyTorch</strong> feedforward neural network</li>
-          <li>18 pytest tests, its own CI job, its own virtual environment</li>
+          <li>21 pytest tests, its own CI job, its own virtual environment</li>
         </ul>
       </div>
     </div>
+
+    <table class="results" style="margin-top:22px;">
+      <caption style="caption-side:top; text-align:left; padding-bottom:10px; font-size:0.85rem; color:var(--ink-soft);">
+        Held-out predictive accuracy, by state (R implementation)
+      </caption>
+      <thead>
+        <tr><th>Model</th><th>RMSE</th><th>R&sup2;</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Linear baseline</td><td>0.0699</td><td>0.394</td></tr>
+        <tr><td>Bagged trees</td><td>0.0667</td><td>0.448</td></tr>
+        <tr><td>Random forest</td><td>0.0643</td><td>0.487</td></tr>
+        <tr><td><strong>Gradient boosting</strong></td><td><strong>0.0536</strong></td><td><strong>0.644</strong></td></tr>
+        <tr><td>Neural network</td><td>0.0582</td><td>0.580</td></tr>
+      </tbody>
+    </table>
+
     <p style="margin-top:18px; font-size:0.92rem;">
-      This is a methods comparison, not a substitute for Model A/C's
-      identification strategy &mdash; a model that predicts employment
-      well isn't thereby estimating the policy's causal effect on it.
-      See <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/blob/main/python/README.md">python/README.md</a>
+      Gradient boosting is the strongest predictor of the five &mdash; a
+      sensible result, not a foregone one, since boosting's sequential
+      residual-fitting strategy is genuinely different from bagging and
+      random forests' independent-trees-then-average strategy. This is a
+      methods comparison, not a substitute for Model A/C's identification
+      strategy &mdash; a model that predicts employment well isn't
+      thereby estimating the policy's causal effect on it. See
+      <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/blob/main/python/README.md">python/README.md</a>
       for implementation notes.
     </p>
   </section>

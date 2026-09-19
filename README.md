@@ -38,7 +38,7 @@ credibility check the data will support.
 | **Model C, β₄** (exposure gradient) | 0.167 food service (p=0.34), -0.005 retail (p=0.95) — noisy and inconsistent in sign |
 | **Robustness on β₄** | 4/4 independent checks (placebo, permutation, event study, spec curve) flag it as confounded |
 | **Inference** | State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis |
-| **Engineering** | 28 R scripts + a Python ML subproject, 141 R test blocks (all passing), CI on every push, `make all` for full reproduction |
+| **Engineering** | 28 R scripts + a Python ML subproject, 143 R test blocks (all passing), CI on every push, `make all` for full reproduction |
 
 ## Results at a Glance
 
@@ -129,15 +129,24 @@ non-independent.
   baseline, a hand-rolled bagged-trees ensemble (bootstrap-aggregated
   `rpart` trees, one fixed random feature subset per tree), a real
   random forest (the `randomForest` package — re-samples features at
-  every split, not once per tree), and a single-hidden-layer neural
-  network (`nnet`).
+  every split, not once per tree), gradient boosting (the `gbm`
+  package, cross-validated to pick the number of trees), and a
+  single-hidden-layer neural network (`nnet`).
 - **Python** (`python/`): an independent replication in a separate
   ecosystem — numpy/pandas for data handling, a from-scratch regression
-  tree with both a bagging ensemble and a true random forest (per-split
-  feature re-sampling, hand-rolled since no forest library is usable
-  here), and a PyTorch feedforward network — reading the same panel the
-  R side exports. See [python/README.md](python/README.md) for why it
-  doesn't use scikit-learn.
+  tree with a bagging ensemble, a true random forest (per-split feature
+  re-sampling), and gradient boosting (sequential trees fit to
+  residuals) all hand-rolled since no ML library is usable here, plus a
+  PyTorch feedforward network — reading the same panel the R side
+  exports. See [python/README.md](python/README.md) for why it doesn't
+  use scikit-learn.
+
+On the held-out states, gradient boosting is the strongest predictor in
+both languages (R: R²=0.64; Python: R²=0.49), ahead of the neural
+network and both other tree ensembles — a sensible result, not a
+foregone one, since boosting's sequential residual-fitting is a
+genuinely different strategy from bagging/forests' independent,
+averaged trees.
 
 This is a methods comparison, not a substitute for Model A/C's
 identification strategy — a model that predicts employment well isn't
