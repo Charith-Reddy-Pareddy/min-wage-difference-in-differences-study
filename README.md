@@ -38,7 +38,7 @@ credibility check the data will support.
 | **Model C, β₄** (exposure gradient) | 0.167 food service (p=0.34), -0.005 retail (p=0.95) — noisy and inconsistent in sign |
 | **Robustness on β₄** | 4/4 independent checks (placebo, permutation, event study, spec curve) flag it as confounded |
 | **Inference** | State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis |
-| **Engineering** | 28 R scripts + a Python ML subproject, 139 R test blocks (all passing), CI on every push, `make all` for full reproduction |
+| **Engineering** | 28 R scripts + a Python ML subproject, 141 R test blocks (all passing), CI on every push, `make all` for full reproduction |
 
 ## Results at a Glance
 
@@ -127,13 +127,17 @@ non-independent.
 
 - **R** (`R/27_ml_prediction.R`, `R/28_neural_network.R`): a linear
   baseline, a hand-rolled bagged-trees ensemble (bootstrap-aggregated
-  `rpart` trees with a random feature subset per tree), and a
-  single-hidden-layer neural network (`nnet`).
+  `rpart` trees, one fixed random feature subset per tree), a real
+  random forest (the `randomForest` package — re-samples features at
+  every split, not once per tree), and a single-hidden-layer neural
+  network (`nnet`).
 - **Python** (`python/`): an independent replication in a separate
   ecosystem — numpy/pandas for data handling, a from-scratch regression
-  tree + bagging ensemble, and a PyTorch feedforward network — reading
-  the same panel the R side exports. See [python/README.md](python/README.md)
-  for why it doesn't use scikit-learn.
+  tree with both a bagging ensemble and a true random forest (per-split
+  feature re-sampling, hand-rolled since no forest library is usable
+  here), and a PyTorch feedforward network — reading the same panel the
+  R side exports. See [python/README.md](python/README.md) for why it
+  doesn't use scikit-learn.
 
 This is a methods comparison, not a substitute for Model A/C's
 identification strategy — a model that predicts employment well isn't

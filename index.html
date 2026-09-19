@@ -313,7 +313,7 @@
       </div>
       <div class="metric-card">
         <div class="label">Engineering</div>
-        <div class="value">28 R scripts + a Python ML subproject, 139 R test blocks (all passing), CI on every push</div>
+        <div class="value">28 R scripts + a Python ML subproject, 141 R test blocks (all passing), CI on every push</div>
       </div>
     </div>
   </section>
@@ -396,7 +396,8 @@
         <p style="margin:0;">Extends the study's own pipeline (<code>R/27_ml_prediction.R</code>, <code>R/28_neural_network.R</code>):</p>
         <ul>
           <li>Linear baseline (no fixed effects, so it can generalize to an unseen state)</li>
-          <li>Hand-rolled <strong>bagged-trees ensemble</strong> &mdash; bootstrap-aggregated <code>rpart</code> trees with a random feature subset per tree</li>
+          <li>Hand-rolled <strong>bagged-trees ensemble</strong> &mdash; bootstrap-aggregated <code>rpart</code> trees, one fixed random feature subset per tree</li>
+          <li>Real <strong>random forest</strong> (<code>randomForest</code> package) &mdash; re-samples the feature subset at every split, not once per tree</li>
           <li>Single-hidden-layer <strong>neural network</strong> (<code>nnet</code>), with train-only standardization</li>
         </ul>
       </div>
@@ -405,9 +406,9 @@
         <p style="margin:0;">An independent replication in a separate ecosystem (<code>python/</code>), reading the same exported panel:</p>
         <ul>
           <li>OLS via closed-form normal equations (numpy)</li>
-          <li>A regression tree + bagging ensemble built from scratch &mdash; no ML library dependency</li>
+          <li>A regression tree built from scratch, with both a bagging ensemble and a true <strong>random forest</strong> (per-split feature re-sampling) on top of it</li>
           <li><strong>PyTorch</strong> feedforward neural network</li>
-          <li>15 pytest tests, its own CI job, its own virtual environment</li>
+          <li>18 pytest tests, its own CI job, its own virtual environment</li>
         </ul>
       </div>
     </div>
