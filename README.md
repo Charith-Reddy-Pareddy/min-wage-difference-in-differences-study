@@ -38,7 +38,7 @@ credibility check the data will support.
 | **Model C, β₄** (exposure gradient) | 0.167 food service (p=0.34), -0.005 retail (p=0.95) — noisy and inconsistent in sign |
 | **Robustness on β₄** | 4/4 independent checks (placebo, permutation, event study, spec curve) flag it as confounded |
 | **Inference** | State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis |
-| **Engineering** | 26 R scripts, 125 test blocks (all passing), CI on every push, `make all` for full reproduction |
+| **Engineering** | 28 R scripts + a Python ML subproject, 139 R test blocks (all passing), CI on every push, `make all` for full reproduction |
 
 ## Results at a Glance
 
@@ -115,6 +115,30 @@ Rscript -e 'rmarkdown::render("reports/final_report.Rmd")'
 
 (needs [pandoc](https://pandoc.org) — `brew install pandoc` on macOS).
 
+## Machine Learning Extension
+
+A predictive-accuracy comparison, separate from the causal claims
+above: how well can flexible ML methods predict quarterly employment
+*growth* for a state they never saw during training, versus a plain
+linear specification? Evaluated by holding out entire states (not
+rows) from training, since a row-level split would leak within-state
+structure the causal models' clustered SEs already treat as
+non-independent.
+
+- **R** (`R/27_ml_prediction.R`, `R/28_neural_network.R`): a linear
+  baseline, a hand-rolled bagged-trees ensemble (bootstrap-aggregated
+  `rpart` trees with a random feature subset per tree), and a
+  single-hidden-layer neural network (`nnet`).
+- **Python** (`python/`): an independent replication in a separate
+  ecosystem — numpy/pandas for data handling, a from-scratch regression
+  tree + bagging ensemble, and a PyTorch feedforward network — reading
+  the same panel the R side exports. See [python/README.md](python/README.md)
+  for why it doesn't use scikit-learn.
+
+This is a methods comparison, not a substitute for Model A/C's
+identification strategy — a model that predicts employment well isn't
+thereby estimating the policy's causal effect on it.
+
 ## Limitations
 
 - **Parallel trends violated** for food service (event study + two-sample t-test).
@@ -169,13 +193,15 @@ make report                    # just render reports/final_report.Rmd
 permutation test, power simulation are the slow steps). Rendering the
 report needs [pandoc](https://pandoc.org), separate from `renv.lock`.
 
-Repo layout: `R/` (26 numbered scripts, run in order), `tests/` (one
+Repo layout: `R/` (28 numbered scripts, run in order), `tests/` (one
 file per script), `reports/` (`final_report.Rmd`, rendered HTML,
-figures), `data/processed/` (all results, gitignored, reproducible).
-CI (`.github/workflows/ci.yml`) parse-checks `R/`, verifies every script
-is wired into the Makefile and has a matching test file
-(`scripts/check_pipeline_sync.R` — also runnable locally as
-`make check-sync`), and runs the test suite, on every push.
+figures), `data/processed/` (all results, gitignored, reproducible),
+`python/` (independent ML/NN replication — see
+[python/README.md](python/README.md)). CI (`.github/workflows/ci.yml`)
+parse-checks `R/`, verifies every script is wired into the Makefile and
+has a matching test file (`scripts/check_pipeline_sync.R` — also
+runnable locally as `make check-sync`), and runs both the R and Python
+test suites, on every push.
 
 ## Status
 
@@ -183,5 +209,7 @@ Complete. See [TIMELINE.md](TIMELINE.md) for the day-by-day build log,
 including every defect found and corrected along the way. The original
 10-day build covered treatment classification through the final report;
 11 new scripts (`R/16`-`R/26`) and 4 extended ones (`R/08`, `R/10`,
-`R/11`, `R/15`) were added afterward — the power analyses, robustness
-checks, and mechanism investigation summarized above.
+`R/11`, `R/15`) were added afterward for the power analyses, robustness
+checks, and mechanism investigation summarized above; `R/27`-`R/28` and
+`python/` add the ML/neural-network predictive comparison described
+above.
