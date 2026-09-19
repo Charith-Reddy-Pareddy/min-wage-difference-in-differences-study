@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State Minimum Wage Increases and Low-Wage Employment</title>
+<meta name="description" content="A difference-in-differences study of the 2021 state minimum-wage increases, extended with an exposure-gradient model, a full robustness suite, and an ML/neural-network predictive comparison.">
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --bg-alt: #f2efe9;
+    --ink: #1c1a17;
+    --ink-soft: #52504a;
+    --line: #e2ddd3;
+    --accent: #9a3324;
+    --accent-soft: #c8785f;
+    --card-bg: #ffffff;
+    --pill-bg: #efe6da;
+    --code-bg: #26241f;
+    --code-ink: #f2efe9;
+    --max-width: 980px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171613;
+      --bg-alt: #201e1a;
+      --ink: #f2efe9;
+      --ink-soft: #b8b3a8;
+      --line: #3a372f;
+      --accent: #e2836b;
+      --accent-soft: #c8785f;
+      --card-bg: #201e1a;
+      --pill-bg: #2c2a24;
+      --code-bg: #0e0d0b;
+      --code-ink: #f2efe9;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171613;
+    --bg-alt: #201e1a;
+    --ink: #f2efe9;
+    --ink-soft: #b8b3a8;
+    --line: #3a372f;
+    --accent: #e2836b;
+    --accent-soft: #c8785f;
+    --card-bg: #201e1a;
+    --pill-bg: #2c2a24;
+    --code-bg: #0e0d0b;
+    --code-ink: #f2efe9;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  a { color: var(--accent); }
+
+  .wrap { max-width: var(--max-width); margin: 0 auto; padding: 0 20px; }
+
+  header.hero {
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--line);
+    padding: 64px 0 44px;
+  }
+  header.hero .kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  header.hero h1 {
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    line-height: 1.15;
+    margin: 0 0 18px;
+    max-width: 820px;
+  }
+  header.hero p.lede {
+    font-size: 1.08rem;
+    color: var(--ink-soft);
+    max-width: 720px;
+    margin: 0 0 26px;
+  }
+  .finding-banner {
+    border-left: 4px solid var(--accent);
+    background: var(--card-bg);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    max-width: 760px;
+    font-size: 0.98rem;
+  }
+  .finding-banner strong { color: var(--accent); }
+
+  nav.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  nav.links a {
+    display: inline-block;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: var(--pill-bg);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    transition: border-color 0.15s ease;
+  }
+  nav.links a:hover { border-color: var(--accent-soft); }
+  nav.links a.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  main { padding: 52px 0; }
+  section { margin-bottom: 60px; }
+  section h2 {
+    font-size: 1.5rem;
+    margin: 0 0 22px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  section h3 { font-size: 1.1rem; margin: 28px 0 10px; }
+  section p { color: var(--ink-soft); max-width: 760px; }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .metric-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .metric-card .label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .metric-card .value { font-size: 0.98rem; }
+
+  table.results {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table.results th, table.results td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.results th {
+    background: var(--bg-alt);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+  }
+  table.results tr:last-child td { border-bottom: none; }
+
+  .fig-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+  }
+  figure {
+    margin: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  figure img {
+    display: block;
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    background: #fff;
+    padding: 8px;
+  }
+  figcaption {
+    padding: 12px 16px 16px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+
+  .ml-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 18px;
+  }
+  .ml-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .ml-card h3 { margin-top: 0; }
+  .ml-card ul { padding-left: 20px; margin: 10px 0 0; color: var(--ink-soft); font-size: 0.94rem; }
+  .ml-card code {
+    background: var(--pill-bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.86em;
+  }
+
+  ul.limitations { padding-left: 20px; color: var(--ink-soft); }
+  ul.limitations li { margin-bottom: 10px; }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 18px 20px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .sources-grid .metric-card .value { color: var(--ink-soft); font-size: 0.9rem; }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 0 60px;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+  }
+  footer a { color: var(--ink-soft); text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    header.hero { padding: 44px 0 32px; }
+    main { padding: 36px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Difference-in-Differences Study</div>
+    <h1>State Minimum Wage Increases and Low-Wage Employment</h1>
+    <p class="lede">
+      A study of the 2021 round of state minimum-wage increases, extended
+      beyond a single average treatment effect to ask how the employment
+      response varies with pre-policy wage exposure — plus an ML and
+      neural-network predictive comparison.
+    </p>
+    <div class="finding-banner">
+      <strong>Finding:</strong> the baseline estimate is negative but not
+      credible as a causal effect — pre-trends are violated for food
+      service, and it's highly sensitive to differential COVID recovery.
+      The exposure-gradient hypothesis is underpowered <em>and</em>, per
+      four independent checks, confounded by a pre-existing association
+      unrelated to the 2021 policy.
+    </div>
+    <nav class="links">
+      <a class="primary" href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/tag/v1.0-report">Read the Full Report</a>
+      <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study">GitHub Repository</a>
+      <a href="#ml-extension">ML / Neural Network Extension</a>
+      <a href="#figures">Key Figures</a>
+      <a href="#reproduce">Reproduce It</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="metrics">
+    <h2>Key Metrics</h2>
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="label">Sample</div>
+        <div class="value">50 states, quarterly 2015&ndash;2022 (1,260 obs) &mdash; 20 treated, 25 control, 5 excluded</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Model A, &beta;&#8323; (avg. effect)</div>
+        <div class="value">&minus;0.025 food service (p=0.12), &minus;0.010 retail (p=0.39); significant only in the &ge;$0.50 subsample</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Model C, &beta;&#8324; (exposure gradient)</div>
+        <div class="value">0.167 food service (p=0.34), &minus;0.005 retail (p=0.95) &mdash; noisy and inconsistent in sign</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Robustness on &beta;&#8324;</div>
+        <div class="value">4/4 independent checks (placebo, permutation, event study, spec curve) flag it as confounded</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Inference</div>
+        <div class="value">State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Engineering</div>
+        <div class="value">28 R scripts + a Python ML subproject, 139 R test blocks (all passing), CI on every push</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results">
+    <h2>Results at a Glance</h2>
+    <table class="results">
+      <thead>
+        <tr><th>Question</th><th>Result</th><th>Interpretation</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Average employment effect</td><td>Negative but not robust</td><td>Weak causal evidence</td></tr>
+        <tr><td>Parallel trends</td><td>Violated (food service)</td><td>Major identification concern</td></tr>
+        <tr><td>COVID sensitivity</td><td>Large change once controlled for</td><td>Confounding likely</td></tr>
+        <tr><td>Exposure gradient (&beta;&#8324;)</td><td>Inconclusive and confounded</td><td>Underpowered, not "no effect"</td></tr>
+        <tr><td>Placebo / permutation / event study / spec curve (&beta;&#8324;)</td><td>All 4 flag a pre-existing exposure&ndash;outcome link</td><td>Convergent evidence, not one fluke</td></tr>
+        <tr><td>Exposure vs. COVID severity</td><td>Significant negative correlation</td><td>A candidate mechanism &mdash; but barely moves the placebo effect once controlled for</td></tr>
+        <tr><td>Multiple-testing correction</td><td>None of the 4 confirmatory tests survive Holm</td><td>Consistent with "not robust," now formal</td></tr>
+        <tr><td>Leave-one-state-out</td><td>Estimate stable across all 20 drops</td><td>No single state drives Model A</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="figures">
+    <h2>Key Figures</h2>
+    <div class="fig-grid">
+      <figure>
+        <img src="reports/figures/treatment_control_overview.png" alt="Map/chart of which states were treated and by how much" loading="lazy">
+        <figcaption>Which states were treated, and by how much</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/event_study_food_service.png" alt="Event study showing pre-trends for food service" loading="lazy">
+        <figcaption>Event study: pre-trends don't hold for food service</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/covid_adjustment_comparison.png" alt="Baseline vs COVID-adjusted estimate comparison" loading="lazy">
+        <figcaption>Baseline vs. COVID-adjusted estimate</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/exposure_distribution.png" alt="Pre-2021 exposure distribution by industry" loading="lazy">
+        <figcaption>Pre-2021 exposure distribution by industry</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/marginal_effects.png" alt="Marginal effects of exposure on treatment effect" loading="lazy">
+        <figcaption>Does the treatment effect scale with exposure?</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/coefficient_forest_plot.png" alt="Forest plot of all four confirmatory estimates" loading="lazy">
+        <figcaption>All four confirmatory estimates at a glance</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/specification_curve.png" alt="Specification curve across band, sample, and industry choices" loading="lazy">
+        <figcaption>Every reasonable band &times; sample &times; industry choice, ranked</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/exposure_covid_correlation_retail.png" alt="Exposure predicts COVID severity correlation" loading="lazy">
+        <figcaption>Exposure predicts COVID severity &mdash; a candidate confound mechanism</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/leave_one_out.png" alt="Leave-one-out sensitivity of Model A treated_post coefficient" loading="lazy">
+        <figcaption>Leave-one-state-out: no single state drives the estimate</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="ml-extension">
+    <h2>Machine Learning &amp; Neural Network Extension</h2>
+    <p>
+      A predictive-accuracy comparison, kept separate from the causal
+      claims above: how well can flexible ML methods predict quarterly
+      employment <em>growth</em> for a state they never saw during
+      training, versus a plain linear specification? States &mdash; not
+      rows &mdash; are held out, since a row-level split would leak
+      within-state structure the causal models' clustered standard
+      errors already treat as non-independent.
+    </p>
+    <div class="ml-columns">
+      <div class="ml-card">
+        <h3>R implementation</h3>
+        <p style="margin:0;">Extends the study's own pipeline (<code>R/27_ml_prediction.R</code>, <code>R/28_neural_network.R</code>):</p>
+        <ul>
+          <li>Linear baseline (no fixed effects, so it can generalize to an unseen state)</li>
+          <li>Hand-rolled <strong>bagged-trees ensemble</strong> &mdash; bootstrap-aggregated <code>rpart</code> trees with a random feature subset per tree</li>
+          <li>Single-hidden-layer <strong>neural network</strong> (<code>nnet</code>), with train-only standardization</li>
+        </ul>
+      </div>
+      <div class="ml-card">
+        <h3>Python implementation</h3>
+        <p style="margin:0;">An independent replication in a separate ecosystem (<code>python/</code>), reading the same exported panel:</p>
+        <ul>
+          <li>OLS via closed-form normal equations (numpy)</li>
+          <li>A regression tree + bagging ensemble built from scratch &mdash; no ML library dependency</li>
+          <li><strong>PyTorch</strong> feedforward neural network</li>
+          <li>15 pytest tests, its own CI job, its own virtual environment</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:18px; font-size:0.92rem;">
+      This is a methods comparison, not a substitute for Model A/C's
+      identification strategy &mdash; a model that predicts employment
+      well isn't thereby estimating the policy's causal effect on it.
+      See <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/blob/main/python/README.md">python/README.md</a>
+      for implementation notes.
+    </p>
+  </section>
+
+  <section id="limitations">
+    <h2>Limitations</h2>
+    <ul class="limitations">
+      <li><strong>Parallel trends violated</strong> for food service (event study + two-sample t-test).</li>
+      <li><strong>COVID-era differential recovery confounds the treatment window</strong> &mdash; a real share of the baseline estimate, not the policy.</li>
+      <li><strong>Both &beta;&#8323; and &beta;&#8324; are underpowered</strong> at the observed effect sizes, not just assumed underpowered.</li>
+      <li><strong>&beta;&#8324; is also confounded</strong>, not just underpowered &mdash; 4 independent checks find high/low-exposure states already differed before 2021.</li>
+      <li><strong>The &ge;$0.50 subsample and the legislated-only subsample are the exact same 10 states</strong> &mdash; the two cuts can't be disentangled in this data.</li>
+      <li><strong>Small cluster count</strong> (20 treated, 45 total) &mdash; addressed via clustered SEs and a wild bootstrap, but always some caution.</li>
+      <li>Results are <strong>DiD estimates under this specification</strong>, not definitive causal effects.</li>
+    </ul>
+  </section>
+
+  <section id="data-sources">
+    <h2>Data Sources</h2>
+    <div class="sources-grid">
+      <div class="metric-card"><div class="label">FRED (public API)</div><div class="value">State-quarter employment, GDP, population, 2015&ndash;2022</div></div>
+      <div class="metric-card"><div class="label">U.S. DOL</div><div class="value">Minimum wage history &mdash; treatment classification</div></div>
+      <div class="metric-card"><div class="label">QCEW Open Data API</div><div class="value">Fallback employment (2 states); validation check</div></div>
+      <div class="metric-card"><div class="label">CPS-ORG via IPUMS-CPS</div><div class="value">Exposure construction (2019&ndash;2020 earnings only)</div></div>
+    </div>
+  </section>
+
+  <section id="reproduce">
+    <h2>How to Reproduce</h2>
+    <pre>Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
+make all                       # R/01-R/28, tests, figures, report end to end
+make test                      # just the R test suite
+
+cd python
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m pytest     # Python ML/NN test suite</pre>
+    <p>
+      <code>make all</code> needs <code>IPUMS_API_KEY</code> in <code>.env</code> for
+      <code>R/03</code>, and takes several minutes. Full details, repo
+      layout, and the day-by-day build log are in the
+      <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study#readme">README</a>
+      and <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/blob/main/TIMELINE.md">TIMELINE.md</a>.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    This page is generated from the project's own README and figures &mdash;
+    see the <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study">GitHub repository</a>
+    for the full source, data pipeline, and report.
+  </div>
+</footer>
+
+</body>
+</html>
