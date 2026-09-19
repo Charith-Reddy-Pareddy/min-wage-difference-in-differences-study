@@ -135,3 +135,65 @@ becomes exactly collinear with the quarter fixed effect once a
 independently in three different test files), and a design needs at
 least 2 treated states with *different* exposure values or
 `treated_post:exposure` is exactly collinear with `treated_post` alone.
+
+**Controlled debugging exercise (`R/04`, `R/07`, `R/13`):** three
+defects were deliberately planted, one at a time, to practice the
+debug workflow itself rather than to demonstrate a real incident — an
+off-by-one on the treatment date (`quarter > treatment_effective`
+instead of `>=` in `build_panel()`, which also silently broke
+`R/10`'s placebo test since it reuses that function), a swapped-operand
+sign flip in `compute_pre_period_trend()`, and a magic-number typo
+(`n_obs < 3` instead of `< 30`) in the exposure cell-size check. Running
+the suite surfaced 6 failures across 4 test files; all three were fixed
+and three new regression tests added that pin the exact failure mode
+(a boundary quarter, an explicit sign check, the exact threshold value)
+rather than relying on the same test that happened to catch it this
+time. Both the planting commit and the fix commit say so directly in
+their messages — this did not happen during ordinary development.
+
+**Post-build addition: ML/neural-network extension (`R/27`-`R/28`,
+`python/`):** a predictive-accuracy comparison, explicitly kept separate
+from the causal claims above — how well can flexible ML methods predict
+quarterly employment growth for a state held out entirely from training,
+versus a plain linear specification. The first working version predicted
+`log_employment`'s *level* and came back with a negative R² for every
+model; the actual bug was the target variable, not the models — a
+held-out state's employment level is dominated by its population size
+(California vs. Wyoming), which nothing in the feature set could recover.
+Switching the target to year-over-year employment *growth* (scale-invariant
+across states) fixed it: R² went from negative to a sensible ~0.39-0.58
+across methods. `R/27` also established the state-level train/test split
+(never a row-level one, for the same reason the causal models' SEs are
+state-clustered) and a hand-rolled bagged-trees ensemble; `R/28` added a
+single-hidden-layer neural network (`nnet`, train-only standardization);
+`python/` is an independent replication in numpy/pandas/PyTorch, built
+because this development machine's `scipy` wheel doesn't load (a
+Mach-O loader error, unrelated to this project's code — see
+`python/README.md`), so the classical models are hand-rolled there too
+rather than via scikit-learn.
+
+**Post-build addition: real random forest (`R/27`, `python/`):** the
+original bagged-trees ensemble's docstring claimed a random feature
+subset per tree "turns plain bagging into a random forest" — that's
+wrong. It's the random subspace method (Ho 1998): one fixed subset per
+tree. Breiman's actual algorithm re-samples the feature subset at
+*every split node*, not once per tree. Added `fit_random_forest()` via
+the real `randomForest` package in R, and a hand-rolled `RandomForest`
+class in Python with genuine per-node resampling (a different code path
+from `BaggedTrees`, not the same ensemble renamed) — and corrected the
+original comment rather than leaving it. Random forest outperformed the
+random-subspace bagging in both languages, as expected from the
+stronger decorrelation.
+
+**Post-build addition: gradient boosting (`R/27`, `python/`):** the
+`gbm` package in R (5-fold cross-validated tree count, rather than
+naively using every tree fit), and a hand-rolled `GradientBoostedTrees`
+in Python (sequential shallow trees fit to residuals — no bootstrap
+resampling at all, a genuinely different combination strategy from the
+two ensembles above). First real-data run crashed: `gbm`'s
+cross-validation workers don't auto-coerce a character `region` column
+to a factor the way `lm()`/`rpart()`/`randomForest()` silently do via
+`model.frame()` — fixed by making `region` an explicit factor in
+`build_ml_panel()`. Gradient boosting came out the strongest predictor
+of all five methods in both languages (R: R²=0.64; Python: R²=0.49), a
+sensible result rather than a foregone one.
