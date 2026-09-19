@@ -19,6 +19,7 @@
 library(dplyr)
 library(rpart)
 library(randomForest)
+library(gbm)
 
 if (file.exists("R/07_model_a_c.R")) {
   source("R/07_model_a_c.R")
@@ -64,7 +65,10 @@ build_ml_panel <- function(fred_panel, treatment_table, exposure_table) {
       attach_employment_growth(fred_panel, "employment_retail") %>%
       mutate(industry = "retail")
   ) %>%
-    mutate(region = census_region(state)) %>%
+    # A factor, not a character column: lm()/rpart()/randomForest() all
+    # coerce a character predictor to a factor internally via
+    # model.frame(), but gbm()'s cross-validation workers don't.
+    mutate(region = factor(census_region(state))) %>%
     filter(!is.na(employment_growth))
 }
 
@@ -139,6 +143,33 @@ fit_random_forest <- function(train, predictors, response, n_trees = 500, mtry =
   do.call(randomForest::randomForest, args)
 }
 
+#' Gradient boosting (Friedman's GBM, via the gbm package): unlike the
+#' two ensembles above, trees here are fit SEQUENTIALLY, each one to the
+#' current residuals of the ensemble so far, rather than independently in
+#' parallel on bootstrap resamples -- a fundamentally different way of
+#' combining weak learners (boosting, not bagging). Fits with a
+#' generous `n_trees` ceiling and picks the actual number of trees to use
+#' via 5-fold cross-validation (gbm.perf) rather than just using all of
+#' them, since boosting keeps improving training fit indefinitely and
+#' will overfit if the iteration count isn't chosen deliberately.
+fit_gradient_boosting <- function(train, predictors, response, n_trees = 1000,
+                                   interaction_depth = 3, shrinkage = 0.01, seed = 1) {
+  set.seed(seed)
+  formula <- reformulate(predictors, response = response)
+  gbm::gbm(
+    formula, data = train, distribution = "gaussian",
+    n.trees = n_trees, interaction.depth = interaction_depth, shrinkage = shrinkage,
+    cv.folds = 5, verbose = FALSE
+  )
+}
+
+#' Predicts using the cross-validation-selected number of trees (see
+#' fit_gradient_boosting) rather than the full n_trees ceiling.
+predict_gradient_boosting <- function(model, newdata) {
+  best_iter <- gbm::gbm.perf(model, method = "cv", plot.it = FALSE)
+  predict(model, newdata = newdata, n.trees = best_iter)
+}
+
 if (sys.nframe() == 0) {
   source("R/01_treatment_classification.R")
   treatment_table <- load_treatment_table()
@@ -164,12 +195,18 @@ if (sys.nframe() == 0) {
   rf_model <- fit_random_forest(split$train, predictors, "employment_growth", n_trees = 500, seed = 1)
   rf_pred <- predict(rf_model, newdata = split$test)
 
+  gb_model <- fit_gradient_boosting(split$train, predictors, "employment_growth", seed = 1)
+  gb_pred <- predict_gradient_boosting(gb_model, split$test)
+
   actual <- split$test$employment_growth
   results <- tibble::tibble(
-    model = c("linear_baseline", "bagged_trees", "random_forest"),
-    rmse = c(rmse(actual, linear_pred), rmse(actual, bagged_pred), rmse(actual, rf_pred)),
+    model = c("linear_baseline", "bagged_trees", "random_forest", "gradient_boosting"),
+    rmse = c(
+      rmse(actual, linear_pred), rmse(actual, bagged_pred), rmse(actual, rf_pred), rmse(actual, gb_pred)
+    ),
     r_squared = c(
-      r_squared(actual, linear_pred), r_squared(actual, bagged_pred), r_squared(actual, rf_pred)
+      r_squared(actual, linear_pred), r_squared(actual, bagged_pred),
+      r_squared(actual, rf_pred), r_squared(actual, gb_pred)
     )
   )
   readr::write_csv(results, "data/processed/ml_prediction_results.csv")

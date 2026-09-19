@@ -97,6 +97,39 @@ test_that("fit_random_forest returns an actual randomForest object, not the hand
   expect_s3_class(rf, "randomForest")
 })
 
+test_that("fit_gradient_boosting + predict_gradient_boosting recover a clear nonlinear split", {
+  # Same synthetic step-function setup as the bagging/forest tests above.
+  # Boosting is a different combination strategy (sequential, fit to
+  # residuals) so this also confirms it isn't just silently bagging.
+  set.seed(42)
+  n <- 400
+  train <- tibble::tibble(
+    x = runif(n, -1, 1),
+    noise = rnorm(n, sd = 0.5),
+    y = ifelse(x > 0, 10, -10) + noise
+  )
+  test <- tibble::tibble(x = c(-0.8, -0.5, 0.5, 0.8))
+
+  model <- fit_gradient_boosting(train, predictors = "x", response = "y", n_trees = 200, seed = 1)
+  preds <- predict_gradient_boosting(model, test)
+
+  expect_length(preds, 4)
+  expect_true(all(preds[1:2] < 0))
+  expect_true(all(preds[3:4] > 0))
+})
+
+test_that("predict_gradient_boosting uses fewer trees than the n_trees ceiling when CV says to", {
+  # Deliberately overshoots n_trees relative to the (tiny, noisy)
+  # dataset, so cross-validation should pick something well short of
+  # the ceiling -- catches a regression to "just use all n_trees".
+  set.seed(3)
+  train <- tibble::tibble(x = rnorm(60), y = rnorm(60))  # pure noise, no real signal
+  model <- fit_gradient_boosting(train, predictors = "x", response = "y",
+                                  n_trees = 1000, shrinkage = 0.1, seed = 1)
+  best_iter <- gbm::gbm.perf(model, method = "cv", plot.it = FALSE)
+  expect_true(best_iter < 1000)
+})
+
 test_that("build_ml_panel stacks food_service and retail with an industry column and region attached", {
   quarters <- seq(as.Date("2019-01-01"), as.Date("2022-10-01"), by = "quarter")
   fred_panel <- tibble::tibble(
@@ -119,8 +152,9 @@ test_that("build_ml_panel stacks food_service and retail with an industry column
   panel <- build_ml_panel(fred_panel, treatment_table, exposure_table)
 
   expect_setequal(unique(panel$industry), c("food_service", "retail"))
-  expect_equal(unique(panel$region[panel$state == "California"]), "West")
-  expect_equal(unique(panel$region[panel$state == "Texas"]), "South")
+  # region is a factor (see build_ml_panel), not a character column.
+  expect_equal(as.character(unique(panel$region[panel$state == "California"])), "West")
+  expect_equal(as.character(unique(panel$region[panel$state == "Texas"])), "South")
   # Flat employment in the fixture -> zero growth everywhere, not NA.
   expect_true("employment_growth" %in% names(panel))
   expect_true(all(panel$employment_growth == 0))

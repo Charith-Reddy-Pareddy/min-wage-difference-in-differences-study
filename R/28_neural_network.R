@@ -2,9 +2,9 @@
 # comparison started in R/27 (same caveat applies -- this is a
 # predictive-accuracy comparison, not a causal claim; Model A/C in R/07
 # remain the study's identification strategy). Reuses R/27's shared
-# ml_panel.csv and state-level train/test split so all four methods
-# (linear baseline, bagged trees, random forest, neural net) are
-# compared on the exact same held-out states.
+# ml_panel.csv and state-level train/test split so all five methods
+# (linear baseline, bagged trees, random forest, gradient boosting,
+# neural net) are compared on the exact same held-out states.
 #
 # A single hidden-layer feedforward network (nnet::nnet) rather than a
 # deep architecture: ~1,000 training rows and 5 predictors is nowhere
@@ -92,6 +92,6 @@ if (sys.nframe() == 0) {
   comparison <- build_comparison_table(prior_results, nn_rmse, nn_r_squared)
   readr::write_csv(comparison, "data/processed/ml_comparison_results.csv")
 
-  cat("\n=== Held-out predictive accuracy, all four methods (same split as R/27) ===\n")
+  cat("\n=== Held-out predictive accuracy, all five methods (same split as R/27) ===\n")
   print(comparison, width = Inf)
 }
