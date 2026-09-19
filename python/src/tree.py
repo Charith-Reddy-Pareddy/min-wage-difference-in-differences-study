@@ -1,13 +1,18 @@
-"""A CART-style regression tree and a bootstrap-aggregated ("bagged")
-ensemble of them, built from scratch on top of numpy only.
+"""A CART-style regression tree, plus two bootstrap ensembles built on
+top of it, all from scratch on numpy only (no tree-fitting library is
+usable in this environment -- see python/README.md).
 
-This is the Python-side counterpart to R/27_ml_prediction.R's
-fit_bagged_trees() (there, `rpart` supplies the single-tree fit; here
-there's no tree-fitting library available at all in this environment
--- see python/README.md -- so the split-search and recursion are
-implemented directly). Same ensembling idea in both: bootstrap-resample
-rows and take a random feature subset per tree, then average
-predictions across trees.
+- BaggedTrees: bootstrap-resample rows; if `mtry` is set, each tree also
+  gets one fixed random feature subset for its entire fit. That's the
+  "random subspace" method (Ho 1998), the direct counterpart to R/27's
+  fit_bagged_trees() -- NOT Breiman's random forest, despite the
+  superficial resemblance.
+- RandomForest: the actual algorithm. Every split, in every tree,
+  re-samples which `mtry` features are even candidates for that split --
+  different splits within the same tree can draw on different features.
+  Counterpart to R/27's fit_random_forest() (there, the real
+  `randomForest` package; here, hand-rolled, since no such package is
+  usable in this environment either).
 """
 
 from __future__ import annotations
@@ -67,18 +72,38 @@ def _best_split(X: np.ndarray, y: np.ndarray, feature_indices: list[int], min_sa
     return best
 
 
-def _build(X: np.ndarray, y: np.ndarray, feature_indices: list[int], depth: int, max_depth: int, min_samples_leaf: int) -> _Node:
+def _build(
+    X: np.ndarray,
+    y: np.ndarray,
+    depth: int,
+    max_depth: int,
+    min_samples_leaf: int,
+    feature_indices: list[int] | None = None,
+    mtry: int | None = None,
+    rng: np.random.Generator | None = None,
+) -> _Node:
+    """Recursive CART builder. Pass a fixed `feature_indices` for a plain
+    tree or a per-tree-fixed subset (RegressionTree, BaggedTrees).
+    Pass `mtry` + `rng` instead for a fresh random feature subset drawn
+    at THIS node -- the call to build the two child nodes below draws
+    its own subset again, independently (RandomForest)."""
     if depth >= max_depth or len(y) < 2 * min_samples_leaf:
         return _Node(is_leaf=True, value=float(y.mean()))
 
-    split = _best_split(X, y, feature_indices, min_samples_leaf)
+    if mtry is not None:
+        n_features = X.shape[1]
+        candidate_features = sorted(rng.choice(n_features, size=min(mtry, n_features), replace=False).tolist())
+    else:
+        candidate_features = feature_indices
+
+    split = _best_split(X, y, candidate_features, min_samples_leaf)
     if split is None:
         return _Node(is_leaf=True, value=float(y.mean()))
 
     feat, threshold = split
     left_mask = X[:, feat] <= threshold
-    left = _build(X[left_mask], y[left_mask], feature_indices, depth + 1, max_depth, min_samples_leaf)
-    right = _build(X[~left_mask], y[~left_mask], feature_indices, depth + 1, max_depth, min_samples_leaf)
+    left = _build(X[left_mask], y[left_mask], depth + 1, max_depth, min_samples_leaf, feature_indices, mtry, rng)
+    right = _build(X[~left_mask], y[~left_mask], depth + 1, max_depth, min_samples_leaf, feature_indices, mtry, rng)
     return _Node(is_leaf=False, feature_index=feat, threshold=threshold, left=left, right=right)
 
 
@@ -99,7 +124,10 @@ class RegressionTree:
         X = np.asarray(X, dtype=float)
         y = np.asarray(y, dtype=float)
         feature_indices = self.feature_indices if self.feature_indices is not None else list(range(X.shape[1]))
-        self.root = _build(X, y, feature_indices, depth=0, max_depth=self.max_depth, min_samples_leaf=self.min_samples_leaf)
+        self.root = _build(
+            X, y, depth=0, max_depth=self.max_depth, min_samples_leaf=self.min_samples_leaf,
+            feature_indices=feature_indices,
+        )
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -108,10 +136,11 @@ class RegressionTree:
 
 
 class BaggedTrees:
-    """Bootstrap-aggregated regression trees, each grown on a bootstrap
-    resample of the rows and a random subset (`mtry`) of the features --
-    plain bagging when mtry is None (all features), a random forest when
-    mtry < number of features."""
+    """Bootstrap-aggregated regression trees. Plain bagging when mtry is
+    None (every tree considers all features). When mtry is set, each
+    tree gets ONE fixed random feature subset for its entire fit -- the
+    random subspace method (Ho 1998), not Breiman's random forest (see
+    RandomForest below for that distinction and the real algorithm)."""
 
     def __init__(self, n_trees: int = 25, max_depth: int = 5, min_samples_leaf: int = 5, mtry: int | None = None, seed: int = 1):
         self.n_trees = n_trees
@@ -142,4 +171,45 @@ class BaggedTrees:
     def predict(self, X: np.ndarray) -> np.ndarray:
         X = np.asarray(X, dtype=float)
         predictions = np.column_stack([tree.predict(X) for tree in self.trees])
+        return predictions.mean(axis=1)
+
+
+class RandomForest:
+    """Breiman's random forest: bagged trees where every split, in every
+    tree, re-samples which `mtry` features are candidates for that split
+    (see module docstring for how this differs from BaggedTrees'
+    mtry). `mtry` defaults to max(1, n_features // 3), the common
+    regression-forest rule of thumb (scikit-learn and R's randomForest
+    both default to this for regression)."""
+
+    def __init__(self, n_trees: int = 25, max_depth: int = 5, min_samples_leaf: int = 5, mtry: int | None = None, seed: int = 1):
+        self.n_trees = n_trees
+        self.max_depth = max_depth
+        self.min_samples_leaf = min_samples_leaf
+        self.mtry = mtry
+        self.seed = seed
+        self.roots: list[_Node] = []
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "RandomForest":
+        X = np.asarray(X, dtype=float)
+        y = np.asarray(y, dtype=float)
+        n, n_features = X.shape
+        mtry = self.mtry if self.mtry is not None else max(1, n_features // 3)
+        rng = np.random.default_rng(self.seed)
+
+        self.roots = []
+        for _ in range(self.n_trees):
+            boot_idx = rng.integers(0, n, size=n)
+            root = _build(
+                X[boot_idx], y[boot_idx], depth=0, max_depth=self.max_depth,
+                min_samples_leaf=self.min_samples_leaf, mtry=mtry, rng=rng,
+            )
+            self.roots.append(root)
+        return self
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        X = np.asarray(X, dtype=float)
+        predictions = np.column_stack(
+            [[_predict_one(root, row) for row in X] for root in self.roots]
+        )
         return predictions.mean(axis=1)
