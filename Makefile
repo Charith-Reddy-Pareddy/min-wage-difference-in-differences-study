@@ -27,7 +27,9 @@ PIPELINE := R/01_treatment_classification.R \
             R/23_specification_curve.R \
             R/24_beta4_robustness_summary.R \
             R/25_exposure_covid_correlation.R \
-            R/26_covid_controlled_placebo.R
+            R/26_covid_controlled_placebo.R \
+            R/27_ml_prediction.R \
+            R/28_neural_network.R
 
 all: check-sync pipeline test figures report
 
