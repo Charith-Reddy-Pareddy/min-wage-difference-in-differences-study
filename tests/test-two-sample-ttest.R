@@ -10,6 +10,12 @@ test_that("compute_pre_period_trend is log(2020Q4) - log(2019Q1), per state", {
   result <- compute_pre_period_trend(fred_panel, "employment_food_service")
   expect_equal(result$pre_trend[result$state == "California"], log(110) - log(100), tolerance = 1e-9)
   expect_equal(result$pre_trend[result$state == "Texas"], log(95) - log(100), tolerance = 1e-9)
+  # Explicit sign check, on top of the exact-value check above: a
+  # swapped-operand bug (start - end instead of end - start) would flip
+  # both signs while sometimes still tripping the tolerance check for
+  # only one of the two states, depending on the magnitudes involved.
+  expect_true(result$pre_trend[result$state == "California"] > 0) # grew: 100 -> 110
+  expect_true(result$pre_trend[result$state == "Texas"] < 0)      # shrank: 100 -> 95
 })
 
 test_that("compute_pre_period_trend returns NA rather than erroring on a missing quarter", {

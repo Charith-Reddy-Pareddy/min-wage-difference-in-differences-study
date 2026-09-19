@@ -85,3 +85,24 @@ test_that("build_exposure_table flags cells under the n=30 threshold", {
   expect_true(result$below_cell_size_threshold)
   expect_equal(result$n_obs, 10)
 })
+
+make_cps_org_of_size <- function(n) {
+  tibble::tibble(
+    state = rep("Alaska", n),
+    industry = rep("food_service", n),
+    wage = rep(10.19, n),
+    earnwt = rep(1000, n)
+  )
+}
+
+test_that("build_exposure_table's n=30 threshold is exact, not just 'somewhere below 30'", {
+  # Pins the specific cutoff value (30) rather than a point safely below
+  # it, so the threshold itself can't silently drift to a smaller number.
+  treatment_table <- tibble::tibble(state = "Alaska", wage_2020 = 10.19)
+
+  below <- build_exposure_table(make_cps_org_of_size(29), treatment_table)
+  expect_true(below$below_cell_size_threshold)
+
+  at_threshold <- build_exposure_table(make_cps_org_of_size(30), treatment_table)
+  expect_false(at_threshold$below_cell_size_threshold)
+})

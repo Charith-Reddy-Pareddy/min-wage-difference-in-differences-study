@@ -99,6 +99,18 @@ test_that("build_panel sets treated_post correctly", {
   expect_true(all(tx_post$treated_post == 0)) # control state, never treated
 })
 
+test_that("build_panel treats the treatment_effective quarter itself as post, not pre", {
+  # Isolates the boundary quarter specifically (>= vs >) rather than
+  # relying on the surrounding pre/post ranges to catch an off-by-one.
+  inputs <- make_synthetic_panel_inputs()
+  panel <- build_panel(inputs$fred_panel, inputs$treatment_table, inputs$exposure_table,
+                        "retail", "employment_retail")
+
+  ca_effective_quarter <- panel %>% dplyr::filter(state == "California", quarter == as.Date("2021-01-01"))
+  expect_equal(nrow(ca_effective_quarter), 1)
+  expect_equal(ca_effective_quarter$treated_post, 1)
+})
+
 test_that("build_panel attaches the right industry's exposure share", {
   inputs <- make_synthetic_panel_inputs()
   panel_food <- build_panel(inputs$fred_panel, inputs$treatment_table, inputs$exposure_table,
