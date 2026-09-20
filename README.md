@@ -114,15 +114,20 @@ power-analysis curves, the beta4 event study and forest plot — are in
 
 ## Final Report
 
-**[Read the rendered report](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/tag/v1.0-report)**
+**[Read the rendered report (HTML)](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/tag/v1.0-report)**
+or **[download the PDF](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/download/v1.0-report/final_report.pdf)**
 — no cloning required. Or render
 [reports/final_report.Rmd](reports/final_report.Rmd) directly:
 
 ```
-Rscript -e 'rmarkdown::render("reports/final_report.Rmd")'
+Rscript -e 'rmarkdown::render("reports/final_report.Rmd")'   # HTML
+make report-pdf                                               # + PDF, via headless Chrome
 ```
 
-(needs [pandoc](https://pandoc.org) — `brew install pandoc` on macOS).
+(needs [pandoc](https://pandoc.org) — `brew install pandoc` on macOS — for
+the HTML, and Chrome/Chromium installed locally for the PDF; see
+`scripts/render_report_pdf.R` for why it's a headless-Chrome print
+rather than a LaTeX pipeline).
 
 ## Wage Pass-Through
 
@@ -248,7 +253,8 @@ proposing a mechanism isn't the same as confirming one.
 Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
 make all                       # R/01-R/29, tests, figures, report end to end
 make test                      # just the R test suite
-make report                    # just render reports/final_report.Rmd
+make report                    # just render reports/final_report.Rmd (HTML)
+make report-pdf                # + reports/final_report.pdf (headless Chrome)
 
 make python-setup               # one-time: creates python/.venv, installs requirements.txt
 make python-test                # Python ML/NN test suite (python/)
@@ -257,13 +263,15 @@ make python-test                # Python ML/NN test suite (python/)
 `make all` needs `IPUMS_API_KEY` in `.env` (see `.env.example`) for
 `R/03`, and takes several minutes (CPS-ORG pull, wild bootstrap,
 permutation test, power simulation are the slow steps). Rendering the
-report needs [pandoc](https://pandoc.org), separate from `renv.lock`.
+HTML report needs [pandoc](https://pandoc.org), separate from
+`renv.lock`; `make report-pdf` additionally needs Chrome/Chromium
+installed locally (no LaTeX distribution required).
 `make python-test` needs `make python-setup` to have been run once
 first; see [python/README.md](python/README.md) for why it's a
 separate virtual environment rather than a renv-tracked dependency.
 
 Repo layout: `R/` (29 numbered scripts, run in order), `tests/` (one
-file per script), `reports/` (`final_report.Rmd`, rendered HTML,
+file per script), `reports/` (`final_report.Rmd`, rendered HTML and PDF,
 figures), `data/processed/` (all results, gitignored, reproducible),
 `python/` (independent ML/NN replication — see
 [python/README.md](python/README.md)). CI (`.github/workflows/ci.yml`)

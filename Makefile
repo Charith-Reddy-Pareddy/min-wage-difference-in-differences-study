@@ -1,4 +1,4 @@
-.PHONY: all pipeline check-sync test report figures clean python-setup python-test
+.PHONY: all pipeline check-sync test report report-pdf figures clean python-setup python-test
 
 # Full pipeline, in order. Needs IPUMS_API_KEY in .env for R/03; see
 # .env.example and README.md.
@@ -55,8 +55,13 @@ figures:
 report:
 	Rscript -e 'rmarkdown::render("reports/final_report.Rmd")'
 
+# PDF export of the rendered HTML report -- see scripts/render_report_pdf.R.
+# Needs Chrome/Chromium installed locally; pagedown auto-detects it.
+report-pdf: report
+	Rscript scripts/render_report_pdf.R
+
 clean:
-	rm -f data/processed/*.csv reports/final_report.html
+	rm -f data/processed/*.csv reports/final_report.html reports/final_report.pdf
 
 # Python ML/NN subproject (python/) -- separate from the R pipeline
 # above; see python/README.md for why it's a separate venv rather than

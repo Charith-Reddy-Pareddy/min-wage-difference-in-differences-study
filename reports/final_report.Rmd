@@ -10,6 +10,17 @@ output:
     theme: flatly
 ---
 
+<style>
+/* The code-folding "Code"/"Show" buttons toggle visibility via JS, which
+   doesn't exist in a static PDF export (reports/final_report.pdf, via
+   pagedown::chrome_print() -- see Makefile's report-pdf target). Chrome
+   applies @media print styles when printing to PDF, so this hides the
+   now-nonfunctional buttons there without touching the interactive HTML. */
+@media print {
+  .btn, .btn-group { display: none !important; }
+}
+</style>
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(dplyr)
@@ -20,7 +31,7 @@ library(knitr)
 # knit -- the CPS-ORG pull, the wild cluster bootstrap, and the 10,000-rep
 # permutation test alone take several minutes combined. Everything here is
 # reproducible by running R/01_treatment_classification.R through
-# R/26_covid_controlled_placebo.R in numeric order (see README.md), which
+# R/29_wage_passthrough.R in numeric order (see README.md), which
 # is what actually produced every number and figure this report displays.
 proc <- function(f) readr::read_csv(file.path("..", "data", "processed", f), show_col_types = FALSE)
 fig <- function(f) file.path("figures", f)
