@@ -156,4 +156,27 @@ if (sys.nframe() == 0) {
   readr::write_csv(results_table, "data/processed/wage_passthrough_results.csv")
   cat("\n=== Wage pass-through: does earnings in the proxy industry rise with treatment? ===\n")
   print(results_table, width = Inf)
+
+  library(ggplot2)
+  plot_data <- results_table %>%
+    mutate(
+      dollar_se = se * baseline_wage, # delta-method approx: d/dx[exp(x)-1] ~= 1 for small x
+      ci_low = implied_dollar_increase - 1.96 * dollar_se,
+      ci_high = implied_dollar_increase + 1.96 * dollar_se
+    )
+  p <- ggplot(plot_data, aes(x = proxy_industry)) +
+    geom_col(aes(y = mandated_dollar_increase), fill = "grey80", width = 0.5) +
+    geom_pointrange(aes(y = implied_dollar_increase, ymin = ci_low, ymax = ci_high),
+                     color = "#9a3324", linewidth = 0.8, size = 0.7) +
+    labs(
+      title = "Wage pass-through: mandated vs. estimated dollar increase",
+      subtitle = "Grey bar = avg. mandated statutory increase; red point = estimated proxy-industry wage effect (95% CI)",
+      x = NULL, y = "Dollars per hour"
+    ) +
+    theme_minimal(base_size = 11) +
+    theme(axis.text.x = element_text(size = 9))
+
+  dir.create("reports/figures", recursive = TRUE, showWarnings = FALSE)
+  ggsave("reports/figures/wage_passthrough.png", p, width = 7.5, height = 5, dpi = 150)
+  cat("Saved reports/figures/wage_passthrough.png\n")
 }
