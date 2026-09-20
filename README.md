@@ -411,6 +411,27 @@ has a matching test file (`scripts/check_pipeline_sync.R` — also
 runnable locally as `make check-sync`), and runs both the R and Python
 test suites, on every push.
 
+## Roadmap
+
+Not yet done, in rough priority order:
+
+- **A heterogeneity-robust DiD comparison.** Model A has a single common
+  treatment date, so the staggered-timing critique (Goodman-Bacon 2021;
+  de Chaisemartin and D'Haultfœuille 2020) doesn't mechanically bind it —
+  but Model C's continuous exposure treatment is a more natural fit for
+  the newer continuous/dose-treatment DiD literature than for
+  Callaway-Sant'Anna (2021) or Sun-Abraham (2021) specifically, which
+  target staggered *binary* adoption. Planned: fit whichever estimator
+  actually matches Model C's design, report it alongside TWFE and the
+  wild-cluster-bootstrap inference already in place, and let
+  disagreement (if any) be informative rather than resolved by picking
+  a side.
+- **A reproducibility summary table** (R version, Python version, exact
+  data source vintages, seed policy, test counts, expected runtime per
+  `make` target) — most of this is scattered across the README already;
+  consolidating it into one table is the remaining work.
+- **A Zenodo-archived release** once the above are in, for a citable DOI.
+
 ## Status
 
 Complete. See [TIMELINE.md](TIMELINE.md) for the day-by-day build log,
