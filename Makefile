@@ -31,7 +31,8 @@ PIPELINE := R/01_treatment_classification.R \
             R/27_ml_prediction.R \
             R/28_neural_network.R \
             R/29_wage_passthrough.R \
-            R/30_treatment_predictability.R
+            R/30_treatment_predictability.R \
+            R/31_state_clustering.R
 
 all: check-sync pipeline test figures report
 
