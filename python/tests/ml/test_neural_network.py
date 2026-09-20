@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.neural_net import Standardizer, train_neural_network
+from minwage.ml.neural_network import Standardizer, train_neural_network
 
 
 def test_standardizer_round_trips_and_normalizes():

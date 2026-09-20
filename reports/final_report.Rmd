@@ -1097,7 +1097,7 @@ boosting outperforms the other tree ensembles and the linear baseline.
 Full details, and why `BaggedTrees`/`RandomForest`/`GradientBoostedTrees`
 are three genuinely different implementations rather than the same
 ensemble under different names, are in `python/README.md` and
-`python/src/tree.py`.
+`python/src/minwage/ml/random_forest.py`.
 
 ### Appendix B: Wage Pass-Through
 

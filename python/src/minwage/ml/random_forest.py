@@ -1,6 +1,6 @@
-"""A CART-style regression tree, plus three ensembles built on top of
-it, all from scratch on numpy only (no tree-fitting library is usable
-in this environment -- see python/README.md).
+"""A CART-style regression tree, plus the two bagging-family ensembles
+built on top of it, all from scratch on numpy only (no tree-fitting
+library is usable in this environment -- see python/README.md).
 
 - BaggedTrees: bootstrap-resample rows; if `mtry` is set, each tree also
   gets one fixed random feature subset for its entire fit. That's the
@@ -13,12 +13,10 @@ in this environment -- see python/README.md).
   Counterpart to R/27's fit_random_forest() (there, the real
   `randomForest` package; here, hand-rolled, since no such package is
   usable in this environment either).
-- GradientBoostedTrees: a different combination strategy entirely --
-  bagging and random forests fit trees INDEPENDENTLY in parallel on
-  resampled data and average them; boosting fits trees SEQUENTIALLY,
-  each one to the residual errors the ensemble so far still has. No
-  bootstrap resampling here at all. Counterpart to R/27's
-  fit_gradient_boosting() (there, the `gbm` package).
+
+Gradient boosting (a different combination strategy entirely -- see
+`minwage.ml.gradient_boosting`) reuses RegressionTree from here as its
+base learner rather than duplicating the CART implementation.
 """
 
 from __future__ import annotations
@@ -44,7 +42,9 @@ def _sse(y: np.ndarray) -> float:
     return float(np.sum((y - y.mean()) ** 2))
 
 
-def _best_split(X: np.ndarray, y: np.ndarray, feature_indices: list[int], min_samples_leaf: int):
+def _best_split(
+    X: np.ndarray, y: np.ndarray, feature_indices: list[int], min_samples_leaf: int
+) -> tuple[int, float] | None:
     """Greedy search over the given features and every midpoint between
     consecutive sorted values, minimizing the total SSE of the two
     resulting halves. Returns (feature_index, threshold) or None if no
@@ -120,7 +120,15 @@ def _predict_one(node: _Node, row: np.ndarray) -> float:
 
 
 class RegressionTree:
-    def __init__(self, max_depth: int = 5, min_samples_leaf: int = 5, feature_indices: list[int] | None = None):
+    """A single CART regression tree, greedily split on SSE reduction.
+    `feature_indices`, if given, restricts every split in this tree to
+    that fixed subset of columns -- used by BaggedTrees' random-subspace
+    mode and by gradient boosting's per-estimator base learner; leave it
+    None for an ordinary tree considering every feature."""
+
+    def __init__(
+        self, max_depth: int = 5, min_samples_leaf: int = 5, feature_indices: list[int] | None = None
+    ) -> None:
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.feature_indices = feature_indices
@@ -148,7 +156,14 @@ class BaggedTrees:
     random subspace method (Ho 1998), not Breiman's random forest (see
     RandomForest below for that distinction and the real algorithm)."""
 
-    def __init__(self, n_trees: int = 25, max_depth: int = 5, min_samples_leaf: int = 5, mtry: int | None = None, seed: int = 1):
+    def __init__(
+        self,
+        n_trees: int = 25,
+        max_depth: int = 5,
+        min_samples_leaf: int = 5,
+        mtry: int | None = None,
+        seed: int = 1,
+    ) -> None:
         self.n_trees = n_trees
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
@@ -188,7 +203,14 @@ class RandomForest:
     regression-forest rule of thumb (scikit-learn and R's randomForest
     both default to this for regression)."""
 
-    def __init__(self, n_trees: int = 25, max_depth: int = 5, min_samples_leaf: int = 5, mtry: int | None = None, seed: int = 1):
+    def __init__(
+        self,
+        n_trees: int = 25,
+        max_depth: int = 5,
+        min_samples_leaf: int = 5,
+        mtry: int | None = None,
+        seed: int = 1,
+    ) -> None:
         self.n_trees = n_trees
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
@@ -219,55 +241,3 @@ class RandomForest:
             [[_predict_one(root, row) for row in X] for root in self.roots]
         )
         return predictions.mean(axis=1)
-
-
-class GradientBoostedTrees:
-    """Gradient boosting for squared-error regression: start from the
-    training mean, then repeatedly fit a shallow RegressionTree to the
-    CURRENT residuals (y minus the ensemble's predictions so far) and add
-    `learning_rate` times that tree's predictions to the running total.
-    For squared-error loss, the residual IS the negative gradient, which
-    is what makes this "gradient" boosting rather than just "fit trees to
-    leftover error" -- for a different loss function the target at each
-    step would be that loss's own negative gradient instead.
-
-    Deliberately shallow trees (`max_depth` small) and a small
-    `learning_rate`: many weak learners added slowly, rather than a few
-    strong ones, is what keeps gradient boosting from overfitting almost
-    immediately."""
-
-    def __init__(
-        self,
-        n_estimators: int = 100,
-        learning_rate: float = 0.1,
-        max_depth: int = 2,
-        min_samples_leaf: int = 5,
-    ):
-        self.n_estimators = n_estimators
-        self.learning_rate = learning_rate
-        self.max_depth = max_depth
-        self.min_samples_leaf = min_samples_leaf
-        self.init_value: float = 0.0
-        self.trees: list[RegressionTree] = []
-
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "GradientBoostedTrees":
-        X = np.asarray(X, dtype=float)
-        y = np.asarray(y, dtype=float)
-        self.init_value = float(y.mean())
-        predictions = np.full(len(y), self.init_value)
-
-        self.trees = []
-        for _ in range(self.n_estimators):
-            residuals = y - predictions
-            tree = RegressionTree(max_depth=self.max_depth, min_samples_leaf=self.min_samples_leaf)
-            tree.fit(X, residuals)
-            predictions = predictions + self.learning_rate * tree.predict(X)
-            self.trees.append(tree)
-        return self
-
-    def predict(self, X: np.ndarray) -> np.ndarray:
-        X = np.asarray(X, dtype=float)
-        predictions = np.full(X.shape[0], self.init_value)
-        for tree in self.trees:
-            predictions = predictions + self.learning_rate * tree.predict(X)
-        return predictions

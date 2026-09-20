@@ -6,17 +6,23 @@ only reads that CSV and one-hot encodes region, rather than re-deriving
 panel-construction logic in a second language. Two implementations of
 "how to build the panel" would drift out of sync; one implementation
 (R) with a shared export, read here, doesn't.
+
+Note on package layout: there is no `fred.py`/`qcew.py`/`minimum_wage.py`
+here for raw data ingestion, even though a `data/` subpackage might
+suggest there should be -- all raw data acquisition (FRED, QCEW,
+CPS-ORG, DOL) happens in R (R/02-R/04), which remains this project's
+single source of truth for how the panel is built. Adding empty or
+duplicate ingestion modules here would just be scaffolding with nothing
+in it.
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 
 import pandas as pd
 
-DEFAULT_PANEL_PATH = Path(__file__).resolve().parents[2] / "data" / "processed" / "ml_panel.csv"
-
-FEATURE_COLUMNS = ["treated_post", "gdp_growth", "pop_growth", "exposure"]
-TARGET_COLUMN = "employment_growth"
-GROUP_COLUMN = "state"
+from minwage.config import DEFAULT_PANEL_PATH, FEATURE_COLUMNS
 
 
 def load_ml_panel(path: Path = DEFAULT_PANEL_PATH) -> pd.DataFrame:

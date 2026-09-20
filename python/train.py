@@ -8,21 +8,23 @@ files' headers for why.
 
 Run from the python/ directory, after the R pipeline has produced
 data/processed/ml_panel.csv (`make pipeline` or at least
-`Rscript ../R/27_ml_prediction.R`):
+`Rscript ../R/27_ml_prediction.R`), with the package installed
+(`pip install -e ".[dev]"` -- see python/README.md):
 
-    .venv/bin/python train.py
+    python train.py
 """
 
 from pathlib import Path
 
 import pandas as pd
 
-from src.data import feature_matrix, load_ml_panel, one_hot_region
-from src.linear_model import LinearRegression
-from src.metrics import r_squared, rmse
-from src.neural_net import train_neural_network
-from src.split import group_train_test_split
-from src.tree import BaggedTrees, GradientBoostedTrees, RandomForest
+from minwage.data.loaders import feature_matrix, load_ml_panel, one_hot_region
+from minwage.ml.baselines import LinearRegression
+from minwage.ml.evaluation import r_squared, rmse
+from minwage.ml.gradient_boosting import GradientBoostedTrees
+from minwage.ml.neural_network import train_neural_network
+from minwage.ml.random_forest import BaggedTrees, RandomForest
+from minwage.ml.splitting import group_train_test_split
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 

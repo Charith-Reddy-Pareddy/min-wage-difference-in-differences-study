@@ -18,3 +18,5 @@ python/.venv/
 python/results/
 python/**/__pycache__/
 python/.pytest_cache/
+python/src/*.egg-info/
+python/build/

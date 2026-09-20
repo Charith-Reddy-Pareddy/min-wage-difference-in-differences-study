@@ -15,7 +15,7 @@ from torch import nn
 
 
 class FeedForwardNet(nn.Module):
-    def __init__(self, input_dim: int, hidden_dim: int = 8):
+    def __init__(self, input_dim: int, hidden_dim: int = 8) -> None:
         super().__init__()
         self.hidden = nn.Linear(input_dim, hidden_dim)
         self.activation = nn.ReLU()
@@ -31,8 +31,8 @@ class Standardizer:
     consistently from train-only statistics."""
 
     def __init__(self) -> None:
-        self.mean_ = None
-        self.std_ = None
+        self.mean_: np.ndarray | None = None
+        self.std_: np.ndarray | None = None
 
     def fit(self, x: np.ndarray) -> "Standardizer":
         self.mean_ = x.mean(axis=0)

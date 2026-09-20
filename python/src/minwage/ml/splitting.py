@@ -6,6 +6,8 @@ within-state structure the model could exploit. Every row for a given
 group (state) must land entirely in train or entirely in test.
 """
 
+from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 

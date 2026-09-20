@@ -1,6 +1,8 @@
 """Shared evaluation metrics, kept identical to R/27's rmse()/r_squared()
 so the two ecosystems' results are directly comparable."""
 
+from __future__ import annotations
+
 import numpy as np
 
 

@@ -3,6 +3,8 @@ or sklearn) -- this environment's scipy wheel doesn't load on this
 machine (see python/README.md), and a closed-form least-squares fit is
 a handful of lines anyway."""
 
+from __future__ import annotations
+
 import numpy as np
 
 

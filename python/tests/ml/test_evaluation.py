@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.metrics import r_squared, rmse
+from minwage.ml.evaluation import r_squared, rmse
 
 
 def test_rmse_matches_hand_computed_example():

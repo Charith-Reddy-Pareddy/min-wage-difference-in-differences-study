@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.linear_model import LinearRegression
+from minwage.ml.baselines import LinearRegression
 
 
 def test_recovers_an_exact_linear_relationship_with_no_noise():

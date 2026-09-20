@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minwage"
+version = "0.1.0"
+description = "ML/NN predictive-comparison extension for the minimum-wage DiD study (independent replication of R/27-R/28)"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy==2.2.6",
+    "pandas==2.3.3",
+    "torch==2.14.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.1.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

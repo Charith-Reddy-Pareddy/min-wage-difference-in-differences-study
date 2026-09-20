@@ -385,7 +385,7 @@ make test                      # just the R test suite
 make report                    # just render reports/final_report.Rmd (HTML)
 make report-pdf                # + reports/final_report.pdf (headless Chrome)
 
-make python-setup               # one-time: creates python/.venv, installs requirements.txt
+make python-setup               # one-time: creates python/.venv, installs the minwage package
 make python-test                # Python ML/NN test suite (python/)
 ```
 

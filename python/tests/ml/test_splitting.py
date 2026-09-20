@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.split import group_train_test_split
+from minwage.ml.splitting import group_train_test_split
 
 
 def make_panel(n_states: int = 10, rows_per_state: int = 4) -> pd.DataFrame:
