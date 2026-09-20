@@ -53,6 +53,7 @@ test:
 
 figures:
 	Rscript scripts/generate_readme_figures.R
+	Rscript scripts/generate_identification_dag.R
 
 report:
 	Rscript -e 'rmarkdown::render("reports/final_report.Rmd")'

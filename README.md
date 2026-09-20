@@ -187,6 +187,13 @@ power-analysis curves, the beta4 event study and forest plot — are in
 - Results are **DiD estimates under this specification**, not definitive
   causal effects — see the full report's Limitations section for detail.
 
+**Identification structure.** Not a generic textbook DAG — the red path
+below is this study's own confounding structure, established
+empirically (exposure predicts treatment status: `R/30`; exposure
+correlates with COVID severity: `R/25`-`R/26`), not assumed:
+
+<img src="reports/figures/identification_dag.png" width="85%">
+
 ## Final Report
 
 **[Read the rendered report (HTML)](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/tag/v1.0-report)**

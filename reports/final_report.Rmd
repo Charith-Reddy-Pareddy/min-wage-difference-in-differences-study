@@ -186,6 +186,17 @@ stated in plain language:
   specification that directly tests whether differential recovery
   explains the baseline result.
 
+The diagram below is not a generic textbook DAG -- the red backdoor
+path is this project's own confounding structure, established
+empirically rather than assumed (exposure predicting treatment status:
+Appendix C.2; the exposure-COVID correlation: Section 8.1). It
+summarizes where this report's identification concerns actually come
+from, ahead of the sections that establish each piece directly.
+
+```{r identification-dag, out.width="90%"}
+include_graphics(fig("identification_dag.png"))
+```
+
 ```{r pretrend-test-early}
 pretrend <- proc("pretrend_joint_test.csv")
 ```

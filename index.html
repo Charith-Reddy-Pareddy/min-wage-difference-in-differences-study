@@ -748,6 +748,14 @@
       <li><strong>Wage pass-through uses broader supersector proxies</strong>, not the exact food-service/retail industries &mdash; BLS/FRED don't publish earnings at that resolution by state.</li>
       <li>Results are <strong>DiD estimates under this specification</strong>, not definitive causal effects.</li>
     </ul>
+    <p style="margin-top:18px; font-size:0.92rem;">
+      <strong>Identification structure:</strong> not a generic textbook
+      DAG &mdash; the red path below is this study's own confounding
+      structure, established empirically (exposure predicts treatment
+      status: <code>R/30</code>; exposure correlates with COVID
+      severity: <code>R/25</code>-<code>R/26</code>), not assumed.
+    </p>
+    <img src="reports/figures/identification_dag.png" alt="Identification diagram showing the confounding backdoor path from exposure through treatment and COVID severity to employment" loading="lazy" style="max-width:100%; border-radius:10px; border:1px solid var(--line);">
   </section>
 
   <section id="data-sources" class="reveal">
