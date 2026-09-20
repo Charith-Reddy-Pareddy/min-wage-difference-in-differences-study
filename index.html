@@ -417,6 +417,7 @@
       <a href="#metrics">Metrics</a>
       <a href="#figures">Figures</a>
       <a href="#wage-passthrough">Wage Pass-Through</a>
+      <a href="#predictability">Predictability</a>
       <a href="#ml-extension">ML / NN</a>
       <a href="#reproduce">Reproduce</a>
     </div>
@@ -482,12 +483,20 @@
         <div class="value">13% (food service proxy, p=0.65) / 63% (retail proxy, p=0.22) of the mandated increase &mdash; neither significant</div>
       </div>
       <div class="metric-card">
+        <div class="label">Treatment predictability</div>
+        <div class="value">Logistic regression on pre-period growth + exposure: 87% accuracy, AUC 0.97 &mdash; highly predictable</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">State clustering</div>
+        <div class="value">k-means (k=3): 2 of 3 clusters are essentially pure treated/control (&chi;&sup2; p&lt;0.0001)</div>
+      </div>
+      <div class="metric-card">
         <div class="label">Inference</div>
         <div class="value">State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis</div>
       </div>
       <div class="metric-card">
         <div class="label">Engineering</div>
-        <div class="value">29 R scripts + a Python ML subproject, 150 R test blocks (all passing), CI on every push</div>
+        <div class="value">31 R scripts + a Python ML subproject, 163 R test blocks (all passing), CI on every push</div>
       </div>
     </div>
   </section>
@@ -508,6 +517,8 @@
         <tr><td>Multiple-testing correction</td><td>None of the 4 confirmatory tests survive Holm</td><td>Consistent with "not robust," now formal</td></tr>
         <tr><td>Leave-one-state-out</td><td>Estimate stable across all 20 drops</td><td>No single state drives Model A</td></tr>
         <tr><td>Wage pass-through</td><td>13%/63% of the mandated increase, neither significant</td><td>Consistent with underpowered, not "no pass-through"</td></tr>
+        <tr><td>Is treatment predictable from pre-period data?</td><td>Yes &mdash; 87% accuracy, AUC 0.97</td><td>Another angle on non-random assignment</td></tr>
+        <tr><td>Do states cluster by treatment status?</td><td>Yes &mdash; 2/3 k-means clusters are nearly pure</td><td>Convergent with the predictability result</td></tr>
       </tbody>
     </table>
   </section>
@@ -610,6 +621,52 @@
     </p>
   </section>
 
+  <section id="predictability" class="reveal">
+    <h2>Treatment Assignment: Predictability &amp; Clustering</h2>
+    <p>
+      Two more angles, chosen to cover STAT 240/340-style techniques not
+      used elsewhere in this project (chi-square, logistic regression,
+      k-means, PCA) &mdash; and not just for coursework coverage: both
+      independently reinforce the confounding story already found above,
+      from angles that don't depend on it.
+    </p>
+
+    <table class="results">
+      <thead>
+        <tr><th>Check</th><th>Result</th><th>Method</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Treatment status vs. Census region</td><td>Not independent (&chi;&sup2;=8.0, p=0.046)</td><td>Chi-square test</td></tr>
+        <tr><td>Treatment status from pre-period growth + exposure</td><td>87% accuracy, AUC 0.97</td><td>Logistic regression, n=45</td></tr>
+        <tr><td>States cluster by pre-period profile</td><td>2/3 clusters nearly pure treated/control (&chi;&sup2;=28.0, p&lt;0.0001)</td><td>Hand-rolled k-means + PCA</td></tr>
+      </tbody>
+    </table>
+
+    <div class="fig-grid" style="margin-top:18px;">
+      <figure>
+        <img src="reports/figures/treatment_predictability.png" alt="Predicted probability of treatment by state, colored by actual treatment status" loading="lazy">
+        <figcaption>Predicted P(treated) by state &mdash; logistic regression, 87% accuracy</figcaption>
+      </figure>
+      <figure>
+        <img src="reports/figures/state_clustering_pca.png" alt="PCA scatter plot of k-means clusters colored by cluster, shaped by treatment status" loading="lazy">
+        <figcaption>k-means clusters (color) vs. treatment status (shape) on the first 2 principal components</figcaption>
+      </figure>
+    </div>
+
+    <div class="callout" style="margin-top:18px;">
+      That a state's minimum-wage <strong>exposure</strong> level so
+      strongly predicts whether it raised its minimum wage &mdash; and
+      that unsupervised clustering on the same features separates
+      treated from control almost perfectly &mdash; is exactly the kind
+      of non-random-assignment signal the &beta;&#8324; robustness
+      battery above was built to catch, confirmed here by two completely
+      independent methods. Exploratory, not a fourth confirmatory test:
+      no cluster-based hypothesis was pre-registered. See
+      <code>R/30_treatment_predictability.R</code> and
+      <code>R/31_state_clustering.R</code>.
+    </div>
+  </section>
+
   <section id="ml-extension" class="reveal">
     <h2>Machine Learning &amp; Neural Network Extension</h2>
     <p>
@@ -704,7 +761,7 @@
   <section id="reproduce" class="reveal">
     <h2>How to Reproduce</h2>
     <pre>Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
-make all                       # R/01-R/29, tests, figures, report end to end
+make all                       # R/01-R/31, tests, figures, report end to end
 make test                      # just the R test suite
 make report-pdf                # PDF export (headless Chrome, no LaTeX needed)
 

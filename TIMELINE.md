@@ -229,3 +229,35 @@ point estimates implying 13% and 63% pass-through of the mandated
 increase respectively — read as "underpowered to detect pass-through at
 this resolution," consistent with this project's recurring theme, not
 as evidence pass-through is genuinely that low.
+
+**Post-build addition: treatment predictability (`R/30`):** picked
+specifically to cover the two STAT 240/340 techniques this project
+hadn't used yet -- a chi-square test of independence and logistic
+regression as a classifier -- but the result turned out to matter well
+beyond coursework coverage. The chi-square test (treatment status x
+Census region) rejects independence (p=0.046). The logistic regression
+(treated ~ pre-period GDP growth + population growth + food-service
+exposure, n=45) classifies treated vs. control states at 87% accuracy
+and AUC=0.97, with exposure the single strongest predictor (p=0.013).
+That the primary scientific-hypothesis variable (exposure) also
+strongly predicts treatment assignment itself is an independent
+confirmation of the confounding R/25-R/26 already found by a completely
+different route (correlating exposure with COVID severity directly) --
+not a coincidence worth burying in a coursework-completion footnote.
+
+**Post-build addition: state clustering (`R/31`):** the second half of
+the same idea, unsupervised this time. Hand-rolled k-means (with
+k-means++ initialization -- Arthur & Vassilvitskii 2007 -- rather than
+uniform-random initial centroids, for the same "make the ensembling
+mechanics visible" reason R/27's fit_bagged_trees() is hand-rolled
+instead of calling a library) on the same pre-period features,
+standardized. The elbow curve was honestly gradual rather than sharply
+bent at any one k; k=3 was picked as a judgment call, documented as
+such in the script rather than overstated as an obvious elbow. Result:
+2 of the 3 resulting clusters are almost entirely pure treated or pure
+control (χ²=28.0, p<0.0001) -- unsupervised, states weren't told their
+treatment status, and it emerged from the clustering anyway. Three
+independent methods (β₄'s original robustness battery, R/30's
+predictability check, and this clustering result) now converge on the
+same conclusion from three unrelated angles: treated and control states
+were not comparable on pre-existing characteristics.
