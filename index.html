@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>State Minimum Wage Increases and Low-Wage Employment</title>
-<meta name="description" content="A difference-in-differences study of the 2021 state minimum-wage increases, extended with an exposure-gradient model, a full robustness suite, and an ML/neural-network predictive comparison.">
+<meta name="description" content="A difference-in-differences study of the 2021 state minimum-wage increases, extended with an exposure-gradient model, a full robustness suite, a wage pass-through analysis, and an ML/neural-network predictive comparison.">
 <link rel="canonical" href="https://charith-reddy-pareddy.github.io/min-wage-difference-in-differences-study/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='11' width='4.5' height='10' rx='0.5' fill='%239a3324'/%3E%3Crect x='9.75' y='6' width='4.5' height='15' rx='0.5' fill='%239a3324'/%3E%3Crect x='16.5' y='2' width='4.5' height='19' rx='0.5' fill='%23c8785f'/%3E%3C/svg%3E">
 <meta name="theme-color" content="#9a3324">
@@ -13,13 +13,14 @@
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="State Minimum Wage Increases and Low-Wage Employment">
-<meta property="og:description" content="A difference-in-differences study of the 2021 state minimum-wage increases, extended with an exposure-gradient model, a full robustness suite, and an ML/neural-network predictive comparison.">
+<meta property="og:description" content="A difference-in-differences study of the 2021 state minimum-wage increases, extended with an exposure-gradient model, a full robustness suite, a wage pass-through analysis, and an ML/neural-network predictive comparison.">
 <meta property="og:url" content="https://charith-reddy-pareddy.github.io/min-wage-difference-in-differences-study/">
 <meta property="og:image" content="https://charith-reddy-pareddy.github.io/min-wage-difference-in-differences-study/reports/figures/coefficient_forest_plot.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="State Minimum Wage Increases and Low-Wage Employment">
 <meta name="twitter:description" content="A difference-in-differences study of the 2021 state minimum-wage increases, with a full robustness suite and an ML/neural-network predictive comparison.">
 <meta name="twitter:image" content="https://charith-reddy-pareddy.github.io/min-wage-difference-in-differences-study/reports/figures/coefficient_forest_plot.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
 <style>
   :root {
     --bg: #fbfaf8;
@@ -29,10 +30,13 @@
     --line: #e2ddd3;
     --accent: #9a3324;
     --accent-soft: #c8785f;
+    --accent2: #3d6b6b;
     --card-bg: #ffffff;
     --pill-bg: #efe6da;
     --code-bg: #26241f;
     --code-ink: #f2efe9;
+    --shadow: 0 1px 2px rgba(28, 26, 23, 0.04);
+    --shadow-hover: 0 6px 20px rgba(28, 26, 23, 0.08);
     --max-width: 980px;
   }
   @media (prefers-color-scheme: dark) {
@@ -44,10 +48,13 @@
       --line: #3a372f;
       --accent: #e2836b;
       --accent-soft: #c8785f;
+      --accent2: #7fb3b3;
       --card-bg: #201e1a;
       --pill-bg: #2c2a24;
       --code-bg: #0e0d0b;
       --code-ink: #f2efe9;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
   }
   :root[data-theme="dark"] {
@@ -58,10 +65,13 @@
     --line: #3a372f;
     --accent: #e2836b;
     --accent-soft: #c8785f;
+    --accent2: #7fb3b3;
     --card-bg: #201e1a;
     --pill-bg: #2c2a24;
     --code-bg: #0e0d0b;
     --code-ink: #f2efe9;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.35);
   }
 
   * { box-sizing: border-box; }
@@ -72,10 +82,71 @@
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     line-height: 1.6;
+    transition: background 0.2s ease, color 0.2s ease;
   }
   a { color: var(--accent); }
 
   .wrap { max-width: var(--max-width); margin: 0 auto; padding: 0 20px; }
+
+  /* Sticky quick-nav: sits right after the hero, so it starts sticking
+     to the top only once the hero has scrolled past -- no JS needed. */
+  .quick-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
+  .quick-nav .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .quick-nav .quick-links {
+    display: flex;
+    gap: 18px;
+    white-space: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .quick-nav .quick-links::-webkit-scrollbar { display: none; }
+  .quick-nav .quick-links a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: color 0.15s ease;
+  }
+  .quick-nav .quick-links a:hover { color: var(--accent); }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--card-bg);
+    color: var(--ink);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .theme-toggle:hover { border-color: var(--accent-soft); transform: scale(1.06); }
+  .theme-toggle svg { width: 16px; height: 16px; }
+  .theme-toggle .icon-moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: none; }
+    :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: block; }
+  }
 
   header.hero {
     background: var(--bg-alt);
@@ -109,6 +180,7 @@
     border-radius: 0 8px 8px 0;
     max-width: 760px;
     font-size: 0.98rem;
+    box-shadow: var(--shadow);
   }
   .finding-banner strong { color: var(--accent); }
 
@@ -128,9 +200,9 @@
     font-size: 0.9rem;
     font-weight: 600;
     border: 1px solid var(--line);
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, transform 0.15s ease;
   }
-  nav.links a:hover { border-color: var(--accent-soft); }
+  nav.links a:hover { border-color: var(--accent-soft); transform: translateY(-1px); }
   nav.links a.primary {
     background: var(--accent);
     color: #fff;
@@ -139,6 +211,15 @@
 
   main { padding: 52px 0; }
   section { margin-bottom: 60px; }
+  section.reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  section.reveal.is-visible { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    section.reveal { opacity: 1; transform: none; transition: none; }
+  }
   section h2 {
     font-size: 1.5rem;
     margin: 0 0 22px;
@@ -158,7 +239,10 @@
     border: 1px solid var(--line);
     border-radius: 10px;
     padding: 18px 20px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
+  .metric-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
   .metric-card .label {
     font-size: 0.78rem;
     text-transform: uppercase;
@@ -190,6 +274,8 @@
     color: var(--ink-soft);
   }
   table.results tr:last-child td { border-bottom: none; }
+  table.results tbody tr { transition: background 0.15s ease; }
+  table.results tbody tr:hover { background: var(--bg-alt); }
 
   .fig-grid {
     display: grid;
@@ -202,7 +288,10 @@
     border: 1px solid var(--line);
     border-radius: 10px;
     overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
+  figure:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
   figure img {
     display: block;
     width: 100%;
@@ -217,6 +306,22 @@
     color: var(--ink-soft);
   }
 
+  .chart-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 22px 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+  }
+  .chart-card .chart-wrap { position: relative; height: 280px; }
+  .chart-card .chart-note {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    text-align: center;
+    margin: 10px 0 4px;
+  }
+
   .ml-columns {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -227,6 +332,7 @@
     border: 1px solid var(--line);
     border-radius: 10px;
     padding: 20px 22px;
+    box-shadow: var(--shadow);
   }
   .ml-card h3 { margin-top: 0; }
   .ml-card ul { padding-left: 20px; margin: 10px 0 0; color: var(--ink-soft); font-size: 0.94rem; }
@@ -239,6 +345,15 @@
 
   ul.limitations { padding-left: 20px; color: var(--ink-soft); }
   ul.limitations li { margin-bottom: 10px; }
+
+  .callout {
+    border-left: 4px solid var(--accent2);
+    background: var(--bg-alt);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+    margin: 16px 0;
+  }
 
   pre {
     background: var(--code-bg);
@@ -257,6 +372,28 @@
   }
   .sources-grid .metric-card .value { color: var(--ink-soft); font-size: 0.9rem; }
 
+  .back-to-top {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: var(--shadow-hover);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60;
+  }
+  .back-to-top.is-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
   footer {
     border-top: 1px solid var(--line);
     padding: 32px 0 60px;
@@ -268,10 +405,27 @@
   @media (max-width: 600px) {
     header.hero { padding: 44px 0 32px; }
     main { padding: 36px 0; }
+    .quick-nav .quick-links { gap: 12px; }
   }
 </style>
 </head>
 <body>
+
+<nav class="quick-nav">
+  <div class="wrap">
+    <div class="quick-links">
+      <a href="#metrics">Metrics</a>
+      <a href="#figures">Figures</a>
+      <a href="#wage-passthrough">Wage Pass-Through</a>
+      <a href="#ml-extension">ML / NN</a>
+      <a href="#reproduce">Reproduce</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</nav>
 
 <header class="hero">
   <div class="wrap">
@@ -280,8 +434,8 @@
     <p class="lede">
       A study of the 2021 round of state minimum-wage increases, extended
       beyond a single average treatment effect to ask how the employment
-      response varies with pre-policy wage exposure — plus an ML and
-      neural-network predictive comparison.
+      response varies with pre-policy wage exposure — plus a wage
+      pass-through analysis and an ML/neural-network predictive comparison.
     </p>
     <div class="finding-banner">
       <strong>Finding:</strong> the baseline estimate is negative but not
@@ -294,16 +448,16 @@
     <nav class="links">
       <a class="primary" href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/tag/v1.0-report">Read the Full Report</a>
       <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study">GitHub Repository</a>
+      <a href="#wage-passthrough">Wage Pass-Through</a>
       <a href="#ml-extension">ML / Neural Network Extension</a>
       <a href="#figures">Key Figures</a>
-      <a href="#reproduce">Reproduce It</a>
     </nav>
   </div>
 </header>
 
 <main class="wrap">
 
-  <section id="metrics">
+  <section id="metrics" class="reveal">
     <h2>Key Metrics</h2>
     <div class="metric-grid">
       <div class="metric-card">
@@ -323,17 +477,21 @@
         <div class="value">4/4 independent checks (placebo, permutation, event study, spec curve) flag it as confounded</div>
       </div>
       <div class="metric-card">
+        <div class="label">Wage pass-through</div>
+        <div class="value">13% (food service proxy, p=0.65) / 63% (retail proxy, p=0.22) of the mandated increase &mdash; neither significant</div>
+      </div>
+      <div class="metric-card">
         <div class="label">Inference</div>
         <div class="value">State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis</div>
       </div>
       <div class="metric-card">
         <div class="label">Engineering</div>
-        <div class="value">28 R scripts + a Python ML subproject, 143 R test blocks (all passing), CI on every push</div>
+        <div class="value">29 R scripts + a Python ML subproject, 150 R test blocks (all passing), CI on every push</div>
       </div>
     </div>
   </section>
 
-  <section id="results">
+  <section id="results" class="reveal">
     <h2>Results at a Glance</h2>
     <table class="results">
       <thead>
@@ -348,11 +506,12 @@
         <tr><td>Exposure vs. COVID severity</td><td>Significant negative correlation</td><td>A candidate mechanism &mdash; but barely moves the placebo effect once controlled for</td></tr>
         <tr><td>Multiple-testing correction</td><td>None of the 4 confirmatory tests survive Holm</td><td>Consistent with "not robust," now formal</td></tr>
         <tr><td>Leave-one-state-out</td><td>Estimate stable across all 20 drops</td><td>No single state drives Model A</td></tr>
+        <tr><td>Wage pass-through</td><td>13%/63% of the mandated increase, neither significant</td><td>Consistent with underpowered, not "no pass-through"</td></tr>
       </tbody>
     </table>
   </section>
 
-  <section id="figures">
+  <section id="figures" class="reveal">
     <h2>Key Figures</h2>
     <div class="fig-grid">
       <figure>
@@ -394,7 +553,63 @@
     </div>
   </section>
 
-  <section id="ml-extension">
+  <section id="wage-passthrough" class="reveal">
+    <h2>Wage Pass-Through</h2>
+    <p>
+      A new research question, not a re-analysis of the one above: did the
+      2021 increases actually raise <em>earnings</em> in low-wage
+      industries, and by how much relative to the dollar size of the
+      mandate? Everything above asks whether employment fell; this asks
+      whether the policy did the thing it was actually meant to do.
+    </p>
+    <div class="callout">
+      <strong>Data limitation, found by direct request:</strong> BLS/FRED
+      don't publish state-level average hourly earnings at the detailed
+      NAICS-722 (food service) or 44-45 (retail trade) level the
+      employment analysis uses &mdash; every candidate series ID at that
+      resolution 404s. The finest available breakdown is the CES
+      <strong>supersector</strong>: "Leisure and Hospitality" (nests food
+      service, but also accommodation and arts/entertainment/recreation)
+      as the food-service proxy, and "Trade, Transportation, and
+      Utilities" (nests retail, but also wholesale trade, transportation,
+      and utilities) as the retail proxy. Both are broader than this
+      study's employment industries &mdash; a real limitation, not a
+      rounding error.
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-wrap"><canvas id="wageChart" role="img" aria-label="Bar chart comparing mandated dollar increase to estimated dollar increase for two proxy industries"></canvas></div>
+      <div class="chart-note">Grey = average mandated statutory increase &middot; Red = estimated proxy-industry wage effect (hover for exact values)</div>
+    </div>
+
+    <table class="results">
+      <thead>
+        <tr><th>Proxy industry</th><th>treated_post (log pts)</th><th>p</th><th>Mandated $/hr</th><th>Estimated $/hr</th><th>Pass-through</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Leisure &amp; Hospitality (food service proxy)</td><td>0.0044</td><td>0.647</td><td>$0.54</td><td>$0.07</td><td>13%</td></tr>
+        <tr><td>Trade, Transportation &amp; Utilities (retail proxy)</td><td>0.0144</td><td>0.217</td><td>$0.54</td><td>$0.34</td><td>63%</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:18px; font-size:0.92rem;">
+      Neither estimate is statistically significant, and the food-service
+      proxy's confidence interval crosses zero on both sides &mdash;
+      consistent with this study's broader theme that these designs are
+      underpowered at the observed effect sizes, not evidence that
+      pass-through is genuinely 13%/63%. The likeliest reason both
+      estimates sit well under 100%: the supersector proxies include large
+      numbers of workers (hotel managers, arts/entertainment/recreation
+      staff, wholesale and utilities employees) who were never near the
+      minimum wage to begin with, diluting any real effect on the
+      low-wage workers actually targeted. See
+      <code>R/29_wage_passthrough.R</code> for the full specification
+      (it reuses Model A's fixed-effects DiD unchanged, just on a
+      different outcome).
+    </p>
+  </section>
+
+  <section id="ml-extension" class="reveal">
     <h2>Machine Learning &amp; Neural Network Extension</h2>
     <p>
       A predictive-accuracy comparison, kept separate from the causal
@@ -429,10 +644,12 @@
       </div>
     </div>
 
-    <table class="results" style="margin-top:22px;">
-      <caption style="caption-side:top; text-align:left; padding-bottom:10px; font-size:0.85rem; color:var(--ink-soft);">
-        Held-out predictive accuracy, by state (R implementation)
-      </caption>
+    <div class="chart-card" style="margin-top:22px;">
+      <div class="chart-wrap"><canvas id="mlChart" role="img" aria-label="Bar chart of held-out R-squared for five predictive models"></canvas></div>
+      <div class="chart-note">Held-out R&sup2; by state (R implementation) &middot; hover a bar for RMSE too</div>
+    </div>
+
+    <table class="results">
       <thead>
         <tr><th>Model</th><th>RMSE</th><th>R&sup2;</th></tr>
       </thead>
@@ -458,7 +675,7 @@
     </p>
   </section>
 
-  <section id="limitations">
+  <section id="limitations" class="reveal">
     <h2>Limitations</h2>
     <ul class="limitations">
       <li><strong>Parallel trends violated</strong> for food service (event study + two-sample t-test).</li>
@@ -467,29 +684,30 @@
       <li><strong>&beta;&#8324; is also confounded</strong>, not just underpowered &mdash; 4 independent checks find high/low-exposure states already differed before 2021.</li>
       <li><strong>The &ge;$0.50 subsample and the legislated-only subsample are the exact same 10 states</strong> &mdash; the two cuts can't be disentangled in this data.</li>
       <li><strong>Small cluster count</strong> (20 treated, 45 total) &mdash; addressed via clustered SEs and a wild bootstrap, but always some caution.</li>
+      <li><strong>Wage pass-through uses broader supersector proxies</strong>, not the exact food-service/retail industries &mdash; BLS/FRED don't publish earnings at that resolution by state.</li>
       <li>Results are <strong>DiD estimates under this specification</strong>, not definitive causal effects.</li>
     </ul>
   </section>
 
-  <section id="data-sources">
+  <section id="data-sources" class="reveal">
     <h2>Data Sources</h2>
     <div class="sources-grid">
       <div class="metric-card"><div class="label">FRED (public API)</div><div class="value">State-quarter employment, GDP, population, 2015&ndash;2022</div></div>
       <div class="metric-card"><div class="label">U.S. DOL</div><div class="value">Minimum wage history &mdash; treatment classification</div></div>
       <div class="metric-card"><div class="label">QCEW Open Data API</div><div class="value">Fallback employment (2 states); validation check</div></div>
       <div class="metric-card"><div class="label">CPS-ORG via IPUMS-CPS</div><div class="value">Exposure construction (2019&ndash;2020 earnings only)</div></div>
+      <div class="metric-card"><div class="label">FRED CES avg. hourly earnings (supersector)</div><div class="value">Wage pass-through analysis (<code>R/29</code>)</div></div>
     </div>
   </section>
 
-  <section id="reproduce">
+  <section id="reproduce" class="reveal">
     <h2>How to Reproduce</h2>
     <pre>Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
-make all                       # R/01-R/28, tests, figures, report end to end
+make all                       # R/01-R/29, tests, figures, report end to end
 make test                      # just the R test suite
 
-cd python
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest     # Python ML/NN test suite</pre>
+make python-setup              # one-time: creates python/.venv, installs requirements.txt
+make python-test                # Python ML/NN test suite (python/)</pre>
     <p>
       <code>make all</code> needs <code>IPUMS_API_KEY</code> in <code>.env</code> for
       <code>R/03</code>, and takes several minutes. Full details, repo
@@ -501,6 +719,10 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
 </main>
 
+<a href="#" class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</a>
+
 <footer>
   <div class="wrap">
     This page is generated from the project's own README and figures &mdash;
@@ -510,6 +732,132 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
     underlying data remains subject to each source's own terms.
   </div>
 </footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // --- Dark mode toggle: explicit override on top of the OS preference,
+  // persisted per-viewer in localStorage. Wrapped in try/catch since
+  // localStorage can throw (private browsing, blocked site data). ---
+  var toggle = document.getElementById("themeToggle");
+  function getStored() {
+    try { return localStorage.getItem("theme"); } catch (e) { return null; }
+  }
+  function setStored(value) {
+    try { localStorage.setItem("theme", value); } catch (e) { /* ignore */ }
+  }
+  var stored = getStored();
+  if (stored === "light" || stored === "dark") {
+    document.documentElement.setAttribute("data-theme", stored);
+  }
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var current = document.documentElement.getAttribute("data-theme") || (prefersDark ? "dark" : "light");
+      var next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      setStored(next);
+    });
+  }
+
+  // --- Scroll-reveal: fade sections in as they enter the viewport. ---
+  var sections = document.querySelectorAll("section.reveal");
+  if ("IntersectionObserver" in window && sections.length) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    sections.forEach(function (s) { observer.observe(s); });
+  } else {
+    sections.forEach(function (s) { s.classList.add("is-visible"); });
+  }
+
+  // --- Back-to-top button visibility ---
+  var backToTop = document.getElementById("backToTop");
+  if (backToTop) {
+    window.addEventListener("scroll", function () {
+      backToTop.classList.toggle("is-visible", window.scrollY > 600);
+    }, { passive: true });
+  }
+
+  // --- Charts (Chart.js loaded with `defer`, so wait for it if this
+  // inline script happens to run first). ---
+  function withChart(fn) {
+    if (window.Chart) { fn(); return; }
+    window.addEventListener("load", function () { if (window.Chart) fn(); });
+  }
+
+  withChart(function () {
+    var textColor = getComputedStyle(document.documentElement).getPropertyValue("--ink-soft").trim();
+    var gridColor = getComputedStyle(document.documentElement).getPropertyValue("--line").trim();
+
+    var mlCanvas = document.getElementById("mlChart");
+    if (mlCanvas) {
+      var mlLabels = ["Linear baseline", "Bagged trees", "Random forest", "Gradient boosting", "Neural network"];
+      var mlR2 = [0.394, 0.448, 0.487, 0.644, 0.580];
+      var mlRmse = [0.0699, 0.0667, 0.0643, 0.0536, 0.0582];
+      new Chart(mlCanvas, {
+        type: "bar",
+        data: {
+          labels: mlLabels,
+          datasets: [{
+            label: "R² (held-out)",
+            data: mlR2,
+            backgroundColor: ["#c8785f", "#c8785f", "#c8785f", "#9a3324", "#3d6b6b"],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                afterLabel: function (ctx) { return "RMSE: " + mlRmse[ctx.dataIndex].toFixed(4); }
+              }
+            }
+          },
+          scales: {
+            y: { beginAtZero: true, max: 0.75, ticks: { color: textColor }, grid: { color: gridColor } },
+            x: { ticks: { color: textColor }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    var wageCanvas = document.getElementById("wageChart");
+    if (wageCanvas) {
+      new Chart(wageCanvas, {
+        type: "bar",
+        data: {
+          labels: ["Leisure & Hospitality\n(food service proxy)", "Trade, Transportation\n& Utilities (retail proxy)"],
+          datasets: [
+            { label: "Mandated increase ($/hr)", data: [0.536, 0.536], backgroundColor: gridColor, borderRadius: 6 },
+            { label: "Estimated effect ($/hr)", data: [0.0716, 0.340], backgroundColor: "#9a3324", borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom", labels: { color: textColor } }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } },
+            x: { ticks: { color: textColor }, grid: { display: false } }
+          }
+        }
+      });
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
