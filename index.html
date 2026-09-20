@@ -447,6 +447,7 @@
     </div>
     <nav class="links">
       <a class="primary" href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/tag/v1.0-report">Read the Full Report</a>
+      <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/download/v1.0-report/final_report.pdf">Download PDF</a>
       <a href="https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study">GitHub Repository</a>
       <a href="#wage-passthrough">Wage Pass-Through</a>
       <a href="#ml-extension">ML / Neural Network Extension</a>
@@ -705,6 +706,7 @@
     <pre>Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
 make all                       # R/01-R/29, tests, figures, report end to end
 make test                      # just the R test suite
+make report-pdf                # PDF export (headless Chrome, no LaTeX needed)
 
 make python-setup              # one-time: creates python/.venv, installs requirements.txt
 make python-test                # Python ML/NN test suite (python/)</pre>
