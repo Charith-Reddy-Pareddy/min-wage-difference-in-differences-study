@@ -30,6 +30,10 @@ industries?
 5. Did the increases actually raise earnings in low-wage industries, and
    by how much relative to the size of the mandate (pass-through)? See
    [Wage Pass-Through](#wage-pass-through).
+6. Is treatment status itself predictable from pre-period state
+   characteristics — and do states form natural economic clusters that
+   track treatment status? See
+   [Treatment Assignment: Predictability & Clustering](#treatment-assignment-predictability--clustering).
 
 This is a Card-Krueger-style state minimum-wage DiD design; the
 contribution is a specific empirical angle (modeling how the effect
@@ -46,7 +50,9 @@ credibility check the data will support.
 | **Robustness on β₄** | 4/4 independent checks (placebo, permutation, event study, spec curve) flag it as confounded |
 | **Inference** | State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis |
 | **Wage pass-through** | 13% (food service proxy, p=0.65) / 63% (retail proxy, p=0.22) of the mandated increase — neither significant |
-| **Engineering** | 29 R scripts + a Python ML subproject, 150 R test blocks (all passing), CI on every push, `make all` for full reproduction |
+| **Treatment predictability** | Logistic regression on pre-period growth + exposure: 87% accuracy, AUC 0.97 — highly predictable |
+| **State clustering** | k-means (k=3) on the same features: 2 of 3 clusters are essentially pure treated/control (χ²p<0.0001) |
+| **Engineering** | 31 R scripts + a Python ML subproject, 163 R test blocks (all passing), CI on every push, `make all` for full reproduction |
 
 ## Results at a Glance
 
@@ -61,6 +67,8 @@ credibility check the data will support.
 | Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
 | Leave-one-state-out | Estimate stable across all 20 drops | No single state drives Model A |
 | Wage pass-through | 13%/63% of the mandated increase, neither significant | Consistent with underpowered, not "no pass-through" |
+| Is treatment predictable from pre-period data? | Yes — 87% accuracy, AUC 0.97 | Another angle on non-random assignment |
+| Do states cluster by treatment status? | Yes — 2/3 k-means clusters are nearly pure | Convergent with the predictability result |
 
 ## Key Figures
 
@@ -169,6 +177,51 @@ and utilities employees) who were never near the minimum wage to begin
 with, diluting any real effect on the low-wage workers actually
 targeted.
 
+## Treatment Assignment: Predictability & Clustering
+
+Two more angles, chosen to cover STAT 240/340-style techniques this
+project hadn't used yet (chi-square test of independence, logistic
+regression, k-means, PCA) — and not just as coursework coverage: both
+turn out to independently reinforce the confounding story already told
+above (β₄'s pre-existing exposure–outcome link, the exposure–COVID
+correlation), from angles that don't depend on either of those.
+
+**Is treatment status independent of Census region?**
+(`R/30_treatment_predictability.R`) A chi-square test of independence
+says no (χ²=8.0, df=3, p=0.046) — the South is heavily under-represented
+among treated states (2 of 20) relative to control (12 of 25).
+
+**Is treatment status predictable from pre-period state
+characteristics?** A logistic regression on pre-period (2019-2020) GDP
+growth, population growth, and food-service exposure — the same
+variables used elsewhere in this study, not new ones picked for this
+check — classifies treated vs. control states with **87% accuracy and
+an AUC of 0.97** at n=45. Exposure alone is the strongest, most
+significant predictor (p=0.013). That a state's minimum-wage exposure
+level so strongly predicts whether it raised its minimum wage is
+exactly the kind of non-random-assignment signal the β₄ robustness
+checks (Section 8.1 of the report) were already built to catch, seen
+here from a completely different angle.
+
+<img src="reports/figures/treatment_predictability.png" width="60%">
+
+**Do states form natural economic clusters, and do those clusters track
+treatment status?** Unsupervised this time — no label is given to the
+algorithm. A hand-rolled k-means (with k-means++ initialization; see
+`R/31_state_clustering.R`) on the same pre-period features, k=3 chosen
+from a gradual (not sharply-elbowed) WCSS curve, finds that **2 of the 3
+clusters are almost pure treated or pure control** (χ²=28.0, p<0.0001):
+
+<img src="reports/figures/state_clustering_pca.png" width="75%">
+
+This is exploratory, not a fourth confirmatory test — no cluster-based
+hypothesis was pre-registered. But three independent methods now (β₄'s
+own robustness battery, this predictability check, and this clustering
+result) converge on the same conclusion: **treated and control states
+were not comparable on pre-existing characteristics**, which is the
+actual reason this report treats the causal estimates with as much
+caution as it does.
+
 ## Machine Learning Extension
 
 A predictive-accuracy comparison, separate from the causal claims
@@ -251,7 +304,7 @@ proposing a mechanism isn't the same as confirming one.
 
 ```
 Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
-make all                       # R/01-R/29, tests, figures, report end to end
+make all                       # R/01-R/31, tests, figures, report end to end
 make test                      # just the R test suite
 make report                    # just render reports/final_report.Rmd (HTML)
 make report-pdf                # + reports/final_report.pdf (headless Chrome)
@@ -270,7 +323,7 @@ installed locally (no LaTeX distribution required).
 first; see [python/README.md](python/README.md) for why it's a
 separate virtual environment rather than a renv-tracked dependency.
 
-Repo layout: `R/` (29 numbered scripts, run in order), `tests/` (one
+Repo layout: `R/` (31 numbered scripts, run in order), `tests/` (one
 file per script), `reports/` (`final_report.Rmd`, rendered HTML and PDF,
 figures), `data/processed/` (all results, gitignored, reproducible),
 `python/` (independent ML/NN replication — see
@@ -289,7 +342,9 @@ including every defect found and corrected along the way. The original
 `R/11`, `R/15`) were added afterward for the power analyses, robustness
 checks, and mechanism investigation summarized above; `R/27`-`R/28` and
 `python/` add the ML/neural-network predictive comparison described
-above, and `R/29` adds the wage pass-through research question.
+above, `R/29` adds the wage pass-through research question, and
+`R/30`-`R/31` add the treatment-predictability and state-clustering
+angles.
 
 ## License
 
