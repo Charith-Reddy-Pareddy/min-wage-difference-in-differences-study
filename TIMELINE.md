@@ -197,3 +197,35 @@ to a factor the way `lm()`/`rpart()`/`randomForest()` silently do via
 `build_ml_panel()`. Gradient boosting came out the strongest predictor
 of all five methods in both languages (R: R²=0.64; Python: R²=0.49), a
 sensible result rather than a foregone one.
+
+**Post-build addition: wage pass-through, a new research question
+(`R/29`):** everything through `R/28` asks whether employment fell;
+this asks whether the policy raised earnings at all, and by how much
+relative to the mandated dollar increase. The obvious approach —
+state-level average hourly earnings at the same NAICS-722/44-45
+resolution the employment analysis uses — doesn't exist: every
+candidate FRED series ID at that resolution 404s (confirmed by direct
+`curl` requests against `fredgraph.csv`, the same verification standard
+`R/02` already holds itself to, not assumed from documentation). Traced
+the actual available resolution by working backward from a known-good
+employment series ID on FRED's own site to its sibling earnings
+series: state-level average hourly earnings is only published at the
+CES **supersector** level. Landed on "Leisure and Hospitality" (SMU
+industry code `70000`, data type `00003`) as the food-service proxy and
+"Trade, Transportation, and Utilities" (`40000`) as the retail proxy —
+both broader than the employment analysis's industries, a real
+limitation stated prominently in the script header, the README, and the
+report rather than glossed over. Unlike the detailed employment series
+(which 404s for New Mexico and South Dakota, needing a QCEW fallback in
+`R/02`), both supersector series returned real data for all 50 states on
+the first attempt — checked directly for several small states (South
+Dakota, Wyoming, Vermont, Alaska, Hawaii) before running the full pull.
+Reused `build_panel()` and `fit_model_a()` from `R/07` completely
+unchanged, by joining the new wage series onto the existing
+`fred_state_quarter.csv` panel and passing it in as `outcome_col` — no
+new DiD machinery needed. Result: neither proxy shows a statistically
+significant wage effect (food service p=0.65, retail p=0.22), with
+point estimates implying 13% and 63% pass-through of the mandated
+increase respectively — read as "underpowered to detect pass-through at
+this resolution," consistent with this project's recurring theme, not
+as evidence pass-through is genuinely that low.
