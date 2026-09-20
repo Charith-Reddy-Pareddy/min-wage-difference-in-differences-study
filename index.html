@@ -624,11 +624,11 @@
   <section id="predictability" class="reveal">
     <h2>Treatment Assignment: Predictability &amp; Clustering</h2>
     <p>
-      Two more angles, chosen to cover STAT 240/340-style techniques not
-      used elsewhere in this project (chi-square, logistic regression,
-      k-means, PCA) &mdash; and not just for coursework coverage: both
-      independently reinforce the confounding story already found above,
-      from angles that don't depend on it.
+      Exploratory analyses investigating systematic differences in
+      pre-treatment economic structure between treated and comparison
+      states, using techniques not used elsewhere in this project
+      (chi-square test of independence, logistic regression as a
+      classifier, k-means, PCA).
     </p>
 
     <table class="results">
@@ -654,14 +654,17 @@
     </div>
 
     <div class="callout" style="margin-top:18px;">
-      That a state's minimum-wage <strong>exposure</strong> level so
-      strongly predicts whether it raised its minimum wage &mdash; and
-      that unsupervised clustering on the same features separates
-      treated from control almost perfectly &mdash; is exactly the kind
-      of non-random-assignment signal the &beta;&#8324; robustness
-      battery above was built to catch, confirmed here by two completely
-      independent methods. Exploratory, not a fourth confirmatory test:
-      no cluster-based hypothesis was pre-registered. See
+      <strong>This does not, by itself, invalidate the causal design.</strong>
+      DiD does not require random treatment assignment &mdash; a highly
+      predictable treatment is entirely compatible with valid causal
+      identification, provided the relevant conditional parallel-trends
+      assumption holds. What these results actually motivate is taking
+      the event study's direct test of that assumption seriously: for
+      food service, pre-trends <strong>are</strong> violated (see
+      Limitations above), and that &mdash; not the predictability or
+      clustering results here &mdash; is this study's real identification
+      problem. Exploratory, not a fourth confirmatory test: no
+      cluster-based hypothesis was pre-registered. See
       <code>R/30_treatment_predictability.R</code> and
       <code>R/31_state_clustering.R</code>.
     </div>

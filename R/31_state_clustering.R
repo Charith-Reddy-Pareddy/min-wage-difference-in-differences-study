@@ -14,7 +14,11 @@
 # those clusters at all, or cut across them? This is exploratory, not a
 # fourth confirmatory test -- no cluster-based hypothesis was
 # pre-registered, so results here inform interpretation rather than
-# replace Sections 4-8's confirmatory battery.
+# replace Sections 4-8's confirmatory battery. Same caveat as R/30: DiD
+# doesn't require random assignment, so a clean cluster/treatment split
+# doesn't itself invalidate the design -- it motivates taking R/08's
+# direct parallel-trends test seriously, which is where the actual
+# identification verdict comes from.
 
 library(dplyr)
 

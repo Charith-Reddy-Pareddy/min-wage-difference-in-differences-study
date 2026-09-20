@@ -1,12 +1,5 @@
-# Post-build addition: a new research angle, chosen to mirror the two
-# STAT 240/340 techniques this project hasn't used yet (chi-square test
-# of independence; logistic regression as a classifier) -- and it's not
-# just coursework box-checking: if treatment status turned out to be
-# highly predictable from pre-period state characteristics, that would
-# be independent evidence against "as-if random" assignment, on top of
-# the parallel-trends violation R/08 already found for food service.
-#
-# Two questions:
+# Post-build addition: an exploratory look at systematic pre-treatment
+# differences between treated and comparison states, via two questions:
 #   1. Chi-square test of independence: is treatment status independent
 #      of Census region? (treated/control only -- "excluded" states
 #      aren't part of the binary treated/control comparison anywhere
@@ -15,6 +8,16 @@
 #      population growth and food-service exposure predict which states
 #      got treated? Reported honestly at n=45 states -- a classifier at
 #      this sample size will have real variance, not a polished result.
+#
+# IMPORTANT interpretive caveat: DiD does not require random treatment
+# assignment. A highly predictable treatment (states raising their
+# minimum wage for identifiable political/economic reasons) is entirely
+# compatible with valid causal identification, provided the relevant
+# conditional parallel-trends assumption holds. What a strong result here
+# actually motivates is taking that parallel-trends check (R/08's event
+# study) seriously, not treating predictability itself as evidence
+# against the design -- see README.md's "Treatment Assignment" section
+# for the full interpretation.
 
 library(dplyr)
 

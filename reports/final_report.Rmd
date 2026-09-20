@@ -1042,12 +1042,13 @@ actually targeted.
 
 ## 13. Treatment Assignment: Predictability & Clustering
 
-Two more angles, chosen to cover STAT 240/340-style techniques this
-report hadn't used yet (a chi-square test of independence, logistic
-regression, k-means, PCA) -- and not merely as coursework coverage: both
-independently reinforce the confounding story already told in Section
-8.1 (β₄'s pre-existing exposure-outcome link) and Section 4.3 (the
-exposure-COVID correlation), from angles that don't depend on either.
+Exploratory analyses investigating systematic differences in
+pre-treatment economic structure between treated and comparison states
+(a chi-square test of independence, logistic regression as a
+classifier, k-means, PCA). Section 13.4 states directly why these
+results, however striking, do not themselves bear on whether the DiD
+design is valid -- read that section before drawing conclusions from
+13.1-13.3 in isolation.
 
 ### 13.1 Is Treatment Independent of Census Region?
 
@@ -1089,11 +1090,8 @@ include_graphics(fig("treatment_predictability.png"))
 
 87% accuracy and an AUC of 0.97 at n=45 is a strong result by any
 standard, and exposure is by far the most significant predictor
-(p=0.013). That a state's minimum-wage exposure level so strongly
-predicts whether it raised its minimum wage is exactly the kind of
-non-random-assignment signal Section 8.1's robustness battery was built
-to catch on β₄ specifically -- seen here from a completely unrelated
-angle (classification accuracy, not a DiD coefficient).
+(p=0.013). Section 13.4 addresses what this does and doesn't imply for
+the causal design.
 
 ### 13.3 Do States Cluster by Treatment Status?
 
@@ -1121,16 +1119,31 @@ include_graphics(fig("state_clustering_pca.png"))
 Two of the three clusters are almost entirely pure treated or pure
 control (χ²=28.0, p<0.0001) -- states weren't assigned to clusters by
 treatment status, yet cluster membership predicts it almost as well as
-the logistic regression above does.
+the logistic regression above does. This is exploratory, not a fourth
+confirmatory test -- no cluster-based hypothesis was pre-registered
+anywhere in the original proposal.
 
-This is exploratory, not a fourth confirmatory test -- no cluster-based
-hypothesis was pre-registered anywhere in the original proposal. But
-three independent methods now (β₄'s own robustness battery in Section
-8.1, Section 13.2's predictability check, and this clustering result)
-converge on the same conclusion: treated and control states were not
-comparable on pre-existing characteristics, which is the actual reason
-this report treats its causal estimates with the caution it does
-throughout, not a single robustness check taken in isolation.
+### 13.4 What This Does and Doesn't Imply for Identification
+
+**This does not, by itself, invalidate the DiD design.** Difference-in-
+differences does not require random treatment assignment. States
+choosing to raise their minimum wage for identifiable political or
+economic reasons is entirely compatible with valid causal identification,
+*provided* the relevant conditional parallel-trends assumption holds --
+that is the assumption DiD actually rests on, not "as-if random"
+assignment. Treatment being this predictable doesn't do the
+identification work itself.
+
+What Sections 13.1-13.3 actually do is raise the prior that treated and
+control states might follow different *counterfactual* employment
+trends -- which is precisely what Section 4.1's event study tests
+directly, rather than assumes. For food service, that direct test finds
+pre-trends **are** violated. That violation -- not the predictability or
+clustering results above -- is this report's actual, load-bearing
+identification problem, stated as such since Section 4.1 and repeated in
+the Summary. Sections 13.1-13.3 are a reason to take that verdict
+seriously; they are not a second, independent verdict standing on their
+own.
 
 ---
 

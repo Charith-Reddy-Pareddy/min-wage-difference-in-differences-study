@@ -67,8 +67,8 @@ credibility check the data will support.
 | Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
 | Leave-one-state-out | Estimate stable across all 20 drops | No single state drives Model A |
 | Wage pass-through | 13%/63% of the mandated increase, neither significant | Consistent with underpowered, not "no pass-through" |
-| Is treatment predictable from pre-period data? | Yes — 87% accuracy, AUC 0.97 | Another angle on non-random assignment |
-| Do states cluster by treatment status? | Yes — 2/3 k-means clusters are nearly pure | Convergent with the predictability result |
+| Is treatment predictable from pre-period data? | Yes — 87% accuracy, AUC 0.97 | Doesn't invalidate DiD, but motivates checking trends directly |
+| Do states cluster by treatment status? | Yes — 2/3 k-means clusters are nearly pure | Same caveat — see event study (Section 4.1) for the actual test |
 
 ## Key Figures
 
@@ -179,12 +179,10 @@ targeted.
 
 ## Treatment Assignment: Predictability & Clustering
 
-Two more angles, chosen to cover STAT 240/340-style techniques this
-project hadn't used yet (chi-square test of independence, logistic
-regression, k-means, PCA) — and not just as coursework coverage: both
-turn out to independently reinforce the confounding story already told
-above (β₄'s pre-existing exposure–outcome link, the exposure–COVID
-correlation), from angles that don't depend on either of those.
+Exploratory analyses investigating systematic differences in
+pre-treatment economic structure between treated and comparison states,
+using techniques not used elsewhere in this study (a chi-square test of
+independence, logistic regression as a classifier, k-means, PCA).
 
 **Is treatment status independent of Census region?**
 (`R/30_treatment_predictability.R`) A chi-square test of independence
@@ -197,11 +195,7 @@ growth, population growth, and food-service exposure — the same
 variables used elsewhere in this study, not new ones picked for this
 check — classifies treated vs. control states with **87% accuracy and
 an AUC of 0.97** at n=45. Exposure alone is the strongest, most
-significant predictor (p=0.013). That a state's minimum-wage exposure
-level so strongly predicts whether it raised its minimum wage is
-exactly the kind of non-random-assignment signal the β₄ robustness
-checks (Section 8.1 of the report) were already built to catch, seen
-here from a completely different angle.
+significant predictor (p=0.013).
 
 <img src="reports/figures/treatment_predictability.png" width="60%">
 
@@ -214,13 +208,20 @@ clusters are almost pure treated or pure control** (χ²=28.0, p<0.0001):
 
 <img src="reports/figures/state_clustering_pca.png" width="75%">
 
-This is exploratory, not a fourth confirmatory test — no cluster-based
-hypothesis was pre-registered. But three independent methods now (β₄'s
-own robustness battery, this predictability check, and this clustering
-result) converge on the same conclusion: **treated and control states
-were not comparable on pre-existing characteristics**, which is the
-actual reason this report treats the causal estimates with as much
-caution as it does.
+**On interpretation — this does not, by itself, invalidate the causal
+design.** DiD does not require random treatment assignment. States
+choosing to raise their minimum wage for identifiable political or
+economic reasons is entirely compatible with valid causal identification,
+*provided* the relevant conditional parallel-trends assumption holds.
+Treatment being this predictable doesn't do the identification work
+itself — what it does is raise the prior that treated and control states
+might follow different *counterfactual* trends, which is exactly what
+Section 4.1's event study tests directly rather than assumes. For food
+service, that direct test finds pre-trends **are** violated (Section
+4.1) — that is the actual identification problem this report leads with,
+not the predictability result. The predictability and clustering
+findings here are a reason to take the event study's verdict seriously,
+not a second, independent verdict of their own.
 
 ## Machine Learning Extension
 
