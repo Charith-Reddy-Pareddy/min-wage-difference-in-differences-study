@@ -1599,8 +1599,8 @@ Heterogeneity, and Robustness Analysis</h3>
 .btn, .btn-group { display: none !important; }
 }
 </style>
-<div id="summary" class="section level2">
-<h2>Summary</h2>
+<div id="abstract" class="section level2">
+<h2>Abstract</h2>
 <p>This report estimates the employment effect of the 2021 round of
 state minimum-wage increases on food service and retail employment, and
 asks whether that effect scales with pre-policy wage exposure. It
@@ -1629,6 +1629,97 @@ states already differed systematically before the 2021 policy. β₄ is
 reported throughout exactly as designed, but it should be read as
 confounded by this pre-existing association, not as clean evidence
 either for or against a real exposure gradient.</p>
+</div>
+<div id="related-literature-and-contribution" class="section level2">
+<h2>Related Literature and Contribution</h2>
+<p><strong>The disemployment debate.</strong> Card and Krueger’s (1994,
+<em>American Economic Review</em>) comparison of fast-food employment in
+New Jersey and Pennsylvania around New Jersey’s 1992 minimum-wage
+increase is the canonical modern minimum-wage DiD design and the direct
+ancestor of the one used here: a treated state, a neighboring untreated
+comparison, and a low-wage industry’s employment as the outcome. It
+found no disemployment effect, against the standard
+competitive-labor-market prediction. Neumark and Wascher’s
+contemporaneous and later work (notably their 2000 AER comment on
+Card-Krueger, and their 2008 MIT Press book <em>Minimum Wages</em>) used
+payroll records instead of the original phone survey and found the
+opposite, and the resulting back-and-forth established that minimum-wage
+employment estimates are sensitive to data source, comparison group, and
+specification in ways that are not obviously resolved by picking a side.
+That sensitivity is the direct motivation for this report’s own emphasis
+on credibility checks over a single headline coefficient.</p>
+<p><strong>Refining the comparison group.</strong> Dube, Lester, and
+Reich (2010, <em>Review of Economics and Statistics</em>) addressed the
+state-pair comparison’s most obvious weakness – that entire states can
+differ on much more than minimum-wage policy – by comparing contiguous
+county pairs straddling state borders, finding minimal disemployment
+effects. This project’s design compares whole states rather than border
+counties (data availability at the state-industry level is the binding
+constraint, not a methodological preference), which is precisely why
+Sections 4 and Appendix C’s checks on whether treated and control states
+are otherwise comparable carry real weight here: this design is more
+exposed to the confound Dube-Lester-Reich’s border-pair refinement was
+built to reduce.</p>
+<p><strong>Exposure and “bite” measures.</strong> Card (1992,
+<em>Industrial and Labor Relations Review</em>) introduced the idea of
+measuring a labor market’s exposure to a minimum-wage change via the
+pre-policy share of workers earning near the new floor – a state or
+industry with more workers close to the floor has more “bite” and should
+show a larger effect if the competitive model’s prediction holds.
+Cengiz, Dube, Lindner, and Zipperer (2019, <em>Quarterly Journal of
+Economics</em>) extended this into a full wage-distribution (“bunching”)
+approach, tracking where in the wage distribution jobs are gained or
+lost rather than only a net employment count. This report’s exposure
+variable (Section 2) is a direct descendant of Card’s bite measure, and
+Model C’s exposure-interaction specification is this study’s primary
+empirical contribution relative to a plain Card-Krueger-style
+replication: rather than estimating only an average employment response,
+it asks whether that response scales with pre-policy exposure, and
+subjects that relationship to a battery of placebo, permutation,
+event-study, and specification-curve checks (Section 8) that a
+replication alone would not need.</p>
+<p><strong>Modern DiD methodology.</strong> A separate literature,
+mostly unrelated to the disemployment debate itself, has shown that the
+two-way fixed-effects (TWFE) estimator used throughout this report
+(Model A, <code>feols(... | state + quarter)</code>) can be badly biased
+when treatment timing is staggered across units and treatment effects
+are heterogeneous over time – already-treated units can act as implicit
+“controls” for later-treated ones, and TWFE’s implicit weighting can
+attach negative weight to some comparisons (Goodman-Bacon 2021,
+<em>Journal of Econometrics</em>; de Chaisemartin and D’Haultfœuille
+2020, <em>American Economic Review</em>). Callaway and Sant’Anna (2021,
+<em>Journal of Econometrics</em>) and Sun and Abraham (2021, <em>Journal
+of Econometrics</em>) propose heterogeneity-robust estimators for
+exactly that staggered-timing setting. <strong>This does not
+mechanically apply to Model A as specified</strong>: every treated state
+adopts on the same date (2021 Q1), so there is no staggered-timing
+variation for TWFE to mis-weight in the way Goodman-Bacon decomposes. It
+is more directly relevant to Model C, where exposure is a continuous
+rather than binary treatment intensity – a setting closer to the newer
+literature on DiD with continuous or “dose” treatments (e.g. Callaway,
+Goodman-Bacon, and Sant’Anna’s work extending difference-in-differences
+to continuous treatments). A direct comparison against a
+heterogeneity-robust estimator is planned future work (see README.md’s
+roadmap) rather than included here; the honest reason to flag it now is
+that a common-timing design being immune to one specific critique is not
+the same as modern DiD methodology having nothing to add.</p>
+<p><strong>COVID-era labor market disruption.</strong> The 2021
+treatment window follows immediately on an unprecedented, highly uneven
+labor-market shock, and a substantial literature (e.g. Forsythe, Kahn,
+Kozlowski, and Lange 2020, <em>Journal of Public Economics</em>)
+documents how sharply COVID-19’s labor demand effects varied by sector
+and geography. That unevenness is the mechanism behind this report’s own
+COVID-sensitivity specification (Section 4.3) and the exposure-COVID
+correlation check (Section 8.1) – both ask a version of the same
+question the broader literature raises at the macro level: whether
+2020-2021 outcome differences reflect the policy under study or the
+pandemic’s own uneven footprint.</p>
+<p><strong>Broader evidence.</strong> Dube’s (2019) review for the UK’s
+Low Pay Commission surveys the post-2010 empirical minimum-wage
+literature internationally and finds the median estimated employment
+effect close to zero with substantial study-to-study variation –
+consistent with this report’s own conclusion that a single DiD estimate,
+however carefully checked, does not settle the question on its own.</p>
 </div>
 <div id="identification-strategy" class="section level2">
 <h2>Identification Strategy</h2>
@@ -3409,8 +3500,14 @@ low-exposure states differ systematically for reasons that predate the
 confounded, and the report says so directly rather than defaulting back
 to “inconclusive” once the stronger evidence was in hand.</p>
 </div>
-<div id="machine-learning-neural-network-extension" class="section level2">
-<h2>11. Machine Learning &amp; Neural Network Extension</h2>
+<div id="appendix" class="section level2">
+<h2>Appendix</h2>
+<p>The three sections below are secondary extensions, not co-equal with
+Sections 1-10’s causal analysis: a predictive-modeling comparison and
+two exploratory checks on treatment assignment. They inform how the main
+results should be read; they do not revise them.</p>
+<div id="appendix-a-machine-learning-neural-network-extension" class="section level3">
+<h3>Appendix A: Machine Learning &amp; Neural Network Extension</h3>
 <p>Everything above is aimed at a causal question: did the 2021
 minimum-wage increases change employment. This section asks a different,
 narrower question instead – how well can flexible ML methods
@@ -3508,8 +3605,8 @@ are three genuinely different implementations rather than the same
 ensemble under different names, are in <code>python/README.md</code> and
 <code>python/src/tree.py</code>.</p>
 </div>
-<div id="wage-pass-through" class="section level2">
-<h2>12. Wage Pass-Through</h2>
+<div id="appendix-b-wage-pass-through" class="section level3">
+<h3>Appendix B: Wage Pass-Through</h3>
 <p>A new research question, not a re-analysis of the one above: did the
 2021 increases actually raise <strong>earnings</strong> in low-wage
 industries, and by how much relative to the dollar size of the mandate?
@@ -3598,17 +3695,18 @@ utilities employees) who were never near the minimum wage to begin with,
 diluting any real effect on the low-wage workers the policy actually
 targeted.</p>
 </div>
-<div id="treatment-assignment-predictability-clustering" class="section level2">
-<h2>13. Treatment Assignment: Predictability &amp; Clustering</h2>
+<div id="appendix-c-treatment-assignment-predictability-clustering" class="section level3">
+<h3>Appendix C: Treatment Assignment: Predictability &amp;
+Clustering</h3>
 <p>Exploratory analyses investigating systematic differences in
 pre-treatment economic structure between treated and comparison states
 (a chi-square test of independence, logistic regression as a classifier,
-k-means, PCA). Section 13.4 states directly why these results, however
+k-means, PCA). Appendix C.4 states directly why these results, however
 striking, do not themselves bear on whether the DiD design is valid –
-read that section before drawing conclusions from 13.1-13.3 in
+read that section before drawing conclusions from C.1-C.3 in
 isolation.</p>
-<div id="is-treatment-independent-of-census-region" class="section level3">
-<h3>13.1 Is Treatment Independent of Census Region?</h3>
+<div id="c.1-is-treatment-independent-of-census-region" class="section level4">
+<h4>C.1 Is Treatment Independent of Census Region?</h4>
 <pre class="r"><code>tp_results &lt;- proc(&quot;treatment_predictability_results.csv&quot;)
 tp_results %&gt;%
   select(n_states, chisq_statistic, chisq_df, chisq_p_value) %&gt;%
@@ -3639,8 +3737,8 @@ regional heterogeneity in outcomes; this shows the regional imbalance
 starts with treatment assignment itself, not just the response to
 it).</p>
 </div>
-<div id="is-treatment-predictable-from-pre-period-characteristics" class="section level3">
-<h3>13.2 Is Treatment Predictable from Pre-Period Characteristics?</h3>
+<div id="c.2-is-treatment-predictable-from-pre-period-characteristics" class="section level4">
+<h4>C.2 Is Treatment Predictable from Pre-Period Characteristics?</h4>
 <p>A logistic regression on pre-period (2019-2020) GDP growth,
 population growth, and food-service exposure – the same variables used
 elsewhere in this report, not new ones picked to make this check look
@@ -3719,8 +3817,8 @@ standard, and exposure is by far the most significant predictor
 (p=0.013). Section 13.4 addresses what this does and doesn’t imply for
 the causal design.</p>
 </div>
-<div id="do-states-cluster-by-treatment-status" class="section level3">
-<h3>13.3 Do States Cluster by Treatment Status?</h3>
+<div id="c.3-do-states-cluster-by-treatment-status" class="section level4">
+<h4>C.3 Do States Cluster by Treatment Status?</h4>
 <p>Unsupervised this time – no label is given to the algorithm. A
 hand-rolled k-means (k-means++ initialization; see
 <code>R/31_state_clustering.R</code>) on the same pre-period features,
@@ -3773,8 +3871,8 @@ the logistic regression above does. This is exploratory, not a fourth
 confirmatory test – no cluster-based hypothesis was pre-registered
 anywhere in the original proposal.</p>
 </div>
-<div id="what-this-does-and-doesnt-imply-for-identification" class="section level3">
-<h3>13.4 What This Does and Doesn’t Imply for Identification</h3>
+<div id="c.4-what-this-does-and-doesnt-imply-for-identification" class="section level4">
+<h4>C.4 What This Does and Doesn’t Imply for Identification</h4>
 <p><strong>This does not, by itself, invalidate the DiD design.</strong>
 Difference-in- differences does not require random treatment assignment.
 States choosing to raise their minimum wage for identifiable political
@@ -3801,6 +3899,7 @@ through <code>R/31_state_clustering.R</code> in order, from
 (<code>make all</code> does this end to end). See <code>README.md</code>
 and <code>TIMELINE.md</code> for the day-by-day build log, including
 every defect found and corrected along the way.</em></p>
+</div>
 </div>
 </div>
 
