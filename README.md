@@ -27,6 +27,9 @@ industries?
 3. Does the effect differ across Census regions?
 4. How sensitive are these conclusions to alternative treatment definitions
    and inference procedures?
+5. Did the increases actually raise earnings in low-wage industries, and
+   by how much relative to the size of the mandate (pass-through)? See
+   [Wage Pass-Through](#wage-pass-through).
 
 This is a Card-Krueger-style state minimum-wage DiD design; the
 contribution is a specific empirical angle (modeling how the effect
@@ -42,7 +45,8 @@ credibility check the data will support.
 | **Model C, β₄** (exposure gradient) | 0.167 food service (p=0.34), -0.005 retail (p=0.95) — noisy and inconsistent in sign |
 | **Robustness on β₄** | 4/4 independent checks (placebo, permutation, event study, spec curve) flag it as confounded |
 | **Inference** | State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis |
-| **Engineering** | 28 R scripts + a Python ML subproject, 143 R test blocks (all passing), CI on every push, `make all` for full reproduction |
+| **Wage pass-through** | 13% (food service proxy, p=0.65) / 63% (retail proxy, p=0.22) of the mandated increase — neither significant |
+| **Engineering** | 29 R scripts + a Python ML subproject, 150 R test blocks (all passing), CI on every push, `make all` for full reproduction |
 
 ## Results at a Glance
 
@@ -56,6 +60,7 @@ credibility check the data will support.
 | Exposure vs. COVID severity | Significant negative correlation | A candidate mechanism — but controlling for it barely moves the placebo effect |
 | Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
 | Leave-one-state-out | Estimate stable across all 20 drops | No single state drives Model A |
+| Wage pass-through | 13%/63% of the mandated increase, neither significant | Consistent with underpowered, not "no pass-through" |
 
 ## Key Figures
 
@@ -118,6 +123,46 @@ Rscript -e 'rmarkdown::render("reports/final_report.Rmd")'
 ```
 
 (needs [pandoc](https://pandoc.org) — `brew install pandoc` on macOS).
+
+## Wage Pass-Through
+
+A new research question, not a re-analysis of the one above: did the
+2021 increases actually raise **earnings** in low-wage industries, and
+by how much relative to the dollar size of the mandate (pass-through)?
+Everything above asks whether employment fell; this asks whether the
+policy did the thing it was actually meant to do.
+
+**Data limitation, found by direct request** (`R/29_wage_passthrough.R`):
+BLS/FRED do not publish state-level average hourly earnings at the
+detailed NAICS-722 (food service) or 44-45 (retail trade) level the
+employment analysis uses — every candidate series ID at that resolution
+404s. The finest available state-level breakdown is the CES
+**supersector**: "Leisure and Hospitality" (nests food service, but also
+accommodation and arts/entertainment/recreation) as the closest proxy for
+food service, and "Trade, Transportation, and Utilities" (nests retail,
+but also wholesale trade, transportation, and utilities) as the closest
+proxy for retail. Both are broader than the industries used elsewhere in
+this study, so **this answers a related but not identical question** —
+not "did retail workers' wages rise" but "did wages in retail's broader
+supersector rise."
+
+| Proxy industry | treated_post (log pts) | p | Mandated $/hr | Estimated $/hr | Pass-through |
+|---|---|---|---|---|---|
+| Leisure & Hospitality (food service proxy) | 0.0044 | 0.647 | $0.54 | $0.07 | 13% |
+| Trade, Transportation & Utilities (retail proxy) | 0.0144 | 0.217 | $0.54 | $0.34 | 63% |
+
+<img src="reports/figures/wage_passthrough.png" width="80%">
+
+Neither estimate is statistically significant, and the food-service
+proxy's confidence interval crosses zero on both sides — consistent
+with this study's broader theme that these designs are underpowered at
+the observed effect sizes, not evidence that pass-through is genuinely
+13%/63% versus some other number. The likeliest reason both estimates
+sit well under 100%: the supersector proxies include large numbers of
+workers (hotel managers, arts/entertainment/recreation staff, wholesale
+and utilities employees) who were never near the minimum wage to begin
+with, diluting any real effect on the low-wage workers actually
+targeted.
 
 ## Machine Learning Extension
 
@@ -195,12 +240,13 @@ proposing a mechanism isn't the same as confirming one.
 | U.S. DOL minimum wage history | Treatment classification |
 | QCEW Open Data API | Fallback employment (2 states); validation check |
 | CPS-ORG via IPUMS-CPS | Exposure construction (2019-2020 earnings only) |
+| FRED CES average hourly earnings (supersector) | Wage pass-through analysis (`R/29`) |
 
 ## How to Reproduce
 
 ```
 Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
-make all                       # R/01-R/28, tests, figures, report end to end
+make all                       # R/01-R/29, tests, figures, report end to end
 make test                      # just the R test suite
 make report                    # just render reports/final_report.Rmd
 
@@ -216,7 +262,7 @@ report needs [pandoc](https://pandoc.org), separate from `renv.lock`.
 first; see [python/README.md](python/README.md) for why it's a
 separate virtual environment rather than a renv-tracked dependency.
 
-Repo layout: `R/` (28 numbered scripts, run in order), `tests/` (one
+Repo layout: `R/` (29 numbered scripts, run in order), `tests/` (one
 file per script), `reports/` (`final_report.Rmd`, rendered HTML,
 figures), `data/processed/` (all results, gitignored, reproducible),
 `python/` (independent ML/NN replication — see
@@ -235,7 +281,7 @@ including every defect found and corrected along the way. The original
 `R/11`, `R/15`) were added afterward for the power analyses, robustness
 checks, and mechanism investigation summarized above; `R/27`-`R/28` and
 `python/` add the ML/neural-network predictive comparison described
-above.
+above, and `R/29` adds the wage pass-through research question.
 
 ## License
 
