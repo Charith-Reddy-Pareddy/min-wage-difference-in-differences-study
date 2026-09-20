@@ -1,8 +1,7 @@
 # Post-build addition: the quantitative Monte Carlo power simulations for
-# beta3 and beta4 (Section 4.4 of the proposal) that TIMELINE.md and the
-# final report both flagged as scoped out of the original 10-day build.
-# This script fills that gap; it was not part of the original 10 days --
-# see the note added to TIMELINE.md and README.md alongside it.
+# beta3 and beta4 (Section 4.4 of the proposal) that the final report
+# flagged as scoped out of the original 10-day build. This script fills
+# that gap; it was not part of the original 10 days.
 #
 # Section 4.4 specifies two separate power analyses:
 #   1. Average-effect power for beta3 (Model A's treated_post), at

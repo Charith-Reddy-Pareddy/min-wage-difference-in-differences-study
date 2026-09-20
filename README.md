@@ -74,9 +74,7 @@ industries?
 ### Confirmatory vs. Exploratory
 
 Which analyses were specified before results were seen, and which were
-added afterward, matters for how much weight a p-value can carry. See
-[TIMELINE.md](TIMELINE.md) for the full, dated build log this table
-summarizes.
+added afterward, matters for how much weight a p-value can carry.
 
 | | Analyses | Status |
 |---|---|---|
@@ -434,9 +432,7 @@ Not yet done, in rough priority order:
 
 ## Status
 
-Complete. See [TIMELINE.md](TIMELINE.md) for the day-by-day build log,
-including every defect found and corrected along the way. The original
-10-day build covered treatment classification through the final report;
+Complete. The original 10-day build covered treatment classification through the final report;
 11 new scripts (`R/16`-`R/26`) and 4 extended ones (`R/08`, `R/10`,
 `R/11`, `R/15`) were added afterward for the power analyses, robustness
 checks, and mechanism investigation summarized above; `R/27`-`R/28` and

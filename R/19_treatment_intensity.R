@@ -1,6 +1,6 @@
 # Exploratory treatment-intensity analysis (added post-build). This is
 # "Model B" from the original 8-week proposal, cut from scope to fit the
-# 10-day compressed build (see TIMELINE.md and the proposal's Section 14).
+# 10-day compressed build (proposal Section 14).
 #
 # Question: does a LARGER minimum-wage increase correspond to a larger
 # employment response, rather than just binary treated-vs-not?

@@ -795,7 +795,7 @@ Section 4.4 specifies two power analyses, not one: average-effect power
 for β₃ at assumed sizes of 0.5%, 1%, 2%, and 3%, reporting the minimum
 detectable effect (MDE); and a separate heterogeneity-detection power
 analysis for β₄ (Section 7.5). Both were added after the original
-10-day build (`R/16_power_analysis.R`; see `TIMELINE.md`).
+10-day build (`R/16_power_analysis.R`).
 
 ```{r power-analysis-beta3}
 proc("power_analysis_beta3_results.csv") %>% kable(digits = 4, caption = "Observed beta3 vs. minimum detectable effect at 80% power, Section 4.4's assumed grid (0.5%-3%)")
@@ -1262,5 +1262,4 @@ own.
 running `R/01_treatment_classification.R` through
 `R/31_state_clustering.R` in order, from
 `min-wage-difference-in-differences-study`'s repo root (`make all` does
-this end to end). See `README.md` and `TIMELINE.md` for the day-by-day
-build log, including every defect found and corrected along the way.*
+this end to end). See `README.md` for full reproduction details.*
