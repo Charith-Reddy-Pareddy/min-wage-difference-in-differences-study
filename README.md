@@ -4,16 +4,51 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Live site](https://img.shields.io/badge/live%20site-charith--reddy--pareddy.github.io-9a3324)](https://charith-reddy-pareddy.github.io/min-wage-difference-in-differences-study/)
 
-A difference-in-differences study of the 2021 round of state minimum-wage
-increases, extended beyond a single average treatment effect to ask how
-the employment response varies with pre-policy wage exposure.
+**Question.** Does the employment response to the 2021 round of state
+minimum-wage increases vary with each state-industry's pre-policy
+exposure to the new wage floor?
 
-**Finding:** the baseline estimate is negative but not credible as a
-causal effect — pre-trends are violated for food service, and it's
-highly sensitive to differential COVID recovery. The exposure-gradient
-hypothesis is underpowered *and*, per four independent checks,
-confounded by a pre-existing association unrelated to the 2021 policy.
-See [Results at a Glance](#results-at-a-glance).
+**Method.** A difference-in-differences design: 20 states that raised
+their minimum wage in 2021 Q1 vs. 25 states with no change that year,
+quarterly food-service and retail employment, 2015-2022, state and
+quarter fixed effects, state-clustered inference — extended with an
+interaction term letting the effect scale with a state-industry's
+pre-policy exposure share.
+
+**Finding.** The baseline average effect is negative but not credible as
+a causal effect, and the exposure-gradient extension is underpowered and
+confounded. See [Results at a Glance](#results-at-a-glance) below.
+
+**Why the finding is uncertain.** Parallel pre-trends — the assumption
+this design's causal claim actually rests on — are directly tested
+(Section 4.1 of the [full report](#final-report)) and found to be
+**violated for food service**. That is this study's real identification
+problem, checked directly rather than assumed, and it's why every result
+below is reported with that caveat attached rather than as a clean
+causal estimate.
+
+<img src="reports/figures/event_study_food_service.png" width="70%">
+
+**Reproduce:** `Rscript -e 'renv::restore()' && make all` — see
+[How to Reproduce](#how-to-reproduce) for the full command list.
+
+---
+
+**Primary contribution — causal inference / econometrics:** a
+Card-Krueger-style state minimum-wage DiD design, extended to ask how
+the effect scales with pre-policy exposure and stress-tested with every
+credibility check the data will support (event study, placebo test,
+COVID-sensitivity spec, wild cluster bootstrap, permutation test,
+specification curve, power analysis). This is the project's actual
+research contribution and the rest of this README is organized around
+it first.
+
+**Secondary — predictive modeling comparison:** an ML/neural-network
+predictive-accuracy comparison (R and Python) and two exploratory checks
+(treatment predictability, state clustering) are included as
+**extensions**, not co-equal findings — see
+[Extensions](#extensions) below. They inform
+the causal analysis's credibility checks; they don't replace them.
 
 ## Research Questions
 
@@ -28,17 +63,25 @@ industries?
 4. How sensitive are these conclusions to alternative treatment definitions
    and inference procedures?
 5. Did the increases actually raise earnings in low-wage industries, and
-   by how much relative to the size of the mandate (pass-through)? See
-   [Wage Pass-Through](#wage-pass-through).
+   by how much relative to the size of the mandate (pass-through)?
 6. Is treatment status itself predictable from pre-period state
-   characteristics — and do states form natural economic clusters that
-   track treatment status? See
-   [Treatment Assignment: Predictability & Clustering](#treatment-assignment-predictability--clustering).
+   characteristics, and do states form natural economic clusters that
+   track treatment status? (Exploratory; see
+   [Extensions](#extensions) — this does not
+   itself bear on whether the DiD design is valid, since DiD doesn't
+   require random assignment.)
 
-This is a Card-Krueger-style state minimum-wage DiD design; the
-contribution is a specific empirical angle (modeling how the effect
-scales with exposure) plus stress-testing that model with every
-credibility check the data will support.
+### Confirmatory vs. Exploratory
+
+Which analyses were specified before results were seen, and which were
+added afterward, matters for how much weight a p-value can carry. See
+[TIMELINE.md](TIMELINE.md) for the full, dated build log this table
+summarizes.
+
+| | Analyses | Status |
+|---|---|---|
+| **Confirmatory** (pre-specified in the original proposal) | Model A (β₃), Model C (β₄, pre-registered as likely underpowered), event study, COVID-sensitivity spec, placebo test, wild cluster bootstrap, permutation test, power analysis | Reported regardless of significance |
+| **Exploratory** (added after the original build, motivated by what the confirmatory results showed) | Bandwidth sensitivity, marginal effects, treatment intensity, leave-one-out, multiple-testing correction, specification curve, exposure–COVID correlation, COVID-controlled placebo, wage pass-through, treatment predictability, state clustering, ML/NN comparison | Informs interpretation; not held to the same inferential standard as the confirmatory family |
 
 ## Key Metrics
 
@@ -120,6 +163,30 @@ power-analysis curves, the beta4 event study and forest plot — are in
 `reports/figures/` and embedded in the
 [full report](reports/final_report.Rmd).
 
+## Limitations
+
+- **Parallel trends violated** for food service (event study + two-sample t-test) — this study's central, load-bearing identification problem.
+- **COVID-era differential recovery confounds the treatment window** — a
+  real share of the baseline estimate, not the policy.
+- **Both β₃ and β₄ are underpowered** at the observed effect sizes
+  (`R/16_power_analysis.R`), not just assumed underpowered.
+- **β₄ is also confounded**, not just underpowered — 4 independent
+  checks find high/low-exposure states already differed before 2021. A
+  candidate mechanism (exposure correlates with COVID severity) was
+  tested directly by controlling for it in the placebo spec
+  (`R/25`-`R/26`) — the effect barely shrank. See report Section 8.1.
+- **The ≥$0.50 subsample and the legislated-only subsample are the exact
+  same 10 states** — the two cuts can't be disentangled in this data.
+- **Small cluster count** (20 treated, 45 total) — addressed via
+  clustered SEs and a wild bootstrap, but always some caution.
+- **Wage pass-through uses broader supersector proxies**, not the exact
+  food-service/retail industries — BLS/FRED don't publish earnings at
+  that resolution by state (see [Extensions](#extensions)).
+- **Exposure-measure construction, spillovers, anticipation effects, and
+  external validity** are documented but not fully resolved.
+- Results are **DiD estimates under this specification**, not definitive
+  causal effects — see the full report's Limitations section for detail.
+
 ## Final Report
 
 **[Read the rendered report (HTML)](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/releases/tag/v1.0-report)**
@@ -137,7 +204,16 @@ the HTML, and Chrome/Chromium installed locally for the PDF; see
 `scripts/render_report_pdf.R` for why it's a headless-Chrome print
 rather than a LaTeX pipeline).
 
-## Wage Pass-Through
+## Extensions
+
+Everything below is secondary to the causal analysis above, not
+co-equal with it: a second research question (wage pass-through), two
+exploratory checks on treatment assignment, and a predictive-modeling
+comparison. None of them revise the causal estimates or their
+limitations; they're included because they add real information, not
+to pad the project's scope.
+
+### Wage Pass-Through
 
 A new research question, not a re-analysis of the one above: did the
 2021 increases actually raise **earnings** in low-wage industries, and
@@ -177,7 +253,7 @@ and utilities employees) who were never near the minimum wage to begin
 with, diluting any real effect on the low-wage workers actually
 targeted.
 
-## Treatment Assignment: Predictability & Clustering
+### Treatment Assignment: Predictability & Clustering
 
 Exploratory analyses investigating systematic differences in
 pre-treatment economic structure between treated and comparison states,
@@ -223,7 +299,7 @@ not the predictability result. The predictability and clustering
 findings here are a reason to take the event study's verdict seriously,
 not a second, independent verdict of their own.
 
-## Machine Learning Extension
+### Machine Learning Extension
 
 A predictive-accuracy comparison, separate from the causal claims
 above: how well can flexible ML methods predict quarterly employment
@@ -260,27 +336,6 @@ This is a methods comparison, not a substitute for Model A/C's
 identification strategy — a model that predicts employment well isn't
 thereby estimating the policy's causal effect on it.
 
-## Limitations
-
-- **Parallel trends violated** for food service (event study + two-sample t-test).
-- **COVID-era differential recovery confounds the treatment window** — a
-  real share of the baseline estimate, not the policy.
-- **Both β₃ and β₄ are underpowered** at the observed effect sizes
-  (`R/16_power_analysis.R`), not just assumed underpowered.
-- **β₄ is also confounded**, not just underpowered — 4 independent
-  checks find high/low-exposure states already differed before 2021. A
-  candidate mechanism (exposure correlates with COVID severity) was
-  tested directly by controlling for it in the placebo spec
-  (`R/25`-`R/26`) — the effect barely shrank. See report Section 8.1.
-- **The ≥$0.50 subsample and the legislated-only subsample are the exact
-  same 10 states** — the two cuts can't be disentangled in this data.
-- **Small cluster count** (20 treated, 45 total) — addressed via
-  clustered SEs and a wild bootstrap, but always some caution.
-- **Exposure-measure construction, spillovers, anticipation effects, and
-  external validity** are documented but not fully resolved.
-- Results are **DiD estimates under this specification**, not definitive
-  causal effects — see the full report's Limitations section for detail.
-
 ## What I Learned
 
 A significant DiD estimate isn't sufficient evidence of a causal effect.
@@ -291,7 +346,9 @@ direct test of the candidate confounding mechanism — reinforced it from
 another angle: a fragile result isn't evidence of "no effect," and
 proposing a mechanism isn't the same as confirming one.
 
-## Data Sources
+## Data
+
+### Sources
 
 | Source | Role |
 |---|---|
@@ -300,6 +357,19 @@ proposing a mechanism isn't the same as confirming one.
 | QCEW Open Data API | Fallback employment (2 states); validation check |
 | CPS-ORG via IPUMS-CPS | Exposure construction (2019-2020 earnings only) |
 | FRED CES average hourly earnings (supersector) | Wage pass-through analysis (`R/29`) |
+
+### Variables
+
+| Variable | Source | Frequency | Transformation | Role in identification |
+|---|---|---|---|---|
+| `log_employment` (food service / retail) | FRED CES; QCEW fallback for 2 states | Monthly → quarterly mean | Natural log | Outcome |
+| `treated_post` | U.S. DOL minimum wage history | Static per state × time-invariant cutoff | Binary (treated × post-2021Q1) | Treatment indicator (Model A/C) |
+| `exposure` (12.5% band) | CPS-ORG via IPUMS-CPS, 2019-2020 pooled | Static per state-industry | Weighted share of workers within band of pre-2021 minimum wage | Moderator — the exposure-gradient hypothesis itself (Model C) |
+| `gdp_growth` | FRED (state GDP) | Quarterly | Year-over-year log growth | Control |
+| `pop_growth` | FRED (state population) | Annual, repeated across quarters | Year-over-year log growth | Control |
+| `region` | Census Bureau region classification | Static | Categorical (4 levels) | Heterogeneity / robustness (ANOVA, chi-square) |
+| `covid_severity` | Derived from FRED employment (own construction) | Static per state | log(2020 Q2 employment) − log(2019 Q4 employment) | COVID-sensitivity covariate (Section 4.3) |
+| `wage_food_service_proxy`, `wage_retail_proxy` | FRED CES average hourly earnings, supersector | Monthly → quarterly mean | Natural log | Outcome, wage pass-through (`R/29`) only |
 
 ## How to Reproduce
 
