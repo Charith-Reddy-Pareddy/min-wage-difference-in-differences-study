@@ -68,7 +68,34 @@ Needs `data/processed/ml_panel.csv`, written by `R/27_ml_prediction.R`
 ```
 
 Writes `results/comparison.csv` (gitignored, like the R side's
-`data/processed/`).
+`data/processed/`), plus three more files describing the random
+forest specifically: `random_forest_grid_search.csv` (every
+max_depth/min_samples_leaf combination tried and its grouped-CV RMSE),
+`random_forest_bootstrap_ci.csv` (a 95% cluster bootstrap interval,
+resampled by state, for test RMSE and R²), and
+`random_forest_permutation_importance.csv` (RMSE increase when each
+feature is independently shuffled on the test set).
+
+## Model selection and uncertainty
+
+`minwage.ml.experiment` is the model-selection layer every estimator in
+`minwage.ml` can use, not something specific to the random forest:
+
+- `group_k_fold` / `cross_validate` — k-fold CV that splits on states,
+  not rows, so no state's quarters leak across a fold boundary.
+- `grid_search_cv` — tries every combination in a hyperparameter grid
+  under grouped CV and returns the lowest-mean-RMSE combination.
+- `bootstrap_metric_ci` — a cluster bootstrap (resampling whole states,
+  with replacement) for a confidence interval on a fixed model's
+  held-out RMSE or R², rather than reporting a single number as if it
+  had no sampling variability.
+- `permutation_importance` — shuffles one feature at a time and reports
+  how much worse predictions get, as a model-agnostic measure of which
+  features the fitted model actually relies on.
+
+`train.py` currently applies all four to the random forest only (the
+one estimator whose depth/leaf-size are worth tuning); the other
+models keep the fixed hyperparameters chosen in earlier work.
 
 ## Tests
 
@@ -91,7 +118,8 @@ python/
 │       ├── random_forest.py    # regression tree + bagging + random forest, from scratch
 │       ├── gradient_boosting.py # sequential residual-fitting ensemble, from scratch
 │       ├── neural_network.py    # PyTorch feedforward net, train-only standardization
-│       └── evaluation.py   # RMSE / R², matching R/27's definitions exactly
+│       ├── evaluation.py   # RMSE / R², matching R/27's definitions exactly
+│       └── experiment.py   # grouped CV, grid search, bootstrap CI, permutation importance
 ├── train.py                # ties the above together, prints and saves the comparison
 └── tests/                  # pytest, mirrors the src/minwage/ layout
 ```
