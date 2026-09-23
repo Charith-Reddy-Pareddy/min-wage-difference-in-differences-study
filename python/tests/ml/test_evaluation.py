@@ -18,3 +18,9 @@ def test_r_squared_is_zero_for_predicting_the_mean():
     actual = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     predicted = np.full_like(actual, actual.mean())
     assert r_squared(actual, predicted) == 0.0
+
+
+def test_r_squared_does_not_divide_by_zero_when_actual_has_no_variance():
+    actual = np.array([7.0, 7.0, 7.0, 7.0])
+    assert r_squared(actual, actual) == 1.0
+    assert r_squared(actual, np.array([7.0, 7.0, 7.0, 9.0])) == 0.0
