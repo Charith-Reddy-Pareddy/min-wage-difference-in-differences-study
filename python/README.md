@@ -20,9 +20,12 @@ trees sequentially, each one to the current residuals of the trees
 before it. See `random_forest.py`'s module docstring for the full
 distinction.
 
-**This is a predictive-accuracy comparison, not a causal claim.** The
-study's actual identification strategy is Model A/C in `R/07`, with the
-robustness checks in `R/08`-`R/26`.
+**`train.py`'s comparison above is predictive-accuracy only, not a
+causal claim.** The study's actual identification strategy is Model
+A/C in `R/07`, with the robustness checks in `R/08`-`R/26`.
+`causal_ml/` (below) is the one place on the Python side that does
+make a causal estimate, and it says exactly what that estimate does
+and doesn't establish.
 
 ## Why numpy/pandas/torch only, no scikit-learn
 
@@ -97,6 +100,32 @@ feature is independently shuffled on the test set).
 one estimator whose depth/leaf-size are worth tuning); the other
 models keep the fixed hyperparameters chosen in earlier work.
 
+## Causal ML: double ML as a functional-form robustness check
+
+```
+.venv/bin/python causal_estimate.py
+```
+
+`causal_ml/dml.py` implements cross-fitted double/debiased ML
+(Chernozhukov et al., 2018) for the partially linear model
+`Y = theta*D + g(X) + U`, `D = m(X) + V`: `g` and `m` are fit with any
+ML estimator instead of assumed linear, then `theta` -- the effect of
+`D` (`treated_post`) on `Y` (`employment_growth`) -- is recovered from
+the residualized regression, cross-fitted by state so no fold's
+nuisance model ever sees the rows it predicts.
+
+**What this is:** a check on whether Model A's linear-in-controls
+functional form (`R/07_model_a_c.R`) matters, run on the same
+`employment_growth` target and control set `train.py` already uses.
+**What this isn't:** a second, independent identification strategy.
+Both the linear and ML-nuisance versions still require no unobserved
+confounder of treatment and outcome given the controls -- exactly
+Model A's parallel-trends assumption, not something double ML relaxes.
+`causal_estimate.py`'s module docstring spells out why its point
+estimate isn't numerically comparable to Model A's coefficient (different
+target, different control set -- region dummies here, full state and
+quarter fixed effects there).
+
 ## Tests
 
 ```
@@ -120,7 +149,10 @@ python/
 │       ├── neural_network.py    # PyTorch feedforward net, train-only standardization
 │       ├── evaluation.py   # RMSE / R², matching R/27's definitions exactly
 │       └── experiment.py   # grouped CV, grid search, bootstrap CI, permutation importance
-├── train.py                # ties the above together, prints and saves the comparison
+│   └── causal_ml/
+│       └── dml.py          # cross-fitted double ML for the partially linear treatment model
+├── train.py                # ties minwage.ml together, prints and saves the comparison
+├── causal_estimate.py      # runs double ML against the real panel
 └── tests/                  # pytest, mirrors the src/minwage/ layout
 ```
 
@@ -130,6 +162,6 @@ should be — all raw acquisition (FRED, QCEW, CPS-ORG, DOL) happens in R
 (`R/02`-`R/04`), which stays this project's single source of truth for
 how the panel is built. See `loaders.py`'s module docstring.
 
-`causal_ml/` and `api/` don't exist yet — planned extensions (a
-heterogeneous-treatment-effects estimator, and a small FastAPI results
-service), not scaffolding for their own sake.
+A heterogeneous-treatment-effects estimator (causal forest) on top of
+`causal_ml/` and a small FastAPI results service (`api/`) don't exist
+yet -- planned extensions, not scaffolding for their own sake.
