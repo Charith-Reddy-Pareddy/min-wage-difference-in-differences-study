@@ -126,6 +126,15 @@ estimate isn't numerically comparable to Model A's coefficient (different
 target, different control set -- region dummies here, full state and
 quarter fixed effects there).
 
+`causal_ml/heterogeneity.py` adds an R-learner (Nie & Wager, 2017) on
+top of the DML residuals: instead of one effect for every row, it
+regresses the pseudo-outcome `y_resid/d_resid` on exposure (weighted
+by `d_resid**2`) to get a slope for how the effect varies with
+exposure specifically -- the same question Model C's
+`treated_post*exposure` interaction asks, without assuming that
+interaction is linear in TWFE's sense. No separate cross-fitting pass;
+it reuses the residuals `partialling_out_dml` already computed.
+
 ## Tests
 
 ```
