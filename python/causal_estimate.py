@@ -14,6 +14,12 @@ independent estimate of Model A's causal parameter. Both estimates
 still rest on the same identifying assumption: no unobserved
 confounder of treatment and outcome given the controls.
 
+Also reports how that effect varies with exposure specifically
+(minwage.causal_ml.heterogeneity's R-learner on the random forest's
+residuals) -- the same question R/07's Model C asks with a
+treated_post*exposure interaction term, asked here without assuming
+the interaction is linear in Model A's TWFE sense.
+
 Run after `python train.py` has been used at least once (needs the
 same data/processed/ml_panel.csv):
 
@@ -25,6 +31,7 @@ from pathlib import Path
 import pandas as pd
 
 from minwage.causal_ml.dml import partialling_out_dml
+from minwage.causal_ml.heterogeneity import fit_r_learner_cate
 from minwage.data.loaders import load_ml_panel, one_hot_region
 from minwage.ml.baselines import LinearRegression
 from minwage.ml.random_forest import RandomForest
@@ -55,10 +62,22 @@ def main() -> pd.DataFrame:
         ]
     )
 
+    # Heterogeneity by exposure specifically -- the R-learner's pseudo-
+    # outcome regression, taking exposure alone as the heterogeneity axis
+    # (not the full control set), mirroring what R/07's Model C already
+    # asks with a treated_post*exposure interaction, but built on the
+    # forest-nuisance DML residuals above rather than TWFE.
+    exposure = panel["exposure"].to_numpy(dtype=float).reshape(-1, 1)
+    cate_coef = fit_r_learner_cate(exposure, forest_result["y_resid"], forest_result["d_resid"])
+    heterogeneity = pd.DataFrame([{"intercept": cate_coef[0], "exposure_slope": cate_coef[1]}])
+
     RESULTS_DIR.mkdir(exist_ok=True)
     results.to_csv(RESULTS_DIR / "dml_estimate.csv", index=False)
+    heterogeneity.to_csv(RESULTS_DIR / "dml_exposure_heterogeneity.csv", index=False)
     print("Double ML estimate of treated_post's effect on employment_growth:")
     print(results.to_string(index=False))
+    print("\nTreatment-effect heterogeneity by exposure (R-learner, forest-nuisance residuals):")
+    print(heterogeneity.to_string(index=False))
     return results
 
 
