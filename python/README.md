@@ -138,14 +138,47 @@ it reuses the residuals `partialling_out_dml` already computed.
 ## Tests
 
 ```
-.venv/bin/python -m pytest
+.venv/bin/python -m pytest --cov=minwage --cov-report=term-missing
 ```
+
+CI fails the build under 90% coverage (`[tool.coverage.report]` in
+`pyproject.toml`); it's at ~99% currently.
+
+## Lint, formatting, and type checking
+
+```
+.venv/bin/ruff check .
+.venv/bin/ruff format .
+.venv/bin/mypy
+```
+
+`ruff` covers both linting and formatting (no separate black
+dependency); `mypy` runs with `disallow_untyped_defs`, and every
+estimator in `minwage.ml`/`minwage.causal_ml` is typed against the
+shared `ml.protocols.Estimator` protocol rather than a bare `object`,
+so a model factory that doesn't actually implement `.fit()`/`.predict()`
+is a type error, not a runtime surprise. All three run in CI
+(`.github/workflows/ci.yml`) alongside the test suite and a package
+build check (`python -m build`).
+
+## Docker
+
+```
+docker build -t minwage -f Dockerfile .
+docker run minwage
+```
+
+Runs the test suite in a clean environment. It doesn't run
+`train.py`/`causal_estimate.py`, since both need
+`data/processed/ml_panel.csv` from the R pipeline, which isn't
+available inside the build context.
 
 ## Layout
 
 ```
 python/
-├── pyproject.toml          # package metadata, dependencies, pytest config
+├── pyproject.toml          # package metadata, dependencies, pytest/coverage/ruff/mypy config
+├── Dockerfile              # runs the test suite in a clean environment
 ├── src/minwage/
 │   ├── config.py           # shared constants (panel path, column names)
 │   ├── data/
@@ -153,6 +186,7 @@ python/
 │   └── ml/
 │       ├── splitting.py    # grouped (by-state) train/test split
 │       ├── baselines.py    # OLS via the normal equations
+│       ├── protocols.py    # the Estimator protocol (fit/predict) every model here follows
 │       ├── random_forest.py    # regression tree + bagging + random forest, from scratch
 │       ├── gradient_boosting.py # sequential residual-fitting ensemble, from scratch
 │       ├── neural_network.py    # PyTorch feedforward net, train-only standardization
