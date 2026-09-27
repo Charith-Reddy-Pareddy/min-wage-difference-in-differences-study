@@ -54,8 +54,22 @@ jobs:
       - name: Install package
         run: pip install -e ".[dev]"
 
-      - name: Run tests
-        run: python -m pytest
+      - name: Lint
+        run: ruff check .
+
+      - name: Check formatting
+        run: ruff format --check .
+
+      - name: Type check
+        run: mypy
+
+      - name: Run tests with coverage
+        run: python -m pytest --cov=minwage --cov-report=term-missing
+
+      - name: Verify the package builds
+        run: |
+          pip install build
+          python -m build
 
   # The full pipeline needs a live IPUMS_API_KEY (R/03) and several
   # minutes of network calls (FRED, QCEW, IPUMS), and reports/final_report.Rmd
