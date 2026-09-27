@@ -43,7 +43,7 @@ class GradientBoostedTrees:
         self.init_value: float = 0.0
         self.trees: list[RegressionTree] = []
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "GradientBoostedTrees":
+    def fit(self, X: np.ndarray, y: np.ndarray) -> GradientBoostedTrees:
         X = np.asarray(X, dtype=float)
         y = np.asarray(y, dtype=float)
         self.init_value = float(y.mean())

@@ -34,7 +34,7 @@ class Standardizer:
         self.mean_: np.ndarray | None = None
         self.std_: np.ndarray | None = None
 
-    def fit(self, x: np.ndarray) -> "Standardizer":
+    def fit(self, x: np.ndarray) -> Standardizer:
         self.mean_ = x.mean(axis=0)
         std = x.std(axis=0)
         self.std_ = np.where(std == 0, 1.0, std)

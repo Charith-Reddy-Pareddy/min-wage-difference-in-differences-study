@@ -13,7 +13,7 @@ rows from the same state aren't independent observations.
 from __future__ import annotations
 
 import itertools
-from typing import Callable
+from collections.abc import Callable
 
 import numpy as np
 import pandas as pd
@@ -37,8 +37,12 @@ def group_k_fold(groups: np.ndarray, n_splits: int = 5, seed: int = 0):
 
 
 def cross_validate(
-    model_fn: Callable[[], object], X: np.ndarray, y: np.ndarray, groups: np.ndarray,
-    n_splits: int = 5, seed: int = 0,
+    model_fn: Callable[[], object],
+    X: np.ndarray,
+    y: np.ndarray,
+    groups: np.ndarray,
+    n_splits: int = 5,
+    seed: int = 0,
 ) -> dict:
     """Fit a fresh model per fold via `model_fn()` and score it on that
     fold's held-out states. Returns per-fold scores plus their mean/std."""
@@ -65,8 +69,13 @@ def cross_validate(
 
 
 def grid_search_cv(
-    model_cls: type, param_grid: dict, X: np.ndarray, y: np.ndarray, groups: np.ndarray,
-    n_splits: int = 5, seed: int = 0,
+    model_cls: type,
+    param_grid: dict,
+    X: np.ndarray,
+    y: np.ndarray,
+    groups: np.ndarray,
+    n_splits: int = 5,
+    seed: int = 0,
 ) -> tuple[dict, pd.DataFrame]:
     """Try every combination of `param_grid` (dict of param name -> list
     of values), score each with `cross_validate`, and return the
@@ -89,9 +98,13 @@ def grid_search_cv(
 
 
 def bootstrap_metric_ci(
-    actual: np.ndarray, predicted: np.ndarray, groups: np.ndarray,
+    actual: np.ndarray,
+    predicted: np.ndarray,
+    groups: np.ndarray,
     metric_fn: Callable[[np.ndarray, np.ndarray], float] = rmse,
-    n_boot: int = 1000, seed: int = 0, alpha: float = 0.05,
+    n_boot: int = 1000,
+    seed: int = 0,
+    alpha: float = 0.05,
 ) -> dict:
     """Cluster-bootstrap confidence interval for a fixed model's
     held-out metric: resample whole states with replacement (not rows),
@@ -121,7 +134,12 @@ def bootstrap_metric_ci(
 
 
 def permutation_importance(
-    model, X: np.ndarray, y: np.ndarray, feature_names: list[str], n_repeats: int = 20, seed: int = 0,
+    model,
+    X: np.ndarray,
+    y: np.ndarray,
+    feature_names: list[str],
+    n_repeats: int = 20,
+    seed: int = 0,
 ) -> pd.DataFrame:
     """For each feature, shuffle its column `n_repeats` times and measure
     how much RMSE increases relative to the unpermuted baseline -- a
@@ -140,10 +158,12 @@ def permutation_importance(
             X_permuted = X.copy()
             X_permuted[:, j] = rng.permutation(X_permuted[:, j])
             increases.append(rmse(y, model.predict(X_permuted)) - baseline_rmse)
-        rows.append({
-            "feature": name,
-            "importance_mean": float(np.mean(increases)),
-            "importance_std": float(np.std(increases)),
-        })
+        rows.append(
+            {
+                "feature": name,
+                "importance_mean": float(np.mean(increases)),
+                "importance_std": float(np.std(increases)),
+            }
+        )
 
     return pd.DataFrame(rows).sort_values("importance_mean", ascending=False).reset_index(drop=True)

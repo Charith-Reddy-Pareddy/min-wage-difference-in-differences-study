@@ -31,7 +31,7 @@ fold its prediction is evaluated on.
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 import numpy as np
 
@@ -39,8 +39,12 @@ from minwage.ml.experiment import group_k_fold
 
 
 def _cross_fitted_residuals(
-    X: np.ndarray, target: np.ndarray, groups: np.ndarray,
-    model_factory: Callable[[], object], n_folds: int = 5, seed: int = 0,
+    X: np.ndarray,
+    target: np.ndarray,
+    groups: np.ndarray,
+    model_factory: Callable[[], object],
+    n_folds: int = 5,
+    seed: int = 0,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Out-of-fold predictions for `target` from `X`, and the resulting
     residuals, using a fresh model per fold so no row is ever predicted
@@ -58,9 +62,14 @@ def _cross_fitted_residuals(
 
 
 def partialling_out_dml(
-    X: np.ndarray, Y: np.ndarray, D: np.ndarray, groups: np.ndarray,
-    y_model_factory: Callable[[], object], d_model_factory: Callable[[], object],
-    n_folds: int = 5, seed: int = 0,
+    X: np.ndarray,
+    Y: np.ndarray,
+    D: np.ndarray,
+    groups: np.ndarray,
+    y_model_factory: Callable[[], object],
+    d_model_factory: Callable[[], object],
+    n_folds: int = 5,
+    seed: int = 0,
 ) -> dict:
     """Estimate theta in Y = theta*D + g(X) + U by cross-fitted
     partialling-out. `y_model_factory`/`d_model_factory` are zero-arg

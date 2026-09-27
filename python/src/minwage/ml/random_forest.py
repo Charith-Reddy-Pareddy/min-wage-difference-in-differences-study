@@ -32,8 +32,8 @@ class _Node:
     value: float = 0.0
     feature_index: int = -1
     threshold: float = 0.0
-    left: "_Node | None" = None
-    right: "_Node | None" = None
+    left: _Node | None = None
+    right: _Node | None = None
 
 
 def _sse(y: np.ndarray) -> float:
@@ -126,20 +126,22 @@ class RegressionTree:
     mode and by gradient boosting's per-estimator base learner; leave it
     None for an ordinary tree considering every feature."""
 
-    def __init__(
-        self, max_depth: int = 5, min_samples_leaf: int = 5, feature_indices: list[int] | None = None
-    ) -> None:
+    def __init__(self, max_depth: int = 5, min_samples_leaf: int = 5, feature_indices: list[int] | None = None) -> None:
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.feature_indices = feature_indices
         self.root: _Node | None = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "RegressionTree":
+    def fit(self, X: np.ndarray, y: np.ndarray) -> RegressionTree:
         X = np.asarray(X, dtype=float)
         y = np.asarray(y, dtype=float)
         feature_indices = self.feature_indices if self.feature_indices is not None else list(range(X.shape[1]))
         self.root = _build(
-            X, y, depth=0, max_depth=self.max_depth, min_samples_leaf=self.min_samples_leaf,
+            X,
+            y,
+            depth=0,
+            max_depth=self.max_depth,
+            min_samples_leaf=self.min_samples_leaf,
             feature_indices=feature_indices,
         )
         return self
@@ -171,7 +173,7 @@ class BaggedTrees:
         self.seed = seed
         self.trees: list[RegressionTree] = []
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "BaggedTrees":
+    def fit(self, X: np.ndarray, y: np.ndarray) -> BaggedTrees:
         X = np.asarray(X, dtype=float)
         y = np.asarray(y, dtype=float)
         n, n_features = X.shape
@@ -218,7 +220,7 @@ class RandomForest:
         self.seed = seed
         self.roots: list[_Node] = []
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "RandomForest":
+    def fit(self, X: np.ndarray, y: np.ndarray) -> RandomForest:
         X = np.asarray(X, dtype=float)
         y = np.asarray(y, dtype=float)
         n, n_features = X.shape
@@ -229,15 +231,18 @@ class RandomForest:
         for _ in range(self.n_trees):
             boot_idx = rng.integers(0, n, size=n)
             root = _build(
-                X[boot_idx], y[boot_idx], depth=0, max_depth=self.max_depth,
-                min_samples_leaf=self.min_samples_leaf, mtry=mtry, rng=rng,
+                X[boot_idx],
+                y[boot_idx],
+                depth=0,
+                max_depth=self.max_depth,
+                min_samples_leaf=self.min_samples_leaf,
+                mtry=mtry,
+                rng=rng,
             )
             self.roots.append(root)
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         X = np.asarray(X, dtype=float)
-        predictions = np.column_stack(
-            [[_predict_one(root, row) for row in X] for root in self.roots]
-        )
+        predictions = np.column_stack([[_predict_one(root, row) for row in X] for root in self.roots])
         return predictions.mean(axis=1)

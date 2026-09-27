@@ -55,10 +55,11 @@ def main() -> pd.DataFrame:
 
     forest_result = partialling_out_dml(X, Y, D, groups, forest_factory, forest_factory, n_folds=5, seed=1)
 
+    summary_keys = ("theta", "se", "ci_lower", "ci_upper", "n")
     results = pd.DataFrame(
         [
-            {"nuisance_model": "linear", **{k: v for k, v in linear_result.items() if k in ("theta", "se", "ci_lower", "ci_upper", "n")}},
-            {"nuisance_model": "random_forest", **{k: v for k, v in forest_result.items() if k in ("theta", "se", "ci_lower", "ci_upper", "n")}},
+            {"nuisance_model": "linear", **{k: v for k, v in linear_result.items() if k in summary_keys}},
+            {"nuisance_model": "random_forest", **{k: v for k, v in forest_result.items() if k in summary_keys}},
         ]
     )
 
