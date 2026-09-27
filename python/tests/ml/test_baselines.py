@@ -4,6 +4,11 @@ import pytest
 from minwage.ml.baselines import LinearRegression
 
 
+def test_predict_before_fit_raises_a_clear_error():
+    with pytest.raises(RuntimeError, match="call fit"):
+        LinearRegression().predict(np.zeros((1, 1)))
+
+
 def test_recovers_an_exact_linear_relationship_with_no_noise():
     rng = np.random.default_rng(0)
     X = rng.uniform(-5, 5, size=(200, 2))

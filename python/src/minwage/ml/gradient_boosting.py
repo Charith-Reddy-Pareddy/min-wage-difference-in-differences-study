@@ -47,7 +47,7 @@ class GradientBoostedTrees:
         X = np.asarray(X, dtype=float)
         y = np.asarray(y, dtype=float)
         self.init_value = float(y.mean())
-        predictions = np.full(len(y), self.init_value)
+        predictions: np.ndarray = np.full(len(y), self.init_value)
 
         self.trees = []
         for _ in range(self.n_estimators):
@@ -59,8 +59,10 @@ class GradientBoostedTrees:
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        if not self.trees:
+            raise RuntimeError("call fit() before predict()")
         X = np.asarray(X, dtype=float)
-        predictions = np.full(X.shape[0], self.init_value)
+        predictions: np.ndarray = np.full(X.shape[0], self.init_value)
         for tree in self.trees:
             predictions = predictions + self.learning_rate * tree.predict(X)
         return predictions

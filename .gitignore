@@ -20,3 +20,6 @@ python/**/__pycache__/
 python/.pytest_cache/
 python/src/*.egg-info/
 python/build/
+python/.coverage
+python/.mypy_cache/
+python/.ruff_cache/

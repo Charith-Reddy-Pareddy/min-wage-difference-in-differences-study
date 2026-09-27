@@ -13,15 +13,16 @@ rows from the same state aren't independent observations.
 from __future__ import annotations
 
 import itertools
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 
 import numpy as np
 import pandas as pd
 
 from minwage.ml.evaluation import r_squared, rmse
+from minwage.ml.protocols import Estimator
 
 
-def group_k_fold(groups: np.ndarray, n_splits: int = 5, seed: int = 0):
+def group_k_fold(groups: np.ndarray, n_splits: int = 5, seed: int = 0) -> Iterator[tuple[np.ndarray, np.ndarray]]:
     """Yield (train_idx, test_idx) row-index arrays for `n_splits` folds,
     splitting on unique groups (states) rather than rows -- every row for
     a given state lands in exactly one fold's test set."""
@@ -37,7 +38,7 @@ def group_k_fold(groups: np.ndarray, n_splits: int = 5, seed: int = 0):
 
 
 def cross_validate(
-    model_fn: Callable[[], object],
+    model_fn: Callable[[], Estimator],
     X: np.ndarray,
     y: np.ndarray,
     groups: np.ndarray,
@@ -85,7 +86,7 @@ def grid_search_cv(
     for combo in itertools.product(*param_grid.values()):
         params = dict(zip(keys, combo))
 
-        def model_fn(params=params):
+        def model_fn(params: dict = params) -> Estimator:
             return model_cls(**params)
 
         cv_result = cross_validate(model_fn, X, y, groups, n_splits=n_splits, seed=seed)
@@ -118,13 +119,13 @@ def bootstrap_metric_ci(
     unique_groups = np.sort(pd.unique(groups))
     rng = np.random.default_rng(seed)
 
-    boot_stats = []
+    boot_stats_list: list[float] = []
     for _ in range(n_boot):
         sampled_groups = rng.choice(unique_groups, size=len(unique_groups), replace=True)
         idx = np.concatenate([np.where(groups == g)[0] for g in sampled_groups])
-        boot_stats.append(metric_fn(actual[idx], predicted[idx]))
+        boot_stats_list.append(metric_fn(actual[idx], predicted[idx]))
 
-    boot_stats = np.array(boot_stats)
+    boot_stats = np.array(boot_stats_list)
     return {
         "point_estimate": float(metric_fn(actual, predicted)),
         "lower": float(np.percentile(boot_stats, 100 * alpha / 2)),
@@ -134,7 +135,7 @@ def bootstrap_metric_ci(
 
 
 def permutation_importance(
-    model,
+    model: Estimator,
     X: np.ndarray,
     y: np.ndarray,
     feature_names: list[str],

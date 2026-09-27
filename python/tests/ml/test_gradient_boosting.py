@@ -1,6 +1,15 @@
 import numpy as np
+import pytest
 
 from minwage.ml.gradient_boosting import GradientBoostedTrees
+
+
+def test_predict_before_fit_raises_instead_of_silently_returning_zeros():
+    # Before this guard, predict() on an unfit model would have returned
+    # np.full(n, 0.0) -- init_value's default -- silently, since self.trees
+    # is just an empty list rather than something that errors on use.
+    with pytest.raises(RuntimeError, match="call fit"):
+        GradientBoostedTrees().predict(np.zeros((1, 1)))
 
 
 def test_gradient_boosted_trees_recovers_a_clean_step_function():

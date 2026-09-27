@@ -36,13 +36,14 @@ from collections.abc import Callable
 import numpy as np
 
 from minwage.ml.experiment import group_k_fold
+from minwage.ml.protocols import Estimator
 
 
 def _cross_fitted_residuals(
     X: np.ndarray,
     target: np.ndarray,
     groups: np.ndarray,
-    model_factory: Callable[[], object],
+    model_factory: Callable[[], Estimator],
     n_folds: int = 5,
     seed: int = 0,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -66,8 +67,8 @@ def partialling_out_dml(
     Y: np.ndarray,
     D: np.ndarray,
     groups: np.ndarray,
-    y_model_factory: Callable[[], object],
-    d_model_factory: Callable[[], object],
+    y_model_factory: Callable[[], Estimator],
+    d_model_factory: Callable[[], Estimator],
     n_folds: int = 5,
     seed: int = 0,
 ) -> dict:

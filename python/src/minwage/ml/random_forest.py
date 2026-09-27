@@ -97,9 +97,16 @@ def _build(
         return _Node(is_leaf=True, value=float(y.mean()))
 
     if mtry is not None:
+        # Callers only ever pass mtry alongside rng (RandomForest.fit) --
+        # asserting it here turns a silent AttributeError on a future
+        # misuse into an immediate, legible one.
+        assert rng is not None, "mtry requires an rng to draw the candidate feature subset from"
         n_features = X.shape[1]
-        candidate_features = sorted(rng.choice(n_features, size=min(mtry, n_features), replace=False).tolist())
+        candidate_features: list[int] = sorted(
+            rng.choice(n_features, size=min(mtry, n_features), replace=False).tolist()
+        )
     else:
+        assert feature_indices is not None, "either mtry+rng or a fixed feature_indices must be given"
         candidate_features = feature_indices
 
     split = _best_split(X, y, candidate_features, min_samples_leaf)
@@ -115,6 +122,10 @@ def _build(
 
 def _predict_one(node: _Node, row: np.ndarray) -> float:
     while not node.is_leaf:
+        # A non-leaf node is only ever built with both children set (see
+        # _build above), so this is a real invariant, not an unchecked
+        # assumption -- the assert documents it for mypy and the reader.
+        assert node.left is not None and node.right is not None
         node = node.left if row[node.feature_index] <= node.threshold else node.right
     return node.value
 
@@ -147,6 +158,8 @@ class RegressionTree:
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        if self.root is None:
+            raise RuntimeError("call fit() before predict()")
         X = np.asarray(X, dtype=float)
         return np.array([_predict_one(self.root, row) for row in X])
 
@@ -192,6 +205,8 @@ class BaggedTrees:
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        if not self.trees:
+            raise RuntimeError("call fit() before predict()")
         X = np.asarray(X, dtype=float)
         predictions = np.column_stack([tree.predict(X) for tree in self.trees])
         return predictions.mean(axis=1)
@@ -243,6 +258,8 @@ class RandomForest:
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        if not self.roots:
+            raise RuntimeError("call fit() before predict()")
         X = np.asarray(X, dtype=float)
         predictions = np.column_stack([[_predict_one(root, row) for row in X] for root in self.roots])
         return predictions.mean(axis=1)

@@ -1,6 +1,22 @@
 import numpy as np
+import pytest
 
 from minwage.ml.random_forest import BaggedTrees, RandomForest, RegressionTree
+
+
+def test_regression_tree_predict_before_fit_raises_a_clear_error():
+    with pytest.raises(RuntimeError, match="call fit"):
+        RegressionTree().predict(np.zeros((1, 1)))
+
+
+def test_bagged_trees_predict_before_fit_raises_a_clear_error():
+    with pytest.raises(RuntimeError, match="call fit"):
+        BaggedTrees().predict(np.zeros((1, 1)))
+
+
+def test_random_forest_predict_before_fit_raises_a_clear_error():
+    with pytest.raises(RuntimeError, match="call fit"):
+        RandomForest().predict(np.zeros((1, 1)))
 
 
 def test_regression_tree_recovers_a_clean_step_function():
