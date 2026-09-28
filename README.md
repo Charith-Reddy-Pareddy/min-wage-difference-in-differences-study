@@ -341,6 +341,21 @@ This is a methods comparison, not a substitute for Model A/C's
 identification strategy — a model that predicts employment well isn't
 thereby estimating the policy's causal effect on it.
 
+### Python Causal ML and Results Service
+
+The Python package also provides state-grouped cross-validation, grid search,
+cluster bootstrap intervals and permutation importance. Its exploratory
+cross-fitted DML and linear R-learner use employment growth and region controls,
+not Model A/C's outcome and fixed effects. Their identifying assumptions differ:
+conditional unconfoundedness is not equivalent to DiD parallel trends. The
+current DML uncertainty calculation is row-based rather than state-clustered,
+so its intervals remain provisional for this panel.
+
+The read-only FastAPI service returns precomputed CSV results and responds
+with 404 when a result is unavailable. It does not refit models. The live site's
+wage and ML charts display saved R results, not API responses. See
+[Python setup and endpoints](python/README.md).
+
 ## What I Learned
 
 A significant DiD estimate isn't sufficient evidence of a causal effect.
