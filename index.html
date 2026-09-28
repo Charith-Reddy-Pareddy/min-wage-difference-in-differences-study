@@ -440,8 +440,7 @@
     </p>
     <div class="finding-banner">
       <strong>Finding:</strong> the baseline estimate is negative but not
-      credible as a causal effect — pre-trends are violated for food
-      service, and it's highly sensitive to differential COVID recovery.
+      credible as a causal effect — event-study pre-trend tests reject for both industries, and it's highly sensitive to differential COVID recovery.
       The exposure-gradient hypothesis is underpowered <em>and</em>, per
       four independent checks, confounded by a pre-existing association
       unrelated to the 2021 policy.
@@ -464,15 +463,15 @@
     <div class="metric-grid">
       <div class="metric-card">
         <div class="label">Sample</div>
-        <div class="value">50 states, quarterly 2015&ndash;2022 (1,260 obs) &mdash; 20 treated, 25 control, 5 excluded</div>
+        <div class="value">50 states, quarterly 2015&ndash;2022 (1,260 obs) &mdash; 19 treated, 26 control, 5 excluded</div>
       </div>
       <div class="metric-card">
         <div class="label">Model A, &beta;&#8323; (avg. effect)</div>
-        <div class="value">&minus;0.025 food service (p=0.12), &minus;0.010 retail (p=0.39); significant only in the &ge;$0.50 subsample</div>
+        <div class="value">&minus;0.020 food service (p=0.22), &minus;0.009 retail (p=0.44); only food service is significant in the &ge;$0.50 subsample</div>
       </div>
       <div class="metric-card">
         <div class="label">Model C, &beta;&#8324; (exposure gradient)</div>
-        <div class="value">0.167 food service (p=0.34), &minus;0.005 retail (p=0.95) &mdash; noisy and inconsistent in sign</div>
+        <div class="value">0.143 food service (p=0.43), &minus;0.006 retail (p=0.94) &mdash; noisy and inconsistent in sign</div>
       </div>
       <div class="metric-card">
         <div class="label">Robustness on &beta;&#8324;</div>
@@ -509,13 +508,13 @@
       </thead>
       <tbody>
         <tr><td>Average employment effect</td><td>Negative but not robust</td><td>Weak causal evidence</td></tr>
-        <tr><td>Parallel trends</td><td>Violated (food service)</td><td>Major identification concern</td></tr>
+        <tr><td>Parallel trends</td><td>Rejected for both industries (event-study joint tests)</td><td>Major identification concern</td></tr>
         <tr><td>COVID sensitivity</td><td>Large change once controlled for</td><td>Confounding likely</td></tr>
         <tr><td>Exposure gradient (&beta;&#8324;)</td><td>Inconclusive and confounded</td><td>Underpowered, not "no effect"</td></tr>
         <tr><td>Placebo / permutation / event study / spec curve (&beta;&#8324;)</td><td>All 4 flag a pre-existing exposure&ndash;outcome link</td><td>Convergent evidence, not one fluke</td></tr>
         <tr><td>Exposure vs. COVID severity</td><td>Significant negative correlation</td><td>A candidate mechanism &mdash; but barely moves the placebo effect once controlled for</td></tr>
         <tr><td>Multiple-testing correction</td><td>None of the 4 confirmatory tests survive Holm</td><td>Consistent with "not robust," now formal</td></tr>
-        <tr><td>Leave-one-state-out</td><td>Estimate stable across all 20 drops</td><td>No single state drives Model A</td></tr>
+        <tr><td>Leave-one-state-out</td><td>Estimate stable across all 19 drops</td><td>No single state drives Model A</td></tr>
         <tr><td>Wage pass-through</td><td>13%/63% of the mandated increase, neither significant</td><td>Consistent with underpowered, not "no pass-through"</td></tr>
         <tr><td>Is treatment predictable from pre-period data?</td><td>Yes &mdash; 87% accuracy, AUC 0.97</td><td>Another angle on non-random assignment</td></tr>
         <tr><td>Do states cluster by treatment status?</td><td>Yes &mdash; 2/3 k-means clusters are nearly pure</td><td>Convergent with the predictability result</td></tr>
@@ -660,7 +659,7 @@
       identification, provided the relevant conditional parallel-trends
       assumption holds. What these results actually motivate is taking
       the event study's direct test of that assumption seriously: for
-      food service, pre-trends <strong>are</strong> violated (see
+      both industries, event-study pre-trends <strong>are</strong> rejected (see
       Limitations above), and that &mdash; not the predictability or
       clustering results here &mdash; is this study's real identification
       problem. Exploratory, not a fourth confirmatory test: no
@@ -757,12 +756,12 @@
   <section id="limitations" class="reveal">
     <h2>Limitations</h2>
     <ul class="limitations">
-      <li><strong>Parallel trends violated</strong> for food service (event study + two-sample t-test).</li>
+      <li><strong>Parallel trends violated</strong> for both industries in the event study; the separate two-sample test rejects for food service only.</li>
       <li><strong>COVID-era differential recovery confounds the treatment window</strong> &mdash; a real share of the baseline estimate, not the policy.</li>
       <li><strong>Both &beta;&#8323; and &beta;&#8324; are underpowered</strong> at the observed effect sizes, not just assumed underpowered.</li>
       <li><strong>&beta;&#8324; is also confounded</strong>, not just underpowered &mdash; 4 independent checks find high/low-exposure states already differed before 2021.</li>
       <li><strong>The &ge;$0.50 subsample and the legislated-only subsample are the exact same 10 states</strong> &mdash; the two cuts can't be disentangled in this data.</li>
-      <li><strong>Small cluster count</strong> (20 treated, 45 total) &mdash; addressed via clustered SEs and a wild bootstrap, but always some caution.</li>
+      <li><strong>Small cluster count</strong> (19 treated, 45 total) &mdash; addressed via clustered SEs and a wild bootstrap, but always some caution.</li>
       <li><strong>Wage pass-through uses broader supersector proxies</strong>, not the exact food-service/retail industries &mdash; BLS/FRED don't publish earnings at that resolution by state.</li>
       <li>Results are <strong>DiD estimates under this specification</strong>, not definitive causal effects.</li>
     </ul>

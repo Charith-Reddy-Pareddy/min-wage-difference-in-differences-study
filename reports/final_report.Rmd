@@ -49,18 +49,17 @@ likely underpowered), and a full confirmatory battery -- event study,
 placebo test, COVID-sensitivity spec, wild cluster bootstrap, and model
 diagnostics -- run before either headline number is taken at face value.
 
-**The honest headline: the credibility checks found a real problem, not a
-clean result.** Pre-COVID-era trends between treated and control states
-were not parallel for food service employment, confirmed by two
-independent methods (the event study and a simple two-sample t-test), and
-the entire baseline effect is highly sensitive to how differently states
-recovered from COVID -- a covariate for that alone reduces Model A's
-estimated effect by roughly 90%. This is reported as a direct limit on
+**The credibility checks do not support a clean causal interpretation.**
+The event-study joint tests reject flat pre-trends for both food service
+and retail. These tests include 2020 and therefore do not establish a
+purely pre-COVID trend violation. The separate 2019-2020 two-sample test
+rejects for food service only. Model A is also sensitive to the
+COVID-severity adjustment. This is reported as a direct limit on
 how much weight the average-effect estimate can carry, exactly as the
 proposal's own design anticipated it might have to be (Section 6.5).
 
 **The exposure gradient (β₄) has its own, separate credibility problem.**
-Four independent checks added after the original build -- a placebo
+Four complementary checks added after the original build -- a placebo
 test, a permutation test, a specification curve, and a dynamic event
 study (Section 8.1) -- all find that high- and low-exposure states
 already differed systematically before the 2021 policy. β₄ is reported
@@ -210,12 +209,13 @@ include_graphics(fig("event_study_retail.png"))
 
 The formal joint test that every pre-treatment lead equals zero
 **rejects flat pre-trends for both industries** (food service F =
-`r round(pretrend$pretrend_f_stat[1], 2)`, p < 0.0001; retail F =
+`r round(pretrend$pretrend_f_stat[1], 2)`, p =
+`r signif(pretrend$pretrend_p_value[1], 3)`; retail F =
 `r round(pretrend$pretrend_f_stat[2], 2)`, p =
 `r round(pretrend$pretrend_p_value[2], 4)`).
 
 **Because the pre-treatment coefficients are not jointly consistent with
-zero, the parallel-trends assumption is not credible for this outcome.
+zero, the parallel-trends assumption is not credible for either outcome.
 Consequently, the baseline DiD coefficient should not be interpreted as
 a clean causal estimate.** Section 4 below tests why directly (a
 COVID-recovery confound explains a substantial share of it), and Section
@@ -232,8 +232,8 @@ finding already on the table, not as a caveat added at the end.
 | QCEW Open Data API | Fallback employment series (2 states); wage-ratio validation check |
 | CPS-ORG via IPUMS-CPS | Exposure construction (2019-2020 earnings only) |
 
-The design compares **20 treated states** (raised wages effective
-1/1/2021) against **25 control states** (source-checked against DOL
+The design compares **19 treated states** (raised wages effective
+1/1/2021) against **26 control states** (source-checked against DOL
 snapshots from Dec 2020, Feb 2021, and Dec 2021 -- confirmed zero
 minimum-wage movement across all of 2021). A further 5 states raised
 wages later in 2021 and are excluded from the primary comparison (they
@@ -246,7 +246,10 @@ rather than assumed:
   had it going \$9.65 → \$9.87; DOL's own Feb 2021 snapshot still shows
   \$9.65. Michigan's automatic adjustment is conditioned on the prior
   year's unemployment rate staying under 8.5%; the COVID-era spike
-  tripped that clause and the scheduled step was skipped.
+  tripped that clause and the scheduled step was skipped. Michigan is now classified as a
+  control with no effective 2021 increase date, giving 19 treated and
+  26 controls. Earlier published estimates used the incorrect treated
+  label; all tables here have been recomputed.
 - **The control group itself was missing initially.** The proposal names
   the 20 treated and 5 excluded states explicitly but never lists the
   actual "no 2021 change" control group its own design requires --
@@ -367,7 +370,7 @@ proc("two_sample_ttest_results.csv") %>%
 
 Food service shows a real, significant difference: treated states'
 pre-period employment trend was already more negative than control
-states' *before* treatment started (p = 0.0043). This independently
+states' *before* treatment started (see the p-value in the table). This independently
 confirms the event study's pre-trend violation with unrelated
 methodology -- not a new problem, the same one caught twice.
 
@@ -395,7 +398,7 @@ picks up.
 
 **Post-build addition: does exposure itself predict COVID severity?**
 Section 8.1 finds that high- and low-exposure states already differed on
-outcome trends before 2021, across four independent checks, without
+outcome trends before 2021, across four complementary checks, without
 identifying a mechanism. This checks the obvious candidate directly:
 correlate each state's pre-2021 exposure share with its own COVID
 severity (same definition as above), restricted to the same
@@ -469,7 +472,7 @@ proc("placebo_test_beta4_results.csv") %>%
 ```
 
 Both industries come back significant at the fake date (food service p
-< 0.001, retail p = 0.016) -- the opposite of the clean Model A result
+reported in the table, retail p also reported there) -- the opposite of the clean Model A result
 above. This means states with higher pre-2021 exposure already had
 systematically different employment trends in 2016-2019, for reasons
 that have nothing to do with the real 2021 minimum-wage increases. Since
@@ -506,12 +509,11 @@ mac %>%
   kable(digits = 4, caption = "Model A: treated_post coefficient")
 ```
 
-Negative in all 4 specifications, but only significant in the
-≥\$0.50-increase subsample (food service p = 0.016, retail p = 0.049) --
-the full sample is diluted by treated states whose increases were as
-small as \$0.00-0.19. Every `fixest` estimate was cross-checked against
-an independent `lm()` + `sandwich::vcovCL()` fit; coefficients and
-clustered SEs matched to 4+ decimal places in all 4 specifications.
+The estimates remain negative. Only food service in the >=$0.50
+subsample is significant at 5%; retail in that subsample is just above
+5%. Michigan is no longer counted as a zero-dose treated state. The
+independent lm cross-check agrees on coefficients; its clustered SEs
+differ slightly because of finite-sample corrections.
 
 ### 5.2 Model C -- Exposure Interaction (β₄, primary scientific hypothesis)
 
@@ -582,12 +584,10 @@ bw %>%
   kable(digits = 4, caption = "Model C beta4 across exposure bandwidths")
 ```
 
-Food service stays positive and never significant across all three
-bandwidths; retail stays small and never significant, though its sign
-flips between the 10% band and the wider two. Nothing here overturns
-Section 5.2's conclusion -- the result is not an artifact of picking
-12.5% specifically, but it was never precise enough to distinguish a
-real gradient from noise at any of the three definitions either.
+The table reports all three bandwidths without selecting a preferred
+result after observing significance. Check the sign and interval within
+each industry; differences between industries need not imply instability
+within an industry.
 
 ### 5.6 Leave-One-State-Out Sensitivity
 
@@ -606,7 +606,7 @@ loo <- proc("leave_one_out_results.csv")
 loo %>%
   group_by(industry) %>%
   summarise(min_estimate = min(treated_post), max_estimate = max(treated_post)) %>%
-  kable(digits = 4, caption = "Range of treated_post across all 20 single-state exclusions")
+  kable(digits = 4, caption = "Range of treated_post across all 19 single-state exclusions")
 ```
 
 The estimate stays negative and moves only modestly regardless of which
@@ -627,20 +627,17 @@ concern applies equally to β₃.
 
 ```{r bootstrap}
 proc("cluster_bootstrap_results.csv") %>%
-  kable(digits = 4, caption = "Wild cluster bootstrap, beta4 (full 20-treated-state sample)")
+  kable(digits = 4, caption = "Wild cluster bootstrap, beta4 (full treated sample)")
 ```
 
 ```{r bootstrap-beta3}
 proc("cluster_bootstrap_beta3_results.csv") %>%
-  kable(digits = 4, caption = "Wild cluster bootstrap, beta3 (full 20-treated-state sample)")
+  kable(digits = 4, caption = "Wild cluster bootstrap, beta3 (full treated sample)")
 ```
 
-Bootstrap p-values track the asymptotic ones closely for both
-coefficients (β₄: food service 0.367 vs. 0.338 asymptotic, retail 0.953
-vs. 0.953; β₃: food service 0.107 vs. 0.118 asymptotic, retail 0.387 vs.
-0.385) -- confirms rather than overturns the Model A and Model C results
-above, under an inference method built specifically for this few
-clusters.
+The tables report bootstrap and asymptotic uncertainty side by side.
+Neither inference procedure repairs confounding or a failed pre-trend
+check.
 
 ### 6.2 Model Diagnostics
 
@@ -681,15 +678,9 @@ proc("specification_curve.csv") %>%
 include_graphics(fig("specification_curve.png"))
 ```
 
-Only 2 of the 12 specifications are significant at p < 0.05, and both
-are retail under the >=$0.50 subsample -- the same subsample already
-flagged in Section 5.1 as the only place Model A reaches significance.
-Food service is never significant in any of the 6 specifications that
-use it, and its point estimate is positive in all 6 while retail's is negative
-in all 6 -- the two industries don't even agree on sign. This
-is the clearest single piece of evidence in the report that the
-exposure-gradient result is fragile to analytical choices rather than a
-stable feature of the data.
+The table reports significance and signs for all 12 specifications.
+This measures specification sensitivity; it is not by itself a test
+that an exposure association predates treatment.
 
 ## 7. Exploratory Analyses
 
@@ -699,23 +690,10 @@ results above (Section 12 of the proposal).
 ### 7.1 SLR and MLR (STAT 240/340 coursework closure)
 
 Simple pre/post comparisons, not the study's identification strategy.
-**SLR**: log employment change (2019-2020 → 2021-2022) on the dollar size
-of the wage increase, treated states only -- not significant for either
-industry (food service p = 0.46, retail p = 0.62).
-
-```{r slr-plots, out.width="50%"}
-include_graphics(fig("slr_log_change_food_service_scatter.png"))
-include_graphics(fig("slr_log_change_retail_scatter.png"))
-```
-
-**MLR**: adds treatment status, GDP growth, population growth, and Census
-region, treated + control states. The treated coefficient is null for
-both industries (food service p = 0.65, retail p = 0.26) -- an earlier
-version of this model that accidentally included the contaminated
-"excluded" group as a stand-in control showed a marginally significant
-result for food service; that turned out to be an artifact of the
-contamination, not a real signal, corrected once the real control group
-was built.
+**SLR** regresses state-level pre/post employment changes on increase size
+among treated states. **MLR** adds treatment status, GDP and population
+growth, and Census region, using treated and control states. These
+exploratory cross-sectional comparisons do not identify a causal effect.
 
 ### 7.2 Regional ANOVA -- exploratory regional variation in employment growth, not a treatment-effect estimate
 
@@ -742,7 +720,7 @@ C remains the formal heterogeneity test; this is exploratory only.
 ### 7.3 Monte Carlo Permutation Test
 
 10,000 relabelings of which states are "treated" (state-level, holding
-n_treated fixed at 20), Model A refit each time.
+n_treated fixed at 19), Model A refit each time.
 
 ```{r permutation}
 proc("permutation_test_results.csv") %>% kable(digits = 4, caption = "Permutation test, Model A treated_post")
@@ -753,11 +731,10 @@ include_graphics(fig("permutation_test_food_service.png"))
 include_graphics(fig("permutation_test_retail.png"))
 ```
 
-Permutation p-values track the asymptotic Model A p-values closely (food
-service 0.09 vs. 0.118; retail 0.377 vs. 0.385) -- another confirmation
-of the Model A result via a completely different inferential route.
+Permutation reference distributions are reported above. Assignment was
+not randomized, so these are descriptive sensitivity checks.
 
-**Post-build addition:** this section originally covered Model A only.
+Post-build addition:** this section originally covered Model A only.
 The same relabeling exercise applies to Model C's exposure interaction
 (β₄, Section 5.2, the primary scientific hypothesis) -- each replication
 keeps every state's own exposure value fixed and only randomizes which
@@ -773,21 +750,10 @@ include_graphics(fig("permutation_test_beta4_food_service.png"))
 include_graphics(fig("permutation_test_beta4_retail.png"))
 ```
 
-Retail's permutation p-value (0.972) tracks its asymptotic one (0.953)
-about as closely as Model A's do. Food service's don't: permutation
-p = 0.100 versus an asymptotic p = 0.338 -- more than a 3x difference,
-though neither crosses the conventional 0.05 threshold. The reason is
-visible in the null distribution itself: its mean is -0.087, not
-approximately zero the way Model A's permutation null is (0.00001).
-Reassigning which states are "treated" while leaving each state's real,
-fixed exposure value in place produces a systematically negative
-placebo β₄ on average -- exactly the kind of exposure-linked,
-treatment-unrelated structure Section 4.4's placebo test already found
-at a false date. This is now the third independent check (with the
-specification curve and the placebo test) pointing at the same
-underlying issue: part of what looks like an exposure gradient in this
-data may be a pre-existing association between exposure and employment
-trends, not a treatment effect.
+An off-center permutation distribution can reflect exposure-related
+structure and model specification. It is not a standalone proof of
+confounding or an exact randomization test under this observational
+assignment mechanism.
 
 ### 7.4 Power Analysis for β₃ (Model A average effect, added after the original build)
 
@@ -805,17 +771,10 @@ proc("power_analysis_beta3_results.csv") %>% kable(digits = 4, caption = "Observ
 include_graphics(fig("power_analysis_beta3.png"))
 ```
 
-The MDE isn't reached anywhere in Section 4.4's own assumed range for
-either industry -- the design needs a true average effect larger than
-3% before it reliably clears 80% power. That's consistent with the rest
-of this report: Model A only came back significant in the
-≥$0.50-increase subsample (Section 5.1). Food service's estimate there
-(4.75%) is comfortably past the range this grid covers; retail's
-(2.74%) sits inside it and only barely cleared significance (p = 0.049)
--- exactly what falling short of 80% power in that region would predict,
-a real but not guaranteed chance of detecting it. The full 20-state
-sample's smaller, more diluted average effect never had a realistic
-shot at significance given this design's power.
+The table and curve show whether 80% power is reached on the tested
+0.5%-3% grid. An NA means it was not reached, not that an MDE was
+estimated outside that grid. Power depends on this fitted simulation
+design and does not establish a causal effect.
 
 ### 7.5 Power Analysis for β₄ (exposure gradient, added after the original build)
 
@@ -832,15 +791,9 @@ proc("power_analysis_results.csv") %>% kable(digits = 3, caption = "Observed bet
 include_graphics(fig("power_analysis.png"))
 ```
 
-Both industries' observed β₄ estimates fall well short of their own
-minimum detectable effect at 80% power -- the design would need a true
-exposure gradient roughly 3x (retail) to 5x (food service) larger than
-what was actually estimated before it could reliably distinguish that
-effect from noise. This is consistent with, and quantifies, the
-qualitative pre-registered expectation. **The simulation quantifies
-which effect sizes this design could realistically distinguish from
-zero** -- it is a design property, not a way of explaining away the
-noisy β₄ result above after the fact.
+Compare each observed coefficient with its industry's simulated MDE
+in the table. The MDE is a design-dependent threshold, not evidence
+that the observed coefficient is causal or that the true effect is zero.
 
 ### 7.6 Exploratory Treatment-Intensity Model
 
@@ -856,12 +809,8 @@ proc("treatment_intensity_results.csv") %>%
   kable(digits = 4, caption = "Exploratory: log employment ~ (wage increase x post), continuous dollar amount")
 ```
 
-Food service's coefficient is negative and marginally significant (p =
-0.04); retail's is negative but not significant. Directionally
-consistent with Model A's binary result, but given the non-random
-assignment of increase size, this doesn't upgrade the evidence -- it's
-one more piece of exploratory information, not a sharper confirmatory
-estimate.
+The continuous-intensity results are exploratory and share the
+identification concerns of Model A/C.
 
 ## 8. Multiple Testing and Inferential Hierarchy
 
@@ -896,13 +845,13 @@ result, and none are treated as if they could.
 
 ### 8.1 Convergent Evidence Against the Exposure-Gradient Interpretation
 
-Four independent checks, run for different reasons and living in four
+Four complementary checks, run for different reasons and living in four
 different sections, all point the same direction on β₄. Collected in one
 place rather than left scattered:
 
 ```{r beta4-robustness-summary}
 proc("beta4_robustness_summary.csv") %>%
-  kable(caption = "Four independent checks on beta4's credibility")
+  kable(caption = "Four complementary checks on beta4's credibility")
 ```
 
 No single one of these is individually damning -- a placebo test can
@@ -938,24 +887,12 @@ that happen to agree.
 
 - **Non-random policy adoption**; parallel trends is a tested assumption,
   not a proven one, and Section 4 above shows it doesn't fully hold for
-  food service.
+  both industries in the event study.
 - **COVID confound**: the single largest limitation this analysis found.
   A meaningful share of the baseline effect is attributable to
   differential COVID recovery, not minimum wage policy.
-- **Limited power**, for both β₃ and β₄ -- pre-registered in Section 4.4
-  of the proposal as a qualitative expectation for both, and borne out
-  by the actual results. The formal quantitative piece for both was
-  scoped out of the original 10-day build, but was added afterward
-  (`R/16_power_analysis.R`, a residual-based Monte Carlo simulation on
-  the real panel). For β₄: the minimum detectable effect at 80% power is
-  β₄≈0.50 for food service and β₄≈0.22 for retail, both well above the
-  actual observed estimates (0.167 and -0.005). For β₃ (Model A, Section
-  7.4): the MDE isn't reached anywhere in the proposal's own assumed
-  0.5%-3% range for either industry -- consistent with Model A's
-  significant results only showing up in the ≥$0.50-increase subsample,
-  where the estimated effects are large enough to fall in or past that
-  range. The qualitative pre-registration held up for both parameters,
-  and the numbers that would have quantified it going in now exist too.
+- **Limited power**: Sections 7.4 and 7.5 report simulated power and
+  MDEs separately for the average effect and exposure gradient.
 - **Exposure-measure construction risk**: band width (10-15%) and cell
   pooling rules are documented choices, not the only defensible ones.
 - **The exposure-gradient placebo test fails** (Section 4.4): at a false
@@ -968,7 +905,7 @@ that happen to agree.
   6.3's specification curve showing the same result is fragile to
   sample and industry choice. Section 7.3's permutation test corroborates
   this from a third, unrelated angle: its placebo null distribution for
-  β₄ isn't centered at zero for food service (mean -0.087) the way Model
+  β₄ isn't centered at zero for food service (see Section 7.3) the way Model
   A's permutation null is -- reassigning treatment labels while keeping
   each state's real exposure value fixed produces a systematically
   negative "effect" on average, the same pattern the placebo test found.
@@ -981,7 +918,7 @@ that happen to agree.
   column), so the dollar-threshold cut and the mechanism cut can't be
   disentangled here -- any difference attributed to "legislated vs.
   automatic" in this sample is equally attributable to "large vs. small."
-- **~20-45 clusters**: addressed via state-clustered SEs throughout and
+- **19 treated / 45 total clusters**: addressed via state-clustered SEs throughout and
   the wild cluster bootstrap for β₄, but inference with this few clusters
   always carries some caution.
 - **Spillovers between neighboring states** aren't modeled -- a control
@@ -1004,28 +941,25 @@ that happen to agree.
 
 ## 10. Conclusion
 
-The working hypothesis going in was a small average effect with an
-inconclusive exposure gradient, reported honestly regardless of
-significance (Section 15 of the proposal). The average-effect half held
-up largely as expected: a real, COVID-driven confound the proposal's own
-credibility-check infrastructure was built to catch (Sections 4.1-4.3),
-plus a power ceiling that explains why Model A was only significant in
-the ≥$0.50-increase subsample (Section 7.4). Success here isn't a clean
-significant result -- it's that the event study, two-sample t-test,
-placebo test, and COVID-sensitivity spec did their jobs and surfaced a
-real problem before it could be reported as a clean finding.
+The corrected analysis assigns Michigan to the 2021 control group.
+Both industries fail the event-study joint pre-trend test. The separate
+two-sample trend test rejects for food service only. COVID adjustment
+changes the estimates, and exposure-gradient placebos remain a concern.
+These results warrant caution about causal interpretation; a
+non-significant coefficient does not establish no effect.
 
-The exposure-gradient half turned out to need more scrutiny than
-"inconclusive" alone would suggest. Beyond the power ceiling that
-independently limits what β₄ could detect (Section 7.5), four
-methodologically unrelated checks added after the original build -- a
-false-date placebo test, a label-randomization permutation test, a
-12-specification robustness curve, and a dynamic quarter-by-quarter
-event study (Section 8.1) -- all converge on the same finding: high- and
-low-exposure states differ systematically for reasons that predate the
-2021 policy. That reframes β₄ from merely underpowered to actively
-confounded, and the report says so directly rather than defaulting back
-to "inconclusive" once the stronger evidence was in hand.
+## Additional interpretation limits
+
+Treatment is defined by 2021 changes only. Some controls, including
+Michigan, raised wages in 2022, so a constant treated/control label
+through 2022 does not isolate all subsequent policy changes. A time-varying
+policy history is needed before interpreting the comparison as a clean
+single-adoption experiment.
+
+The treatment-classifier accuracy and AUC below are in-sample fit
+statistics, not held-out prediction estimates. The DAG is a hypothesized
+causal structure informed by associations; correlation does not establish
+its arrow directions.
 
 ## Appendix
 
@@ -1144,7 +1078,7 @@ proxy's confidence interval crosses zero. Read alongside this report's
 recurring theme (Sections 7.4-7.5's power analysis, the noisy β₄
 throughout), the honest interpretation is "underpowered to detect
 pass-through at this resolution," not "pass-through is genuinely
-13%/63%." The likeliest reason both point estimates sit well under
+these point estimates." The likeliest reason both point estimates sit well under
 100% regardless: the supersector proxies include large numbers of
 workers (hotel managers, arts/entertainment/recreation staff, wholesale
 and utilities employees) who were never near the minimum wage to begin
@@ -1199,10 +1133,8 @@ proc("treatment_predictability_coefficients.csv") %>%
 include_graphics(fig("treatment_predictability.png"))
 ```
 
-87% accuracy and an AUC of 0.97 at n=45 is a strong result by any
-standard, and exposure is by far the most significant predictor
-(p=0.013). Section 13.4 addresses what this does and doesn't imply for
-the causal design.
+These are in-sample accuracy and AUC, not held-out estimates.
+Section C.4 explains why they do not establish or invalidate parallel trends.
 
 #### C.3 Do States Cluster by Treatment Status?
 
@@ -1228,7 +1160,7 @@ include_graphics(fig("state_clustering_pca.png"))
 ```
 
 Two of the three clusters are almost entirely pure treated or pure
-control (χ²=28.0, p<0.0001) -- states weren't assigned to clusters by
+control (see the updated chi-square test above) -- states weren't assigned to clusters by
 treatment status, yet cluster membership predicts it almost as well as
 the logistic regression above does. This is exploratory, not a fourth
 confirmatory test -- no cluster-based hypothesis was pre-registered
@@ -1248,7 +1180,7 @@ identification work itself.
 What Sections 13.1-13.3 actually do is raise the prior that treated and
 control states might follow different *counterfactual* employment
 trends -- which is precisely what Section 4.1's event study tests
-directly, rather than assumes. For food service, that direct test finds
+directly, rather than assumes. For both industries, that direct test finds
 pre-trends **are** violated. That violation -- not the predictability or
 clustering results above -- is this report's actual, load-bearing
 identification problem, stated as such since Section 4.1 and repeated in

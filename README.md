@@ -8,8 +8,8 @@
 minimum-wage increases vary with each state-industry's pre-policy
 exposure to the new wage floor?
 
-**Method.** A difference-in-differences design: 20 states that raised
-their minimum wage in 2021 Q1 vs. 25 states with no change that year,
+**Method.** A difference-in-differences design: 19 states that raised
+their minimum wage in 2021 Q1 vs. 26 states with no change that year,
 quarterly food-service and retail employment, 2015-2022, state and
 quarter fixed effects, state-clustered inference — extended with an
 interaction term letting the effect scale with a state-industry's
@@ -22,7 +22,7 @@ confounded. See [Results at a Glance](#results-at-a-glance) below.
 **Why the finding is uncertain.** Parallel pre-trends — the assumption
 this design's causal claim actually rests on — are directly tested
 (Section 4.1 of the [full report](#final-report)) and found to be
-**violated for food service**. That is this study's real identification
+**rejected for both food service and retail by the event-study joint tests**. That is this study's real identification
 problem, checked directly rather than assumed, and it's why every result
 below is reported with that caveat attached rather than as a clean
 causal estimate.
@@ -85,9 +85,9 @@ added afterward, matters for how much weight a p-value can carry.
 
 | | |
 |---|---|
-| **Sample** | 50 states, quarterly 2015-2022 (1,260 obs in the estimation panel) — 20 treated, 25 control, 5 excluded |
-| **Model A, β₃** (avg. effect) | -0.025 food service (p=0.12), -0.010 retail (p=0.39); significant only in the ≥$0.50 subsample |
-| **Model C, β₄** (exposure gradient) | 0.167 food service (p=0.34), -0.005 retail (p=0.95) — noisy and inconsistent in sign |
+| **Sample** | 50 states, quarterly 2015-2022 (1,260 obs in the estimation panel) — 19 treated, 26 control, 5 excluded |
+| **Model A, β₃** (avg. effect) | -0.020 food service (p=0.22), -0.009 retail (p=0.44); only food service is significant in the ≥$0.50 subsample |
+| **Model C, β₄** (exposure gradient) | 0.143 food service (p=0.43), -0.006 retail (p=0.94) — noisy and inconsistent in sign |
 | **Robustness on β₄** | 4/4 independent checks (placebo, permutation, event study, spec curve) flag it as confounded |
 | **Inference** | State-clustered SEs, wild cluster bootstrap, 10,000-rep permutation test, Monte Carlo power analysis |
 | **Wage pass-through** | 13% (food service proxy, p=0.65) / 63% (retail proxy, p=0.22) of the mandated increase — neither significant |
@@ -100,13 +100,13 @@ added afterward, matters for how much weight a p-value can carry.
 | Question | Result | Interpretation |
 |---|---|---|
 | Average employment effect | Negative but not robust | Weak causal evidence |
-| Parallel trends | Violated (food service) | Major identification concern |
+| Parallel trends | Rejected for both industries (event-study joint tests) | Major identification concern |
 | COVID sensitivity | Large change once controlled for | Confounding likely |
 | Exposure gradient (β₄) | Inconclusive and confounded | Underpowered, not "no effect" |
 | Placebo / permutation / event study / spec curve (β₄) | All 4 flag a pre-existing exposure-outcome link | Convergent evidence, not one fluke |
 | Exposure vs. COVID severity | Significant negative correlation | A candidate mechanism — but controlling for it barely moves the placebo effect |
 | Multiple-testing correction | None of the 4 confirmatory tests survive Holm | Consistent with "not robust," now formal |
-| Leave-one-state-out | Estimate stable across all 20 drops | No single state drives Model A |
+| Leave-one-state-out | Estimate stable across all 19 drops | No single state drives Model A |
 | Wage pass-through | 13%/63% of the mandated increase, neither significant | Consistent with underpowered, not "no pass-through" |
 | Is treatment predictable from pre-period data? | Yes — 87% accuracy, AUC 0.97 | Doesn't invalidate DiD, but motivates checking trends directly |
 | Do states cluster by treatment status? | Yes — 2/3 k-means clusters are nearly pure | Same caveat — see event study (Section 4.1) for the actual test |
@@ -163,7 +163,7 @@ power-analysis curves, the beta4 event study and forest plot — are in
 
 ## Limitations
 
-- **Parallel trends violated** for food service (event study + two-sample t-test) — this study's central, load-bearing identification problem.
+- **Parallel trends violated** for both industries in the event study; the separate two-sample test rejects for food service only — this study's central, load-bearing identification problem.
 - **COVID-era differential recovery confounds the treatment window** — a
   real share of the baseline estimate, not the policy.
 - **Both β₃ and β₄ are underpowered** at the observed effect sizes
@@ -175,7 +175,7 @@ power-analysis curves, the beta4 event study and forest plot — are in
   (`R/25`-`R/26`) — the effect barely shrank. See report Section 8.1.
 - **The ≥$0.50 subsample and the legislated-only subsample are the exact
   same 10 states** — the two cuts can't be disentangled in this data.
-- **Small cluster count** (20 treated, 45 total) — addressed via
+- **Small cluster count** (19 treated, 45 total) — addressed via
   clustered SEs and a wild bootstrap, but always some caution.
 - **Wage pass-through uses broader supersector proxies**, not the exact
   food-service/retail industries — BLS/FRED don't publish earnings at
@@ -297,8 +297,7 @@ economic reasons is entirely compatible with valid causal identification,
 Treatment being this predictable doesn't do the identification work
 itself — what it does is raise the prior that treated and control states
 might follow different *counterfactual* trends, which is exactly what
-Section 4.1's event study tests directly rather than assumes. For food
-service, that direct test finds pre-trends **are** violated (Section
+Section 4.1's event study tests directly rather than assumes. For both industries, that direct test finds pre-trends **are** violated (Section
 4.1) — that is the actual identification problem this report leads with,
 not the predictability result. The predictability and clustering
 findings here are a reason to take the event study's verdict seriously,
