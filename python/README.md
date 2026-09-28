@@ -54,11 +54,14 @@ layout), not a flat script collection:
 
 ```
 python3 -m venv .venv
-.venv/bin/pip install -e ".[dev]"
+.venv/bin/pip install -e ".[dev,api]"
 ```
 
 (`-e` is an editable install — code changes under `src/minwage/` take
-effect immediately, no reinstall needed. `[dev]` pulls in `pytest`.)
+effect immediately, no reinstall needed. `[dev]` pulls in
+pytest/ruff/mypy/coverage; `[api]` pulls in FastAPI/uvicorn. `[api]`
+is only needed to run the results service below, but `[dev]`'s test
+suite exercises it, so CI installs both.)
 
 ## Run the comparison
 
