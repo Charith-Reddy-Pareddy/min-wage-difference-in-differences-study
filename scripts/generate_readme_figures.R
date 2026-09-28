@@ -10,7 +10,7 @@ dir.create("reports/figures", recursive = TRUE, showWarnings = FALSE)
 
 # 1. Treatment status and wage-increase size. A geographic map would
 # need the maps/usmap package (not otherwise a project dependency); a
-# sorted bar chart of the 20 treated states' increase size, against a
+# sorted bar chart of the 19 treated states' increase size, against a
 # labeled count of the zero-change control states, shows the same
 # treated/control split plus the increase *magnitude* a plain map
 # can't -- without listing 25 identical zero-height control bars.
@@ -24,7 +24,7 @@ p_treatment <- treatment %>%
   geom_col(fill = "#d95f02") +
   coord_flip() +
   labs(
-    title = "2021 minimum-wage increase, 20 treated states",
+    title = "2021 minimum-wage increase, 19 treated states",
     subtitle = paste0("Plus ", n_control, " zero-change control states (not shown) and 5 excluded later-2021-changers"),
     x = NULL, y = "Wage increase ($)"
   ) +

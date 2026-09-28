@@ -2,7 +2,7 @@
 # Hierarchy) names the confirmatory family explicitly -- beta3 and beta4,
 # both industries -- but never actually applied a multiple-testing
 # correction across those 4 primary tests. This does, using the
-# full-20-state-treated-sample specification (the headline spec; the
+# full-treated-sample specification (the headline spec; the
 # >=$0.50 subsample is a robustness cut on the same hypotheses, not a
 # separate confirmatory test, so it's excluded from the correction to
 # avoid double-counting).
@@ -11,7 +11,7 @@ library(dplyr)
 
 #' Holm-adjusted p-values for the 4 primary confirmatory tests (beta3 and
 #' beta4, food service and retail) at the headline specification.
-holm_adjust_confirmatory <- function(mac, sample_label = "full 20-state treated sample") {
+holm_adjust_confirmatory <- function(mac, sample_label = "full treated sample") {
   primary <- mac %>% filter(sample == sample_label)
 
   raw <- dplyr::bind_rows(

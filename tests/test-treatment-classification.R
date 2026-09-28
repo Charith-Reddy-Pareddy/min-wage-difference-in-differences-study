@@ -15,9 +15,7 @@ make_valid_df <- function() {
 
 test_that("a well-formed table has no validation problems", {
   df <- make_valid_df()
-  # only 2 states here, so relax the "20 treated" rule for this synthetic case
   problems <- validate_treatment_table(df)
-  problems <- problems[!grepl("^expected 20 treated", problems)]
   expect_length(problems, 0)
 })
 
@@ -46,4 +44,34 @@ test_that("the real treatment table passes validation", {
   df <- load_treatment_table("../data/treatment_classification.csv")
   problems <- validate_treatment_table(df)
   expect_length(problems, 0)
+})
+
+
+test_that("zero-increase states cannot be classified as treated", {
+  df <- make_valid_df()
+  df$wage_2021[1] <- df$wage_2020[1]
+  df$increase[1] <- 0
+  expect_true(any(grepl("treated states must have a positive increase", validate_treatment_table(df))))
+})
+
+test_that("control states cannot have a recorded wage increase", {
+  df <- make_valid_df()
+  df$group[1] <- "control"
+  expect_true(any(grepl("control states must have zero increase", validate_treatment_table(df))))
+})
+
+test_that("Michigan is a no-change control in 2021", {
+  df <- load_treatment_table("../data/treatment_classification.csv")
+  mi <- df[df$state == "Michigan", ]
+  expect_equal(mi$group, "control")
+  expect_equal(mi$increase, 0)
+  expect_true(is.na(mi$effective_date))
+})
+
+
+test_that("the real sample has 19 treated and 26 control states", {
+  df <- load_treatment_table("../data/treatment_classification.csv")
+  expect_equal(sum(df$group == "treated"), 19)
+  expect_equal(sum(df$group == "control"), 26)
+  expect_equal(sum(df$group == "excluded"), 5)
 })

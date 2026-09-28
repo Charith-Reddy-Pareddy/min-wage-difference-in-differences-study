@@ -13,26 +13,14 @@
 # 9.65 through all of 2021. The table now reflects that (increase = 0.00,
 # type "inflation_adj_paused").
 #
-# That correction does NOT change the 20-treated-states count (Michigan
-# stays in the treated group, per the proposal's explicit state list -- it
-# still "raised wages" on the proposal's own binary definition, it just
-# raised them by $0). It also doesn't change the below-$0.50-threshold
-# count: Michigan was already counted there at $0.22, and $0.00 is still
-# under $0.50, so the count stays at 10. The proposal text's claim of "9
-# of the 20 states" below that threshold appears to be a minor error in
-# the proposal narrative itself, not a data problem in this table -- 10 is
-# what a direct DOL source check supports.
-#
-# CONTROL GROUP (added Day 5): the proposal names the 20 treated and 5
-# excluded/secondary states explicitly (Section 4.2) but never lists the
-# actual "no 2021 change" control group its own design calls for -- without
-# it there's no DiD to run. The remaining 25 states were source-checked the
-# same way (DOL snapshots from Dec 2020, Feb 2021, and Dec 2021) and all 25
-# had zero minimum-wage movement across the entire year, so all 25 are used
-# as controls (group = "control"). Five of them (Alabama, Louisiana,
-# Mississippi, South Carolina, Tennessee) have no state minimum wage law at
-# all and default to the federal $7.25 floor -- recorded as wage_2020 =
-# wage_2021 = 7.25 here, which is what DOL's own page shows them paying.
+# Michigan is a control: treatment is an actual 2021 increase, not a
+# scheduled increase that never took effect. This gives 19 treated,
+# 26 control and 5 excluded states; 9 treated increases are below $0.50.
+# Confirmation: Michigan LEO's December 2, 2021 announcement describes
+# the 2022 increase from the unchanged $9.65 rate and the 2021 delay:
+# https://www.michigan.gov/leo/news/2021/12/02/michigans-minimum-wage-set-to-increase-on-january-1-2022
+# Classification concerns 2021 only; later policy changes remain a
+# limitation when interpreting outcomes through 2022.
 
 library(dplyr)
 library(readr)
@@ -63,9 +51,11 @@ validate_treatment_table <- function(df) {
                                    paste(mismatch, collapse = ", ")))
   }
 
-  n_treated <- sum(df$group == "treated")
-  if (n_treated != 20) {
-    problems <- c(problems, paste("expected 20 treated states, found", n_treated))
+  if (any(df$group == "treated" & (is.na(df$increase) | df$increase <= 0))) {
+    problems <- c(problems, "treated states must have a positive increase")
+  }
+  if (any(df$group == "control" & (is.na(df$increase) | df$increase != 0))) {
+    problems <- c(problems, "control states must have zero increase")
   }
 
   bad_groups <- setdiff(unique(df$group), c("treated", "excluded", "control"))

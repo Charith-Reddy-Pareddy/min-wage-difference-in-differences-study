@@ -50,7 +50,7 @@ test_that("run_specification_curve covers every bandwidth x sample x industry co
 
   expect_equal(nrow(result), 12)
   expect_setequal(result$bandwidth, c("10%", "12.5%", "15%"))
-  expect_setequal(result$sample, c("full 20-state sample", ">=$0.50 subsample"))
+  expect_setequal(result$sample, c("full treated sample", ">=$0.50 subsample"))
   expect_setequal(result$industry, c("food_service", "retail"))
   expect_equal(nrow(dplyr::distinct(result, bandwidth, sample, industry)), 12)
 })
@@ -74,7 +74,7 @@ test_that(">=$0.50 subsample actually drops the lowest-increase treated state", 
   # samples producing different beta4 estimates for the same
   # bandwidth/industry cell (identical estimates would mean the filter
   # silently did nothing).
-  full <- result %>% dplyr::filter(sample == "full 20-state sample", bandwidth == "12.5%", industry == "food_service")
+  full <- result %>% dplyr::filter(sample == "full treated sample", bandwidth == "12.5%", industry == "food_service")
   sub <- result %>% dplyr::filter(sample == ">=$0.50 subsample", bandwidth == "12.5%", industry == "food_service")
   expect_false(isTRUE(all.equal(full$beta4, sub$beta4)))
 })

@@ -83,7 +83,7 @@ if (sys.nframe() == 0) {
     list(industry = "retail", col = "employment_retail")
   )) {
     cat("\n============================================================\n")
-    cat("COVID-sensitivity spec --", ind$industry, "(full 20-state treated sample)\n")
+    cat("COVID-sensitivity spec --", ind$industry, "(full treated sample)\n")
 
     panel <- build_panel(fred_panel, treatment_table, exposure_table, ind$industry, ind$col)
     covid_severity <- compute_covid_severity(fred_panel, ind$col)

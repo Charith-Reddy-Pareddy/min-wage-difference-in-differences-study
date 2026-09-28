@@ -3,7 +3,7 @@ source("../R/22_multiple_testing_correction.R")
 
 make_fake_mac <- function() {
   tibble::tibble(
-    sample = c("full 20-state treated sample", "full 20-state treated sample",
+    sample = c("full treated sample", "full treated sample",
                ">=$0.50-increase subsample", ">=$0.50-increase subsample"),
     industry = c("food_service", "retail", "food_service", "retail"),
     model_a_p = c(0.02, 0.40, 0.99, 0.99),

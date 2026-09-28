@@ -2,7 +2,7 @@
 # Simmons & Nelson-style multiverse analysis), varying every analytical
 # choice that R/17's bandwidth check and R/07's sample cut each varied
 # separately, together in one comprehensive view: exposure band (10%,
-# 12.5%, 15%) x sample (full 20-state, >=$0.50 subsample) x industry
+# 12.5%, 15%) x sample (full treated, >=$0.50 subsample) x industry
 # (food service, retail) = 12 specifications, all for the same
 # hypothesis test (beta4). Answers directly: out of every reasonable
 # combination of choices actually used elsewhere in this report, how
@@ -21,7 +21,7 @@ if (file.exists("R/07_model_a_c.R")) {
 BETA4_TERM <- "treated_post:exposure"
 BANDWIDTHS <- c("10%" = "exposure_share_10", "12.5%" = "exposure_share_125", "15%" = "exposure_share_15")
 SAMPLES <- list(
-  "full 20-state sample" = function(tt) tt,
+  "full treated sample" = function(tt) tt,
   ">=$0.50 subsample" = function(tt) tt %>% filter(group != "treated" | increase >= 0.50)
 )
 

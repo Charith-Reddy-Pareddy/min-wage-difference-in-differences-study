@@ -122,7 +122,12 @@ if (sys.nframe() == 0) {
   fred_panel <- readr::read_csv("data/processed/fred_state_quarter.csv", show_col_types = FALSE)
   exposure_table <- readr::read_csv("data/processed/exposure_state_industry.csv", show_col_types = FALSE)
 
-  wage_data <- fetch_all_wage_data()
+  # Recompute estimates from a known data vintage without a fresh API pull.
+  wage_data <- if ("--cached" %in% commandArgs(trailingOnly = TRUE)) {
+    readr::read_csv("data/processed/wage_state_quarter.csv", show_col_types = FALSE)
+  } else {
+    fetch_all_wage_data()
+  }
   wage_input <- build_wage_input(fred_panel, wage_data)
 
   proxies <- list(

@@ -3,7 +3,7 @@ source("../R/21_coefficient_forest_plot.R")
 
 make_fake_mac <- function() {
   tibble::tibble(
-    sample = c("full 20-state treated sample", "full 20-state treated sample",
+    sample = c("full treated sample", "full treated sample",
                ">=$0.50-increase subsample", ">=$0.50-increase subsample"),
     industry = c("food_service", "retail", "food_service", "retail"),
     model_a_treated_post = c(-0.025, -0.010, -0.048, -0.027),
@@ -31,9 +31,9 @@ test_that("build_forest_data pulls the correct estimate for each coefficient", {
   mac <- make_fake_mac()
   forest <- build_forest_data(mac)
   beta3_row <- forest %>% dplyr::filter(coefficient == "beta3 (Model A)", industry == "food_service",
-                                         sample == "full 20-state treated sample")
+                                         sample == "full treated sample")
   beta4_row <- forest %>% dplyr::filter(coefficient == "beta4 (Model C)", industry == "food_service",
-                                         sample == "full 20-state treated sample")
+                                         sample == "full treated sample")
   expect_equal(beta3_row$estimate, -0.025)
   expect_equal(beta4_row$estimate, 0.167)
 })

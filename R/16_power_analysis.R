@@ -12,7 +12,7 @@
 # Both live in this file: simulate_power_at_effect_a()/power_curve_a()
 # for (1), simulate_power_at_effect()/power_curve() for (2).
 #
-# Question: at the sample actually collected (20 treated + 25 control
+# Question: at the sample actually collected (19 treated + 26 control
 # states, quarterly 2016-2022), what's the power to detect a given true
 # beta3 or beta4, and what effect size is detectable at 80% power?
 #
@@ -163,7 +163,7 @@ if (sys.nframe() == 0) {
     list(industry = "retail", col = "employment_retail")
   )) {
     cat("\n============================================================\n")
-    cat("Power simulation for beta3 (Model A) --", ind$industry, "(full 20-state treated sample)\n")
+    cat("Power simulation for beta3 (Model A) --", ind$industry, "(full treated sample)\n")
 
     panel <- build_panel(fred_panel, treatment_table, exposure_table, ind$industry, ind$col)
     t0 <- Sys.time()
@@ -197,7 +197,7 @@ if (sys.nframe() == 0) {
     scale_y_continuous(labels = scales::label_percent(accuracy = 1), limits = c(0, 1)) +
     labs(
       title = "Power to detect beta3 (Model A average effect), by assumed effect size",
-      subtitle = "Section 4.4's own assumed grid (0.5%-3%), 20 treated + 25 control states",
+      subtitle = "Section 4.4's own assumed grid (0.5%-3%), 19 treated + 26 control states",
       x = "Assumed true beta3 (log-point average effect)",
       y = "Simulated power",
       color = "Industry"
@@ -226,7 +226,7 @@ if (sys.nframe() == 0) {
     list(industry = "retail", col = "employment_retail")
   )) {
     cat("\n============================================================\n")
-    cat("Power simulation for beta4 --", ind$industry, "(full 20-state treated sample)\n")
+    cat("Power simulation for beta4 --", ind$industry, "(full treated sample)\n")
 
     panel <- build_panel(fred_panel, treatment_table, exposure_table, ind$industry, ind$col)
     t0 <- Sys.time()
@@ -265,7 +265,7 @@ if (sys.nframe() == 0) {
     scale_y_continuous(labels = scales::label_percent(accuracy = 1), limits = c(0, 1)) +
     labs(
       title = "Power to detect beta4 (exposure gradient), by assumed effect size",
-      subtitle = "Design: 20 treated + 25 control states, quarterly 2016-2022, state-clustered residual simulation",
+      subtitle = "Design: 19 treated + 26 control states, quarterly 2016-2022, state-clustered residual simulation",
       x = "Assumed true beta4 (log-point exposure gradient)",
       y = "Simulated power",
       color = "Industry"

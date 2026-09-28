@@ -77,7 +77,7 @@ test_that("a designed beta4 effect is picked up as significant", {
   # to behave -- confirmed by testing 10 vs. 30 states directly, where 10
   # gave a wildly unstable bootstrap-t distribution (matching known
   # wild-bootstrap behavior at very low cluster counts) and 30 didn't.
-  # Real Day 5-8 data has 20 treated states, comfortably in the stable
+  # Real Day 5-8 data has 19 treated states, comfortably in the stable
   # range.
   inputs <- make_bootstrap_panel(n_states = 30, beta4 = 0.3)
   panel <- build_panel(inputs$fred_panel, inputs$treatment_table, inputs$exposure_table,

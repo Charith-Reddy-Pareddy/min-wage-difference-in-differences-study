@@ -157,7 +157,7 @@ if (sys.nframe() == 0) {
     list(industry = "retail", col = "employment_retail")
   )) {
     cat("\n============================================================\n")
-    cat("Wild cluster bootstrap for beta4 --", ind$industry, "(full 20-state treated sample)\n")
+    cat("Wild cluster bootstrap for beta4 --", ind$industry, "(full treated sample)\n")
 
     panel <- build_panel(fred_panel, treatment_table, exposure_table, ind$industry, ind$col)
     t0 <- Sys.time()
@@ -180,7 +180,7 @@ if (sys.nframe() == 0) {
       wild_boot_ci_high = boot$ci_high
     )
 
-    cat("\nWild cluster bootstrap for beta3 --", ind$industry, "(full 20-state treated sample)\n")
+    cat("\nWild cluster bootstrap for beta3 --", ind$industry, "(full treated sample)\n")
     t0 <- Sys.time()
     boot3 <- wild_cluster_bootstrap_beta3(panel, B = 999, seed = 1)
     elapsed3 <- round(as.numeric(Sys.time() - t0, units = "secs"), 1)

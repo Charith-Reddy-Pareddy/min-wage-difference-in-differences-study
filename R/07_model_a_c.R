@@ -122,7 +122,7 @@ if (sys.nframe() == 0) {
   results <- list()
 
   for (spec in list(
-    list(label = "full 20-state treated sample", treatment_table = treatment_table),
+    list(label = "full treated sample", treatment_table = treatment_table),
     list(label = ">=$0.50-increase subsample", treatment_table = treatment_table %>%
            filter(group != "treated" | increase >= 0.50))
   )) {
