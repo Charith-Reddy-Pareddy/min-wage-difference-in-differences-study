@@ -70,7 +70,7 @@ clean:
 # above; see python/README.md for why it's a separate venv rather than
 # a renv-tracked dependency.
 python-setup:
-	cd python && python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+	cd python && python3 -m venv .venv && .venv/bin/pip install -e ".[dev,api]"
 
 python-test:
 	cd python && .venv/bin/python -m pytest

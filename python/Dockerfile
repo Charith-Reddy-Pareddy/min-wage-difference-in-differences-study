@@ -12,6 +12,6 @@ COPY pyproject.toml ./
 COPY src ./src
 COPY tests ./tests
 
-RUN pip install --no-cache-dir -e ".[dev]"
+RUN pip install --no-cache-dir -e ".[dev,api]"
 
 CMD ["python", "-m", "pytest"]
