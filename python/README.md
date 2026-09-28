@@ -161,6 +161,35 @@ is a type error, not a runtime surprise. All three run in CI
 (`.github/workflows/ci.yml`) alongside the test suite and a package
 build check (`python -m build`).
 
+## Results API
+
+```
+.venv/bin/pip install -e ".[api]"
+.venv/bin/uvicorn minwage.api.app:app --reload
+```
+
+A small read-only FastAPI service over whatever `train.py` and
+`causal_estimate.py` have already written to `results/` -- it does not
+train or refit anything itself, it just serves the CSVs as JSON:
+
+| Endpoint | Source file |
+|---|---|
+| `GET /health` | -- |
+| `GET /ml/comparison` | `comparison.csv` |
+| `GET /ml/random-forest/grid-search` | `random_forest_grid_search.csv` |
+| `GET /ml/random-forest/bootstrap-ci` | `random_forest_bootstrap_ci.csv` |
+| `GET /ml/random-forest/permutation-importance` | `random_forest_permutation_importance.csv` |
+| `GET /causal/dml` | `dml_estimate.csv` |
+| `GET /causal/heterogeneity` | `dml_exposure_heterogeneity.csv` |
+
+Each endpoint returns 404 (not a crash) if its source file doesn't
+exist yet, since `results/` is gitignored and only populated after
+running the script that writes it. There's deliberately no endpoint
+that takes new covariates and returns a prediction -- this is a
+results-serving layer for what's already been computed and reviewed,
+not a live model a caller could feed arbitrary input and misread as
+the study's causal estimate.
+
 ## Docker
 
 ```
@@ -192,8 +221,11 @@ python/
 │       ├── neural_network.py    # PyTorch feedforward net, train-only standardization
 │       ├── evaluation.py   # RMSE / R², matching R/27's definitions exactly
 │       └── experiment.py   # grouped CV, grid search, bootstrap CI, permutation importance
-│   └── causal_ml/
-│       └── dml.py          # cross-fitted double ML for the partially linear treatment model
+│   ├── causal_ml/
+│   │   ├── dml.py           # cross-fitted double ML for the partially linear treatment model
+│   │   └── heterogeneity.py # R-learner treatment-effect heterogeneity on the DML residuals
+│   └── api/
+│       └── app.py          # read-only FastAPI service over results/
 ├── train.py                # ties minwage.ml together, prints and saves the comparison
 ├── causal_estimate.py      # runs double ML against the real panel
 └── tests/                  # pytest, mirrors the src/minwage/ layout
@@ -206,5 +238,5 @@ should be — all raw acquisition (FRED, QCEW, CPS-ORG, DOL) happens in R
 how the panel is built. See `loaders.py`'s module docstring.
 
 A heterogeneous-treatment-effects estimator (causal forest) on top of
-`causal_ml/` and a small FastAPI results service (`api/`) don't exist
-yet -- planned extensions, not scaffolding for their own sake.
+`causal_ml/` doesn't exist yet -- a planned extension, not scaffolding
+for its own sake.
