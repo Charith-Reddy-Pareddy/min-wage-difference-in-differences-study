@@ -471,11 +471,9 @@ proc("placebo_test_beta4_results.csv") %>%
   kable(digits = 4, caption = "Placebo test, Model C (beta4), false treatment date 2018-01-01")
 ```
 
-Both industries come back significant at the fake date (food service p
-reported in the table, retail p also reported there) -- the opposite of the clean Model A result
-above. This means states with higher pre-2021 exposure already had
-systematically different employment trends in 2016-2019, for reasons
-that have nothing to do with the real 2021 minimum-wage increases. Since
+The table reports the exposure-gradient placebo estimates and p-values
+for each industry. Significant placebo estimates challenge the
+interpretation of the 2021 interaction as a policy effect. Since
 that same exposure measure is what the real Model C relies on to
 identify β₄, this is a direct threat to the exposure-gradient result's
 credibility specifically -- not just a general caveat, but evidence that
