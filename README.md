@@ -394,7 +394,7 @@ proposing a mechanism isn't the same as confirming one.
 
 ```
 Rscript -e 'renv::restore()'   # pinned package versions (renv.lock, R 4.5.1)
-make all                       # R/01-R/31, tests, figures, report end to end
+make all                       # R/01-R/32, tests, figures, report end to end
 make test                      # just the R test suite
 make report                    # just render reports/final_report.Rmd (HTML)
 make report-pdf                # + reports/final_report.pdf (headless Chrome)
@@ -427,17 +427,6 @@ test suites, on every push.
 
 Not yet done, in rough priority order:
 
-- **A heterogeneity-robust DiD comparison.** Model A has a single common
-  treatment date, so the staggered-timing critique (Goodman-Bacon 2021;
-  de Chaisemartin and D'Haultfœuille 2020) doesn't mechanically bind it —
-  but Model C's continuous exposure treatment is a more natural fit for
-  the newer continuous/dose-treatment DiD literature than for
-  Callaway-Sant'Anna (2021) or Sun-Abraham (2021) specifically, which
-  target staggered *binary* adoption. Planned: fit whichever estimator
-  actually matches Model C's design, report it alongside TWFE and the
-  wild-cluster-bootstrap inference already in place, and let
-  disagreement (if any) be informative rather than resolved by picking
-  a side.
 - **A reproducibility summary table** (R version, Python version, exact
   data source vintages, seed policy, test counts, expected runtime per
   `make` target) — most of this is scattered across the README already;

@@ -136,11 +136,11 @@ decomposes. It is more directly relevant to Model C, where exposure is a
 continuous rather than binary treatment intensity -- a setting closer to
 the newer literature on DiD with continuous or "dose" treatments
 (e.g. Callaway, Goodman-Bacon, and Sant'Anna's work extending
-difference-in-differences to continuous treatments). A direct comparison
-against a heterogeneity-robust estimator is planned future work (see
-README.md's roadmap) rather than included here; the honest reason to
-flag it now is that a common-timing design being immune to one specific
-critique is not the same as modern DiD methodology having nothing to add.
+difference-in-differences to continuous treatments). Section 6.4 checks
+the concern those estimators motivate directly, on this data's own
+exposure variable, rather than treating a common-timing design being
+immune to one specific critique as though modern DiD methodology had
+nothing to add.
 
 **COVID-era labor market disruption.** The 2021 treatment window follows
 immediately on an unprecedented, highly uneven labor-market shock, and a
@@ -679,6 +679,46 @@ include_graphics(fig("specification_curve.png"))
 The table reports significance and signs for all 12 specifications.
 This measures specification sensitivity; it is not by itself a test
 that an exposure association predates treatment.
+
+### 6.4 Binned Dose-Response Check on Model C's Linear Interaction
+
+Model C assumes the treatment effect is *linear* in exposure
+(`treated_post * exposure`). Callaway, Goodman-Bacon, and Sant'Anna's
+continuous-treatment DiD work (Section "Related Literature") warns that
+imposing linearity on a continuous treatment can average over
+heterogeneous effects in a way that is hard to interpret, the
+continuous-treatment analogue of the staggered-binary-adoption
+negative-weighting problem (Goodman-Bacon 2021). Callaway-Sant'Anna
+(2021) and Sun-Abraham (2021) themselves target staggered *binary*
+adoption specifically and don't mechanically apply to either of this
+study's models, so `R/32_modern_did.R` does not fit either estimator.
+Instead it checks the concern directly: cut exposure into terciles,
+interact `treated_post` with the tercile dummies instead of the raw
+continuous value, and see whether the binned coefficients move in a
+way consistent with Model C's assumed straight line.
+
+```{r modern-did-support}
+proc("modern_did_results.csv") %>%
+  select(industry, model_c_beta4, binned_mid_baseline, binned_high_vs_mid) %>%
+  kable(digits = 4, caption = "Model C's linear beta4 vs. the binned (tercile) dose-response")
+```
+
+The `binned_low_vs_mid` column (in the full CSV but omitted above) is
+`NA` for both industries: zero treated states fall in the bottom
+exposure tercile in this data, so that contrast is unidentified rather
+than small -- a common-support gap, not a null result. This is itself
+informative: the states that raised their minimum wage in 2021 are not
+spread evenly across the exposure distribution, which is exactly the
+kind of imbalance a purely linear specification can obscure. Where the
+comparison *is* identified (mid vs. high exposure), the binned and
+linear estimates tell the same qualitative story for both industries --
+the linear interaction is not papering over a sharply different binned
+pattern here, though the small per-bin state counts (Section 1) keep
+every estimate noisy. A clean high-vs-low comparison (dropping the
+middle tercile entirely, the two exposure groups least like each other)
+is also in the CSV for the same reason Section 5.6 drops one state at a
+time: a check that doesn't depend on every state being used the same
+way.
 
 ## 7. Exploratory Analyses
 
