@@ -4,20 +4,11 @@ partially linear model
     Y = theta * D + g(X) + U
     D = m(X) + V
 
-instead of assuming g and m are linear -- TWFE's implicit functional-
-form assumption in R/07_model_a_c.R's Model A -- g and m are each fit
-with any ML estimator that exposes .fit()/.predict() (this project's
-hand-rolled RandomForest or GradientBoostedTrees, or LinearRegression
-as a sanity check). theta is recovered from the residualized
-regression: partial X's predictable part out of both Y and D, then
-regress what's left of Y on what's left of D.
-
-theta has the same interpretation as Model A's DiD coefficient -- this
-is a functional-form robustness check on that estimate, not a
-different identification strategy. It still requires no unobserved
-confounder of treatment and outcome given X, the same assumption
-Model A's parallel-trends argument makes; ML nuisance functions relax
-how g and m are allowed to look, not what has to be true about U and V.
+The nuisance functions g and m can use any estimator exposing fit/predict.
+Theta is recovered by regressing residualized Y on residualized D.
+A causal interpretation requires conditional unconfoundedness and suitable
+nuisance estimation rates and treatment variation. This is not equivalent
+to DiD parallel trends or a reproduction of the TWFE specification.
 
 Cross-fitting (Y and D are each predicted out-of-fold, never using a
 row's own fold to predict that row) is required so that overfitting in
@@ -34,6 +25,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 import numpy as np
+import pandas as pd
 
 from minwage.ml.experiment import group_k_fold
 from minwage.ml.protocols import Estimator
@@ -78,28 +70,46 @@ def partialling_out_dml(
     respectively (they can be the same estimator or different ones --
     Y and D need not be equally hard to predict from X).
 
-    Returns theta_hat, its asymptotic standard error and a 95% CI
-    (Chernozhukov et al. 2018's Neyman-orthogonal score, which is what
-    makes the CI valid despite theta_hat being built from ML first-stage
-    predictions), plus both sets of residuals for diagnostics."""
+    Returns a state-clustered sandwich SE with G/(G-1) correction and
+    normal-approximation 95% CI. Clusters must be independent; inference
+    is asymptotic in the number of clusters. `se_row` retains the old
+    uncorrected row-independent SE for comparison only. `groups` defines
+    both cross-fitting folds and variance clusters.
+    """
+    X = np.asarray(X, dtype=float)
     Y = np.asarray(Y, dtype=float)
     D = np.asarray(D, dtype=float)
+    groups = np.asarray(groups)
+    if Y.ndim != 1 or D.shape != Y.shape or groups.shape != Y.shape or X.ndim != 2 or len(X) != len(Y):
+        raise ValueError("X, Y, D and groups must have aligned rows; Y, D and groups must be one-dimensional")
+    if not all(np.isfinite(v).all() for v in (X, Y, D)) or pd.isna(groups).any():
+        raise ValueError("Inputs must be finite and groups must not be missing")
+    labels, cluster_ids = np.unique(groups, return_inverse=True)
+    n_clusters = len(labels)
+    if not isinstance(n_folds, int) or not 2 <= n_folds <= n_clusters:
+        raise ValueError("n_folds must be between 2 and the number of clusters")
     n = len(Y)
 
     y_resid, y_fitted = _cross_fitted_residuals(X, Y, groups, y_model_factory, n_folds, seed)
     d_resid, d_fitted = _cross_fitted_residuals(X, D, groups, d_model_factory, n_folds, seed)
 
-    theta_hat = float(np.sum(d_resid * y_resid) / np.sum(d_resid**2))
-
-    # Chernozhukov et al. (2018), eq. 4.1: the sandwich variance of the
-    # Neyman-orthogonal moment psi(theta) = (Y_resid - theta*D_resid) * D_resid.
+    denominator = float(np.sum(d_resid**2))
+    if not np.isfinite(denominator) or denominator <= 0:
+        raise ValueError("Residualized treatment must have positive finite variation")
+    theta_hat = float(np.sum(d_resid * y_resid) / denominator)
     psi = (y_resid - theta_hat * d_resid) * d_resid
-    j0 = np.mean(d_resid**2)
-    se = float(np.sqrt(np.mean(psi**2) / j0**2 / n))
+    if not np.isfinite(psi).all():
+        raise ValueError("Nuisance predictions must produce finite scores")
+    # Sum scores within each state before squaring to retain within-state covariance.
+    cluster_scores = np.bincount(cluster_ids, weights=psi, minlength=n_clusters)
+    se = float(np.sqrt(n_clusters / (n_clusters - 1) * np.sum(cluster_scores**2)) / denominator)
+    se_row = float(np.sqrt(np.sum(psi**2)) / denominator)
 
     return {
         "theta": theta_hat,
         "se": se,
+        "se_row": se_row,
+        "n_clusters": n_clusters,
         "ci_lower": theta_hat - 1.96 * se,
         "ci_upper": theta_hat + 1.96 * se,
         "n": n,
