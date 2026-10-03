@@ -413,7 +413,28 @@ installed locally (no LaTeX distribution required).
 first; see [python/README.md](python/README.md) for why it's a
 separate virtual environment rather than a renv-tracked dependency.
 
-Repo layout: `R/` (31 numbered scripts, run in order), `tests/` (one
+### Reproducibility Summary
+
+| Item | Value |
+|---|---|
+| R version | 4.5.1 (pinned in `renv.lock`; `renv::restore()`) |
+| Python version | 3.10.16 locally, 3.11 in CI; numpy 2.2.6, pandas 2.3.3, torch 2.14.0 (exact pins in `python/pyproject.toml`) |
+| Seed policy | Every stochastic step takes an explicit `seed` argument. R defaults to `seed = 1` (`R/11`, `R/15`, `R/16`, `R/27`, `R/28`, `R/31`); the power simulations offset it per grid point (`seed + i`), and the β₃ power curve starts from `seed = 100`. All Python scripts use `seed = 1`. |
+| Test counts | 369 R assertions across 32 test files (`tests/`), about 52 s; 51 Python tests (`python/tests/`), about 18 s; Python coverage gate 90% (about 99% actual) |
+| Data: FRED employment, GDP, population | Public CSV endpoint, pulled live with no vintage pinned, so a re-pull can differ if FRED revises a series. The local processed files were pulled 2026-08-23 |
+| Data: FRED CES average hourly earnings | Same live pull, no pinned vintage; local file dated 2026-09-19 |
+| Data: CPS-ORG (exposure) | IPUMS-CPS extracts for 2019 and 2020, requires `IPUMS_API_KEY`; extract definitions are in `R/03`, and the downloaded files are not committed |
+| Data: DOL minimum wage history | Transcribed into `data/treatment_classification.csv` (committed) and cross-checked against two Wayback Machine snapshots of DOL's state table (2020-12-01 and 2021-02-02); provenance notes are in `R/01_treatment_classification.R` |
+| Runtime: `R/32_modern_did.R` | about 4 s |
+| Runtime: `python/train.py` | about 75 s (grouped-CV grid search is most of it) |
+| Runtime: `python/causal_estimate.py` | about 28 s |
+| Runtime: full `make all` | not measured end to end here; it needs a live IPUMS key and network, and the wild bootstrap, 10,000-rep permutation test and power simulations dominate |
+
+Exact reproduction of the committed results needs the same FRED
+vintage, which isn't archived here; a fresh pull should agree up to
+data revisions, not bit for bit.
+
+Repo layout: `R/` (32 numbered scripts, run in order), `tests/` (one
 file per script), `reports/` (`final_report.Rmd`, rendered HTML and PDF,
 figures), `data/processed/` (all results, gitignored, reproducible),
 `python/` (independent ML/NN replication — see
@@ -425,13 +446,10 @@ test suites, on every push.
 
 ## Roadmap
 
-Not yet done, in rough priority order:
+Not yet done:
 
-- **A reproducibility summary table** (R version, Python version, exact
-  data source vintages, seed policy, test counts, expected runtime per
-  `make` target) — most of this is scattered across the README already;
-  consolidating it into one table is the remaining work.
-- **A Zenodo-archived release** once the above are in, for a citable DOI.
+- **A Zenodo-archived release** for a citable DOI. `CITATION.cff` is in
+  place; the release itself is still to be cut.
 
 ## Status
 
