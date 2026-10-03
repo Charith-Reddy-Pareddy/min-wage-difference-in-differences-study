@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it as below."
+title: "Minimum Wage Difference-in-Differences Study: 2021 State Increases and Food Service/Retail Employment"
+type: software
+authors:
+  - family-names: Pareddy
+    given-names: Charith Reddy
+repository-code: "https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study"
+license: MIT
+abstract: >-
+  A difference-in-differences study of 2021 state minimum wage increases and
+  employment in food service and retail, with an exposure-gradient hypothesis,
+  inference and robustness checks, and a Python machine learning and causal ML
+  extension. The R pipeline is the study's identification strategy; the Python
+  package is an exploratory extension and makes no claim beyond that.
+keywords:
+  - difference-in-differences
+  - minimum wage
+  - econometrics
+  - reproducible research
