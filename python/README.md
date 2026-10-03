@@ -117,25 +117,47 @@ ML estimator instead of assumed linear, then `theta` -- the effect of
 the residualized regression, cross-fitted by state so no fold's
 nuisance model ever sees the rows it predicts.
 
-**What this is:** a check on whether Model A's linear-in-controls
-functional form (`R/07_model_a_c.R`) matters, run on the same
-`employment_growth` target and control set `train.py` already uses.
-**What this isn't:** a second, independent identification strategy.
-Both the linear and ML-nuisance versions still require no unobserved
-confounder of treatment and outcome given the controls -- exactly
-Model A's parallel-trends assumption, not something double ML relaxes.
-`causal_estimate.py`'s module docstring spells out why its point
-estimate isn't numerically comparable to Model A's coefficient (different
-target, different control set -- region dummies here, full state and
-quarter fixed effects there).
+This compares linear and forest nuisance models on the Python panel. A causal
+interpretation requires conditional unconfoundedness, which differs from
+DiD parallel trends. The outcome is employment growth with region controls;
+Model A uses log employment with state and quarter fixed effects. Their
+coefficients are not directly comparable.
+
+Standard errors aggregate the orthogonal scores within states before
+squaring: `SE = sqrt(G/(G-1) * sum_g(sum_i psi_i)^2) / sum_i d_resid_i^2`,
+where `psi_i = d_resid_i * (y_resid_i - theta*d_resid_i)` and `G` is the
+number of states. The same states define cross-fitting folds and variance
+clusters. This follows the [cluster-robust DML approach](https://docs.doubleml.org/stable/examples/py_double_ml_multiway_cluster.html).
+The output uses `se` for clustered uncertainty, `se_row` for the previous
+row-independent calculation, and `n_clusters` for the state count.
+
+Rerunning `.venv/bin/python causal_estimate.py` on the local processed panel
+(seed 1, five folds, 2,520 rows, 45 states) gives:
+
+| Nuisance model | Estimate | Row SE | State-clustered SE | Clustered 95% CI |
+|---|---:|---:|---:|---:|
+| Linear | 0.005812 | 0.006673 | 0.010740 | [-0.015239, 0.026863] |
+| Random forest | -0.000771 | 0.008432 | 0.009478 | [-0.019347, 0.017806] |
+
+Point estimates and nuisance fits are unchanged by the variance correction.
+The clustered SE is about 61% larger for linear nuisances and 12% larger for
+the forest. Both intervals include zero. Results are in employment-growth
+units; a different data vintage can change them.
+
+The 95% intervals use `theta +/- 1.96*se`: they are asymptotic in the number
+of independent states, not exact small-sample intervals. Clustering allows
+within-state dependence but does not address cross-state shocks, weak
+residual treatment variation, poor nuisance estimation or unobserved
+confounding. The R-learner output remains a descriptive linear exposure
+slope without its own uncertainty estimate.
 
 `causal_ml/heterogeneity.py` adds an R-learner (Nie & Wager, 2017) on
 top of the DML residuals: instead of one effect for every row, it
 regresses the pseudo-outcome `y_resid/d_resid` on exposure (weighted
 by `d_resid**2`) to get a slope for how the effect varies with
-exposure specifically -- the same question Model C's
-`treated_post*exposure` interaction asks, without assuming that
-interaction is linear in TWFE's sense. No separate cross-fitting pass;
+exposure specifically, with a linear exposure slope. This uses a different
+outcome and control set from Model C's `treated_post*exposure` interaction.
+No separate cross-fitting pass;
 it reuses the residuals `partialling_out_dml` already computed.
 
 ## Tests

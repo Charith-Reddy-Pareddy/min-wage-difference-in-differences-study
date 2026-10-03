@@ -743,8 +743,9 @@
     <p>These exploratory estimates use employment growth and region controls,
       rather than Model A/C's log employment and state/quarter fixed effects.
       They do not reproduce the same estimand or repair failed parallel trends.
-      The current DML standard errors are row-based, not state-clustered;
-      treat its intervals as provisional for this panel.</p>
+      DML standard errors cluster by state with a finite-cluster correction.
+      Its normal-approximation intervals assume independent states and adequate
+      nuisance fits; they do not resolve confounding or cross-state shocks.</p>
     <p>A read-only FastAPI service serves precomputed comparison, tuning and
       causal-ML CSVs. It does not train models or accept prediction requests.
       Missing result files return HTTP 404. This static website's two charts

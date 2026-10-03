@@ -346,9 +346,13 @@ The Python package also provides state-grouped cross-validation, grid search,
 cluster bootstrap intervals and permutation importance. Its exploratory
 cross-fitted DML and linear R-learner use employment growth and region controls,
 not Model A/C's outcome and fixed effects. Their identifying assumptions differ:
-conditional unconfoundedness is not equivalent to DiD parallel trends. The
-current DML uncertainty calculation is row-based rather than state-clustered,
-so its intervals remain provisional for this panel.
+conditional unconfoundedness is not equivalent to DiD parallel trends.
+DML standard errors now cluster by state with a `G/(G-1)` correction;
+the CSV retains `se_row` for comparison. The 95% intervals use a normal
+approximation and assume independent states, adequate nuisance fits and
+residual treatment variation. They do not address cross-state shocks or
+establish the identifying assumptions. See the [Python results](python/README.md#causal-ml-double-ml-as-a-functional-form-robustness-check)
+for the comparison.
 
 The read-only FastAPI service returns precomputed CSV results and responds
 with 404 when a result is unavailable. It does not refit models. The live site's
@@ -420,7 +424,7 @@ separate virtual environment rather than a renv-tracked dependency.
 | R version | 4.5.1 (pinned in `renv.lock`; `renv::restore()`) |
 | Python version | 3.10.16 locally, 3.11 in CI; numpy 2.2.6, pandas 2.3.3, torch 2.14.0 (exact pins in `python/pyproject.toml`) |
 | Seed policy | Every stochastic step takes an explicit `seed` argument. R defaults to `seed = 1` (`R/11`, `R/15`, `R/16`, `R/27`, `R/28`, `R/31`); the power simulations offset it per grid point (`seed + i`), and the β₃ power curve starts from `seed = 100`. All Python scripts use `seed = 1`. |
-| Test counts | 369 R assertions across 32 test files (`tests/`), about 52 s; 51 Python tests (`python/tests/`), about 18 s; Python coverage gate 90% (about 99% actual) |
+| Test counts | 369 R assertions across 32 test files (`tests/`), about 52 s; 61 Python tests (`python/tests/`), runtime varies by machine; Python coverage gate 90% (about 99% actual) |
 | Data: FRED employment, GDP, population | Public CSV endpoint, pulled live with no vintage pinned, so a re-pull can differ if FRED revises a series. The local processed files were pulled 2026-08-23 |
 | Data: FRED CES average hourly earnings | Same live pull, no pinned vintage; local file dated 2026-09-19 |
 | Data: CPS-ORG (exposure) | IPUMS-CPS extracts for 2019 and 2020, requires `IPUMS_API_KEY`; extract definitions are in `R/03`, and the downloaded files are not committed |
