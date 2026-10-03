@@ -10,15 +10,14 @@ with only region dummies as controls, matching the feature set the
 Python ML panel has always used. The point is a functional-form
 robustness check within that panel -- does relaxing the linear-in-X
 assumption change the treated_post coefficient -- not a second,
-independent estimate of Model A's causal parameter. Both estimates
-still rest on the same identifying assumption: no unobserved
-confounder of treatment and outcome given the controls.
+independent estimate of Model A's causal parameter. The DML causal interpretation requires conditional unconfoundedness;
+this differs from the DiD parallel-trends assumption. Standard errors
+cluster by state; row-independent standard errors are exported for comparison.
 
 Also reports how that effect varies with exposure specifically
 (minwage.causal_ml.heterogeneity's R-learner on the random forest's
 residuals) -- the same question R/07's Model C asks with a
-treated_post*exposure interaction term, asked here without assuming
-the interaction is linear in Model A's TWFE sense.
+treated_post*exposure interaction term, using a linear exposure slope fitted to the DML residuals.
 
 Run after `python train.py` has been used at least once (needs the
 same data/processed/ml_panel.csv):
@@ -55,7 +54,7 @@ def main() -> pd.DataFrame:
 
     forest_result = partialling_out_dml(X, Y, D, groups, forest_factory, forest_factory, n_folds=5, seed=1)
 
-    summary_keys = ("theta", "se", "ci_lower", "ci_upper", "n")
+    summary_keys = ("theta", "se", "se_row", "ci_lower", "ci_upper", "n", "n_clusters")
     results = pd.DataFrame(
         [
             {"nuisance_model": "linear", **{k: v for k, v in linear_result.items() if k in summary_keys}},
@@ -76,6 +75,7 @@ def main() -> pd.DataFrame:
     results.to_csv(RESULTS_DIR / "dml_estimate.csv", index=False)
     heterogeneity.to_csv(RESULTS_DIR / "dml_exposure_heterogeneity.csv", index=False)
     print("Double ML estimate of treated_post's effect on employment_growth:")
+    print("se: state-clustered (G/(G-1)); se_row: row-independent comparison; CI: normal approximation")
     print(results.to_string(index=False))
     print("\nTreatment-effect heterogeneity by exposure (R-learner, forest-nuisance residuals):")
     print(heterogeneity.to_string(index=False))
