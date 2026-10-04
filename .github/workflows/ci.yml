@@ -71,6 +71,18 @@ jobs:
           pip install build
           python -m build
 
+  docker-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build test image
+        run: docker build --tag minwage-tests --file python/Dockerfile python
+
+      - name: Run tests inside the image
+        run: docker run --rm --network none minwage-tests python -m pytest --cov=minwage --cov-report=term-missing
+
   # The full pipeline needs a live IPUMS_API_KEY (R/03) and several
   # minutes of network calls (FRED, QCEW, IPUMS), and reports/final_report.Rmd
   # reads data/processed/ and reports/figures/, both gitignored and not
