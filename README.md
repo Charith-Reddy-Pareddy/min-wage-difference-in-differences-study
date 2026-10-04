@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/actions/workflows/ci.yml/badge.svg)](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study)](https://github.com/Charith-Reddy-Pareddy/min-wage-difference-in-differences-study/stargazers)
 [![Live site](https://img.shields.io/badge/live%20site-charith--reddy--pareddy.github.io-9a3324)](https://charith-reddy-pareddy.github.io/min-wage-difference-in-differences-study/)
 
 **Question.** Does the employment response to the 2021 round of state
