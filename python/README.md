@@ -217,15 +217,28 @@ the study's causal estimate.
 
 ## Docker
 
-```
+From the `python/` directory:
+
+```sh
 docker build -t minwage -f Dockerfile .
-docker run minwage
+docker run --rm --network none minwage
 ```
 
-Runs the test suite in a clean environment. It doesn't run
-`train.py`/`causal_estimate.py`, since both need
-`data/processed/ml_panel.csv` from the R pipeline, which isn't
-available inside the build context.
+The image installs the package and runs its tests with synthetic fixtures.
+It includes `causal_estimate.py` because an integration test imports that
+script, but does not run the real-data analysis. Both analysis scripts need
+`data/processed/ml_panel.csv` from the R pipeline, which is not included.
+The build context is restricted to package metadata, source, tests and the
+integration-test script; local environments and generated results are excluded.
+
+**Verification status:** the image has not been built or run locally because
+the Docker daemon is unavailable. The image's copied-file layout was checked
+with the host Python environment, which reproduced and verified the fix for
+a missing `causal_estimate.py`. That check does not validate the Linux base
+image or dependency installation. CI now builds the image and runs the full
+Python suite inside it with the 90% coverage gate; consult the `docker-tests`
+job for the actual container result. Building requires network access to
+fetch the base image and packages; the test container runs without networking.
 
 ## Layout
 
