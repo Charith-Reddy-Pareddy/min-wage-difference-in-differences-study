@@ -11,6 +11,7 @@ WORKDIR /app
 COPY pyproject.toml ./
 COPY src ./src
 COPY tests ./tests
+COPY causal_estimate.py ./
 
 RUN pip install --no-cache-dir -e ".[dev,api]"
 
