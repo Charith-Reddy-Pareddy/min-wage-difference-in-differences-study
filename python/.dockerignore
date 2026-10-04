@@ -1,0 +1,15 @@
+# Send only the files needed to install the package and run its tests.
+*
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!causal_estimate.py
+!src/
+!src/**
+!tests/
+!tests/**
+**/__pycache__/
+**/*.pyc
+**/*.egg-info/
+**/.env
+**/.env.*
