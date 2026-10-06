@@ -33,6 +33,13 @@ jobs:
             cat("All", length(files), "R scripts parse cleanly.\n")
           '
 
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Validate citation metadata
+        run: ruby scripts/check_citation.rb
+
       - name: Verify Makefile/tests stay in sync with R/
         run: Rscript scripts/check_pipeline_sync.R
 
