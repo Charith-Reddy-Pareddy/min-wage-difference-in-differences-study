@@ -94,7 +94,7 @@ added afterward, matters for how much weight a p-value can carry.
 | **Wage pass-through** | 13% (food service proxy, p=0.65) / 63% (retail proxy, p=0.22) of the mandated increase — neither significant |
 | **Treatment predictability** | Logistic regression on pre-period growth + exposure: 87% accuracy, AUC 0.97 — highly predictable |
 | **State clustering** | k-means (k=3) on the same features: 2 of 3 clusters are essentially pure treated/control (χ²p<0.0001) |
-| **Engineering** | 31 R scripts + a Python ML subproject, 163 R test blocks (all passing), CI on every push, `make all` for full reproduction |
+| **Engineering** | 32 R scripts, 369 R assertions and 61 Python tests (all passing); CI on every push; `make all` for full reproduction |
 
 ## Results at a Glance
 
