@@ -449,12 +449,23 @@ has a matching test file (`scripts/check_pipeline_sync.R` — also
 runnable locally as `make check-sync`), and runs both the R and Python
 test suites, on every push.
 
+## Release Notes
+
+### v1.0.0 (prepared; Zenodo archive pending)
+
+- Includes the complete R analysis pipeline and report, with 32 numbered
+  scripts and 369 R assertions across 32 test files.
+- Includes the Python predictive and causal ML extension, read-only results
+  API, and 61 Python tests.
+- Reports rejected event-study pre-trends for both industries and describes
+  the limits on causal interpretation throughout the report and site.
+- Carries citation metadata in `CITATION.cff`; the DOI and archive badge will
+  be added after the Zenodo archive and release exist.
+
 ## Roadmap
 
-Not yet done:
-
-- **A Zenodo-archived release** for a citable DOI. `CITATION.cff` is in
-  place; the release itself is still to be cut.
+The `v1.0.0` release is prepared locally. Zenodo archival, DOI assignment and
+publication remain pending; no DOI is published yet.
 
 ## Status
 
